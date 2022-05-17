@@ -1,0 +1,9 @@
+db.sqlite3
+/.history
+/.vs
+/.idea
+__pycache__
+*.pyc
+*~
+/static
+.DS_Store
