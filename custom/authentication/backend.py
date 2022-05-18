@@ -1,7 +1,7 @@
 from django.contrib.auth.backends import ModelBackend
-
+from rest_framework.authentication import TokenAuthentication
 from . import directorio
-from custom.authentication.models import DirectoryUser
+from custom.authentication.models import DirectoryUser, DirectoryUserAPIKey
 
 
 class DirectorioLocalAuthBackend(ModelBackend):
@@ -18,3 +18,10 @@ class DirectorioLocalAuthBackend(ModelBackend):
             return DirectoryUser.objects.get(pk=user_id)
         except DirectoryUser.DoesNotExist:
             return None
+
+class BearerAuthentication(TokenAuthentication):
+    keyword = 'Bearer'
+
+class APIKeyAuthentication(TokenAuthentication):
+    keyword = 'api-key'
+    model = DirectoryUserAPIKey

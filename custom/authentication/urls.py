@@ -1,6 +1,7 @@
-from django.urls import path
+from django.urls import path, include
 from rest_framework import routers
 
+from custom.authentication.views import DirectoryUserAPIKeyView
 from .views import CustomObtainAuthToken,LogoutAPIView
 
 
@@ -8,8 +9,10 @@ from .views import CustomObtainAuthToken,LogoutAPIView
 
 app_name = 'Authentication'
 viewset_patterns = routers.SimpleRouter()
+viewset_patterns.register('api-key', DirectoryUserAPIKeyView, 'api-key')
 
-urlpatterns = viewset_patterns.urls + [
+urlpatterns = [
+    path('',include(viewset_patterns.urls)),
     path('login',CustomObtainAuthToken.as_view(),name='login'),
-    path('logout',LogoutAPIView.as_view(),name='logout')
+    path('logout',LogoutAPIView.as_view(),name='logout'),
 ]

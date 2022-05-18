@@ -58,6 +58,9 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+
+    #Custom Middlewares
+    'crum.CurrentRequestUserMiddleware'
 ]
 
 ROOT_URLCONF = 'config.urls'
@@ -147,10 +150,11 @@ REST_FRAMEWORK = {
     # or allow read-only access for unauthenticated users.
     'DEFAULT_SCHEMA_CLASS':'rest_framework.schemas.coreapi.AutoSchema',
     'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticated'
+        'rest_framework.permissions.IsAuthenticated',
     ],
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework.authentication.TokenAuthentication',
+        'custom.authentication.backend.APIKeyAuthentication',
+        'custom.authentication.backend.BearerAuthentication'
     ),
 }
 

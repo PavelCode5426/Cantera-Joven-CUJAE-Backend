@@ -1,10 +1,12 @@
+import binascii
+import os
+
 from django.contrib.auth.base_user import BaseUserManager, AbstractBaseUser
 from django.contrib.auth.models import Permission, AbstractUser, PermissionsMixin
 from django.utils.translation import gettext_lazy as _
 from django.db import models
 
 # Create your models here.
-
 '''
 MANAGER PARA USUARIOS, SON FUNCIONES QUE SIRVEN PARA MANIPULAR OBJETOS DE AUTH.MODELS.USER
 '''
@@ -48,3 +50,39 @@ class DirectoryUser(AbstractUser): #Abstract User Implementa AbstractBaseUser,Pe
     password = None #Eliminados por cuestion del directorio de la CUJAE
 
     objects=CustomUserManager()
+
+
+class APIKeyManager(models.Manager):
+    def create_apikey(self,user:DirectoryUser,name='default',expire_in=None):
+        apiKey=DirectoryUserAPIKey(
+            user=user,
+            name = name,
+            expired_at = expire_in
+        ).save()
+
+        return apiKey
+
+
+
+class DirectoryUserAPIKey(models.Model):
+    key = models.CharField(max_length=100,unique=True)
+    name = models.CharField(max_length=100)
+    user = models.ForeignKey(DirectoryUser,models.CASCADE)
+    is_active = models.BooleanField(default=True)
+    expired_at = models.DateTimeField(blank=True,null=True,default=None)
+    created_at = models.DateTimeField(auto_now=True)
+
+    objects = APIKeyManager()
+
+    def save(self,*args,**kwargs):
+        if not self.key:
+            self.key = binascii.hexlify(os.urandom(20)).decode()
+        return super(DirectoryUserAPIKey,self).save(*args,**kwargs)
+
+    def __str__(self):
+        return self.name+' '+self.user.username
+
+    class Meta:
+        verbose_name = 'Usuario API-KEYS'
+        verbose_name_plural = 'Usuarios API-KEYS'
+
