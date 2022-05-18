@@ -47,7 +47,15 @@ INSTALLED_APPS = [
 
     #My Apps
     'custom.authentication',
-    'custom.administrator'
+    'custom.administrator',
+    'core.base',
+
+    #Familiarizacion
+
+    #Formacion Complementaria
+    'core.formacion_complementaria.base.apps.BaseFormacionComplementariaConfig'
+
+
 ]
 
 MIDDLEWARE = [
