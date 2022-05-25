@@ -46,6 +46,7 @@ CON ELLO SE MODIFICA EL CREATESUPERUSER, LA CLASE USUARIO
 USUARIO DEL DIRECTORIO DE LA CUJAE
 '''
 class DirectoryUser(AbstractUser): #Abstract User Implementa AbstractBaseUser,PermissionsMixin Juntos
+    direccion = models.CharField(max_length=255,blank=True)
     directorioID = models.CharField(max_length=255,blank=True)
     password = None #Eliminados por cuestion del directorio de la CUJAE
 
