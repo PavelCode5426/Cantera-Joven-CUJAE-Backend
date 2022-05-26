@@ -70,11 +70,11 @@ class Actividad(abstractModels.AbstractNameEntity):
 
     dimesion = models.ForeignKey(simpleModels.Dimension,on_delete=models.RESTRICT)
     responsable = models.ForeignKey(authModels.DirectoryUser,related_name='responsable',on_delete=models.RESTRICT)
-    participantes = models.ManyToManyField(authModels.DirectoryUser,related_name='participantesActividades')
+    participantes = models.ManyToManyField(authModels.DirectoryUser,related_name='participantes')
     area = models.ForeignKey(simpleModels.Area,on_delete=models.RESTRICT)
 
     actividadPadre = models.ForeignKey('Actividad',on_delete=models.RESTRICT)
-    asistencias = models.ManyToManyField(userModels.PosibleGraduado,related_name='asistenciasFamiliarizacion')
+    asistencias = models.ManyToManyField(userModels.PosibleGraduado,related_name='asistencias')
 
 class Comentario(abstractModels.AbtractUserForeignKey):
     texto = models.CharField(max_length=255)

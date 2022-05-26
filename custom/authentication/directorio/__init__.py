@@ -16,7 +16,7 @@ def authenticate(username,password):
     return find
 
 
-
+#Auxiliar
 def update_user(user,permissions=[]):
     __user = None
     try:
