@@ -19,7 +19,8 @@ from rest_framework_swagger.views import get_swagger_view
 
 api_routers_v1 = [
     path('auth/',include('custom.authentication.urls',namespace='Authentication')),
-    path('config',include('core.configuracion.urls',namespace='SystemConfiguration'))
+    path('config',include('core.configuracion.urls',namespace='SystemConfiguration')),
+    path('',include('core.formacion_complementaria.gestionar_avales.urls',namespace='GestionarAval'))
 ]
 
 api_routers = [
