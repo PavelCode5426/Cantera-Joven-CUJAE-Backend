@@ -12,7 +12,7 @@ class Graduado(authModels.DirectoryUser):
 
 class PosibleGraduado(authModels.DirectoryUser):
     lugarProcedencia = models.ForeignKey(simpleModels.LugarProcedencia,on_delete=models.RESTRICT)
-    evaluacionFamiliarizacion = models.ForeignKey('Evaluacion',on_delete=models.RESTRICT)
+    evaluacionFamiliarizacion = models.ForeignKey('Evaluacion',on_delete=models.RESTRICT,null=True,blank=True)
 
 class Aval(abstractModel.AbtractUserForeignKey):
     indiceAcademico = models.FloatField(default=None,null=True,blank=True)
