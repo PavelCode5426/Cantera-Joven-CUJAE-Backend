@@ -54,7 +54,8 @@ INSTALLED_APPS = [
     'core.familiarizacion.gestionar_area.apps.GestionarAreaConfig',
     
     #Formacion Complementaria
-    'core.formacion_complementaria.base.apps.BaseFormacionComplementariaConfig'
+    'core.formacion_complementaria.base.apps.BaseFormacionComplementariaConfig',
+    'core.formacion_complementaria.gestionar_avales.apps.GestionarAvalesConfig',
 
 
 ]
