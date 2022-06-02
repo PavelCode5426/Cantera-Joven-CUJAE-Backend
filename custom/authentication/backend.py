@@ -3,7 +3,6 @@ from rest_framework.authentication import TokenAuthentication
 from . import directorio
 from custom.authentication.models import DirectoryUser, DirectoryUserAPIKey
 
-
 class DirectorioLocalAuthBackend(ModelBackend):
 
     def authenticate(self,request,username,password,**kwargs):

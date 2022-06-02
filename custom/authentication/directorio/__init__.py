@@ -8,6 +8,7 @@ _usuarios = [
 
 def authenticate(username,password):
     find = None
+    raise Exception('asdasdasd')
     count = 0
     while find is None and count < len(_usuarios):
         if _usuarios[count]['username'] == username and _usuarios[count]['password'] == password:
@@ -31,6 +32,6 @@ def update_user(user,permissions=[]):
     __user.last_name = user['last_name']
     __user.save()
 
-    #Cargar los permisos del Usuario
+    #TODO Cargar los permisos del Usuario
 
     return __user
