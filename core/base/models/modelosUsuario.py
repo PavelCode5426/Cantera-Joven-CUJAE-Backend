@@ -24,3 +24,4 @@ class Aval(abstractModel.AbtractUserForeignKey):
     cargosEstudiante = models.CharField(max_length=1000,blank=True,null=True,default='')
     cargosMilitante = models.CharField(max_length=1000,blank=True,null=True,default='')
     resumenDesempeno = models.CharField(max_length=1000,blank=True,null=True,default='')
+    usuario = models.OneToOneField("authentication.DirectoryUser", on_delete=models.RESTRICT)

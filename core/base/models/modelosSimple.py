@@ -1,8 +1,6 @@
 from django.db import models
 from . import modelosAbstractos as abstractModels
 
-#TODO BUSCAR LA MANERA DE CREAR NUEVO LOGHANDLER Y ESCRIBIR AQUI
-# DEFINIR LOS TIPOS DE REGISTROS PROXIMAMENTE
 tiposRegistros = [
     ('A','Ejemplo A'),
 ]

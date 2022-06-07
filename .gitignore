@@ -8,3 +8,5 @@ __pycache__
 /static
 .DS_Store
 /registro.log
+/.env
+00*.py
