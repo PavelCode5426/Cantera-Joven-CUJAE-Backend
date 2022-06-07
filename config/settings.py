@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     #Libs Instaladas
     'rest_framework',
     'rest_framework_swagger',
+    'django_seed',
 
     #Libs de Autenticacion
     'rest_framework.authtoken',
@@ -69,6 +70,7 @@ INSTALLED_APPS = [
     #Formacion Complementaria
     'core.formacion_complementaria.base.apps.BaseFormacionComplementariaConfig',
     'core.formacion_complementaria.gestionar_avales.apps.GestionarAvalesConfig',
+    'core.formacion_complementaria.gestionar_solicitar_tutor.apps.GestionarSolicitarTutorConfig'
 
 
 ]
@@ -207,7 +209,7 @@ LOGGING = {
                 'class':'custom.logging.TelegramLogHandler',
                 'channel':env('TELEGRAM_CHANNEL'),
                 'token':env('TELEGRAM_TOKEN'),
-                'level':'WARNING',
+                'level':'ERROR',
                 'formatter':'telegram-format',
             }
     },
@@ -227,14 +229,7 @@ LOGGING = {
             'style': '{',
         },
         'telegram-format':{
-            'format':'Nivel: {levelname} \n'
-                     'Fecha: {asctime} \n'
-                     'Archivo: {pathname} \n'
-                     'Usuario: {request.user} \n'
-                     'Metodo: {request.method} \n'
-                     'URL: {request.path_info} \n'
-                     'Mensaje: {message} \n',
-            'style':'{'
+            'class':'custom.logging.TelegramFormater'
         }
     },
 }
