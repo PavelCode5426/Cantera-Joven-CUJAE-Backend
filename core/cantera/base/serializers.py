@@ -1,7 +1,6 @@
 from rest_framework import serializers
 from custom.authentication.directorio.estudiante import obtenerEstudiantes
 from core.base.models import modelosUsuario
-from core.base.models import modelosSimple
 
 
 class ImportarFromDirectorioSerializer(serializers.Serializer):

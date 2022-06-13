@@ -42,7 +42,6 @@ ALLOWED_HOSTS = []
 
 
 # Application definition
-
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -58,22 +57,9 @@ INSTALLED_APPS = [
 
     #Libs de Autenticacion
     'rest_framework.authtoken',
-
-    #My Apps
-    'custom.authentication',
-    'custom.administrator',
-    'core.base',
-
-    #Familiarizacion
-    'core.familiarizacion.gestionar_area.apps.GestionarAreaConfig',
-
-    #Formacion Complementaria
-    'core.formacion_complementaria.base.apps.BaseFormacionComplementariaConfig',
-    'core.formacion_complementaria.gestionar_avales.apps.GestionarAvalesConfig',
-    'core.formacion_complementaria.gestionar_solicitar_tutor.apps.GestionarSolicitarTutorConfig'
-
-
 ]
+from helpers import AutoImporter
+INSTALLED_APPS += AutoImporter().loadApps()
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

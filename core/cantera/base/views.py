@@ -1,6 +1,6 @@
 from rest_framework.generics import ListCreateAPIView,RetrieveAPIView
 from rest_framework.response import Response
-from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST
+from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST, HTTP_404_NOT_FOUND
 
 from custom.authentication.directorio.estudiante import obtenerEstudiante,obtenerEstudiantes
 from .serializers import ImportarEstudianteSerializer
@@ -9,7 +9,6 @@ class EstudiantesEnDirectorio(ListCreateAPIView):
     def list(self, request):
         items = obtenerEstudiantes()
         return Response(items,HTTP_200_OK)
-
     def create(self, request):
         data = request.data
         serializer = ImportarEstudianteSerializer(data=data)
@@ -23,7 +22,7 @@ class EstudianteEnDirectorio(RetrieveAPIView):
         graduado = obtenerEstudiante(estudianteID)
         if graduado:
             return Response(graduado, HTTP_200_OK)
-        return Response({'detail':'No encontrado'},HTTP_400_BAD_REQUEST)
+        return Response({'detail':'No encontrado'},HTTP_404_NOT_FOUND)
 
 
 

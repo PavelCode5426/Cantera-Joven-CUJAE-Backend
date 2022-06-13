@@ -8,6 +8,7 @@ from .views import CustomObtainAuthToken,LogoutAPIView
 #Importante colocar el app_name y el urlpatterns (NO PUEDE SER OTRO NOMBRE)
 
 app_name = 'Authentication'
+app_prefix = 'auth/'
 viewset_patterns = routers.SimpleRouter()
 viewset_patterns.register('api-key', DirectoryUserAPIKeyView, 'api-key')
 
