@@ -20,6 +20,7 @@ from rest_framework_swagger.views import get_swagger_view
 from helpers import AutoImporter
 api_routers_v1 = AutoImporter().loadUrls(['config.urls','custom.administrator.urls'])
 
+
 api_routers = [
     #Cargando las Versiones de APIS
     path('api/v1/',include(api_routers_v1))

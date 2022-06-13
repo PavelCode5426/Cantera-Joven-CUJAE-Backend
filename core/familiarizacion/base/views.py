@@ -1,7 +1,6 @@
 from rest_framework.generics import ListCreateAPIView,RetrieveAPIView
 from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST
-
 from custom.authentication.directorio.posibleGraduado import obtenerPosibleGraduados,obtenerPosibleGraduado
 from .serializers import ImportarPosibleGraduadoSerializer
 

@@ -2,6 +2,7 @@ from django.urls import path
 # Create your views here.
 from .views import PosiblesGraduadosEnDirectorio,PosibleGraduadoEnDirectorio
 
+
 app_name = 'BaseFamiliarizacion'
 
 urlpatterns = [
