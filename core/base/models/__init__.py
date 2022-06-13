@@ -8,7 +8,6 @@ from . import modelosUsuario
 from . import modelosAbstractos
 
 
-
 adminModels=[
     #Planificacion
     modelosPlanificacion.Evaluacion,
