@@ -153,7 +153,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTH_USER_MODEL = 'authentication.DirectoryUser'
 
 AUTHENTICATION_BACKENDS = [
-    'custom.authentication.backend.DirectorioLocalAuthBackend',#Cambiar a Produccion
+    'custom.authentication.backend.DirectorioOnlineAuthBackend',#Autenticacion en Directorio Online
+    'custom.authentication.backend.DirectorioLocalAuthBackend',#Autenticacion en Directorio Local
 ]
 
 REST_FRAMEWORK = {
