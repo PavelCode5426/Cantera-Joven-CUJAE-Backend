@@ -54,12 +54,17 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_swagger',
     'django_seed',
+    'django_q',
+    'notifications',
 
     #Libs de Autenticacion
     'rest_framework.authtoken',
 ]
 from helpers import AutoImporter
-INSTALLED_APPS += AutoImporter().loadApps()
+excludeApps = [
+    'AppConfig',
+]
+INSTALLED_APPS += AutoImporter().loadApps(excludeApps)
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -220,3 +225,22 @@ LOGGING = {
         }
     },
 }
+
+Q_CLUSTER = {
+    'name': 'CanteraJovenCUJAE',
+    'workers':1,
+    'timeout':60,
+    'recycle':500,
+    'compress':True,
+    'queue_limit':500,
+    'save_limit':250,
+    'max_attempts':3,
+    'label': 'Tareas de Cantera Joven CUJAE',
+    'orm':'default'
+}
+
+# EMAIL_HOST = env('EMAIL_HOST')
+# EMAIL_PORT = env('EMAIL_PORT')
+# EMAIL_HOST_USER = env('EMAIL_HOST_USER')
+# EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
+# EMAIL_USE_TLS = env('EMAIL_USE_TLS')

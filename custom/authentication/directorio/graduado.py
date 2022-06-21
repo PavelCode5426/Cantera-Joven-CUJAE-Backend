@@ -23,6 +23,9 @@ def obtenerGraduados(listIDs=[]):
     from . import obtenerPorIDs
     return obtenerPorIDs(__graduados, listIDs)
 
+def obtenerTodosGraduados():
+    return __graduados
+
 
 
 

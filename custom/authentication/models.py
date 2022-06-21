@@ -79,6 +79,6 @@ class DirectoryUserAPIKey(models.Model):
         return self.name+' '+self.user.username
 
     class Meta:
-        verbose_name = 'Usuario API-KEYS'
-        verbose_name_plural = 'Usuarios API-KEYS'
+        verbose_name = 'API-Key'
+        verbose_name_plural = 'API-Keys'
 

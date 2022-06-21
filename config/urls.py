@@ -16,9 +16,12 @@ Including another URLconf
 from django.urls import path, include
 from rest_framework_swagger.views import get_swagger_view
 
-
 from helpers import AutoImporter
-api_routers_v1 = AutoImporter().loadUrls(['config.urls','custom.administrator.urls'])
+excludeURLs = [
+    'config.*',
+    'custom.administrator.urls'
+]
+api_routers_v1 = AutoImporter().loadUrls(excludeURLs)
 
 
 api_routers = [
@@ -34,4 +37,3 @@ urlpatterns = api_routers + [
     # Configurando Swagger Open API
     path('', swaggerSchema, name='doc_swagger'),
 ]
-

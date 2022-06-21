@@ -11,7 +11,7 @@ class DirectorioLocalAuthBackend(ModelBackend):
         user = None
         data = directorio.authenticate(username, password)
         if data:
-            user = directorio.update_user(data['user'], data['permissions'])
+            user = directorio.update_or_create_user(data['user'], data['permissions'])
         return user
     def get_user(self, user_id):
         try:
