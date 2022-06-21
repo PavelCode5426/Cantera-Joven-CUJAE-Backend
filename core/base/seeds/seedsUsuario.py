@@ -13,7 +13,6 @@ fake_data = {
 }
 seeder.add_entity(authModels.DirectoryUser,20,fake_data)
 
-
 #Me daba error si volvia a asignar la variables y asi funciona.
 fake_data_1= dict(**fake_data)
 seeder.add_entity(modelosUsuario.Graduado,10,fake_data_1)
@@ -25,7 +24,6 @@ seeder.add_entity(modelosUsuario.PosibleGraduado,5,fake_data_2)
 fake_data_3 = dict(**fake_data,**{'anno_academico':lambda x:random.randint(1,5)})
 fake_data_3.pop('area')
 seeder.add_entity(modelosUsuario.Estudiante,5,fake_data_3)
-
 
 fake_data = {
     'usuario':lambda x:modelosUsuario.Graduado.objects.filter(aval=None).order_by('?').first()

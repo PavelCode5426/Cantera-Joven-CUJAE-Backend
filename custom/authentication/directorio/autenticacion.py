@@ -7,7 +7,7 @@ DIRECTORIO_URL = 'http://apidev.cujae.edu.cu'
 # DIRECTORIO_URL = 'http://apidevinter.cujae.edu.cu'
 
 class Autenticacion:
-    def authentication(self, username, password):
+    def authentication(self, username, password,**kwargs):
         user = None
         response = requests.get(DIRECTORIO_URL,headers={"Authorization":"Basic YWRtaW5pc3RyYXRvcjpncm91cGxkYXAyMDlxKis","x-access-token":""})
 
