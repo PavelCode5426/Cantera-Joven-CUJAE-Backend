@@ -15,6 +15,7 @@ def obtenerEstudiantes(listIDs=[]):
     from . import obtenerPorIDs
     return obtenerPorIDs(__estudiantes, listIDs)
 
+<<<<<<< HEAD
 def obtenerPorAnno(__estudiantes,anno):
     encontrado = False
     items = list()
@@ -27,6 +28,13 @@ def obtenerPorAnno(__estudiantes,anno):
                 encontrado = True
         except StopIteration:
             encontrado = True
+=======
+def obtenerTodosEstudiantes():
+    return __estudiantes
+
+>>>>>>> feature-autenticacion-directorio-online
 
     return items
 
+def obtenerTodosEstudiantes():
+    return __estudiantes

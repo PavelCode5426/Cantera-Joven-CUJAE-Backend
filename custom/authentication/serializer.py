@@ -4,6 +4,7 @@ from rest_framework import serializers
 from rest_framework.authtoken.serializers import AuthTokenSerializer
 from django.utils.translation import gettext_lazy as _
 
+from custom.authentication.directorio.autenticacion import Autenticacion
 from .models import DirectoryUser,DirectoryUserAPIKey
 
 
@@ -13,12 +14,8 @@ class CustomAuthTokenSerializer(AuthTokenSerializer):
         password = attrs.get('password')
 
         if username and password:
-            user = authenticate(request=self.context.get('request'),
-                                username=username, password=password)
+            user = authenticate(request=self.context.get('request'),username=username, password=password)
 
-            # The authenticate call simply returns None for is_active=False
-            # users. (Assuming the default ModelBackend authentication
-            # backend.)
             if not user:
                 msg = {'detail':_('Unable to log in with provided credentials.')}
                 raise serializers.ValidationError(msg, code='authorization')

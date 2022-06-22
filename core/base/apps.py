@@ -1,6 +1,5 @@
 from django.apps import AppConfig
 
-
 class BaseConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
     name = 'core.base'
@@ -10,3 +9,6 @@ class BaseConfig(AppConfig):
         super().__init__(app_name, app_module)
         self.models_module = '/models'
 
+    def ready(self):
+        from .trackers import registerModels
+        registerModels()

@@ -5,14 +5,20 @@ from . import modelosSimple as simpleModels
 
 class Estudiante(authModels.DirectoryUser):
     anno_academico = models.PositiveSmallIntegerField()
+    class Meta:
+        verbose_name = 'Estudiante'
 
 class Graduado(authModels.DirectoryUser):
     esExterno = models.BooleanField(default=False)
     esNivelSuperior = models.BooleanField(default=False)
+    class Meta:
+        verbose_name = 'Graduado'
 
 class PosibleGraduado(authModels.DirectoryUser):
     lugarProcedencia = models.ForeignKey(simpleModels.LugarProcedencia,on_delete=models.RESTRICT)
     evaluacionFamiliarizacion = models.ForeignKey('Evaluacion',on_delete=models.RESTRICT,null=True,blank=True)
+    class Meta:
+        verbose_name = 'Posible Graduado'
 
 class Aval(abstractModel.AbtractUserForeignKey):
     indiceAcademico = models.FloatField(default=None,null=True,blank=True)

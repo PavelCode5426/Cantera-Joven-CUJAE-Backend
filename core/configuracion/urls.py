@@ -7,5 +7,5 @@ app_prefix = 'config/'
 
 urlpatterns = [
     path('',GestionarConfiguracion.as_view()),
-    path('/<int:pk>',GestionarConfiguracion.as_view())
+    path('<int:pk>',GestionarConfiguracion.as_view())
 ]
