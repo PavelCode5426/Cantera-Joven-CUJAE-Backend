@@ -12,7 +12,6 @@ class AuthenticationTestCase(TestCase):
     def login(self,user,passw):
         return self.client.post(AUTH_LOGIN_URL,{'username':user,'password':passw})
 
-
     def setUp(self) -> None:
         self.client = APIClient()
     def test_login_user_test(self):
@@ -27,7 +26,6 @@ class AuthenticationTestCase(TestCase):
         self.assertIsNone(login_result.get('user'))
         self.assertEqual(login_result.get('detail')[0].title(),'No Puede Iniciar Sesión Con Las Credenciales Proporcionadas.')
 
-
     def test_logout_user(self):
         logout_result = self.client.post(AUTH_LOGOUT_URL).data
 
@@ -40,5 +38,9 @@ class AuthenticationTestCase(TestCase):
 
 
         logout_result = self.client.post(AUTH_LOGOUT_URL)
+
+    def test_autoupdate_user(self):
+        from .tasks import actualizar_informacion_usuarios
+        actualizar_informacion_usuarios()
 
 

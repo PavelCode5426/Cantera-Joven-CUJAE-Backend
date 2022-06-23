@@ -1,13 +1,6 @@
 from django.db import models
 from . import modelosAbstractos as abstractModels
 
-tiposRegistros = [
-    ('A','Ejemplo A'),
-]
-class Registro(abstractModels.AbtractUserForeignKey):
-    accion = models.CharField(max_length=255,choices=tiposRegistros)
-    fechaCreado = models.DateTimeField(auto_now=True)
-
 class Alertas(abstractModels.AbtractUserForeignKey):
     texto = models.CharField(max_length=255)
 
