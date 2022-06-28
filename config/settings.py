@@ -39,6 +39,10 @@ SECRET_KEY = env('SECRET_KEY')
 
 
 ALLOWED_HOSTS = []
+CORS_ORIGIN_ALLOW_ALL = True
+# CORS_ORIGIN_WHITELIST = (
+#   'http://localhost:3000',
+# )
 
 
 # Application definition
@@ -49,6 +53,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'corsheaders',
 
     #Libs Instaladas
     'rest_framework',
@@ -74,6 +79,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
 
     #Custom Middlewares
     'crum.CurrentRequestUserMiddleware'

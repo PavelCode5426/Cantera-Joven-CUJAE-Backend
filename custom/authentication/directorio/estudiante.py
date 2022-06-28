@@ -21,6 +21,9 @@ def obtenerEstudiantes(listIDs=[]):
     from . import obtenerPorIDs
     return obtenerPorIDs(__estudiantes, listIDs)
 
+def obtenerTodosEstudiantes():
+    return __estudiantes
+
 
 def obtenerPorAnno(__estudiantes, anno):
     items = list()
