@@ -10,26 +10,42 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.0/ref/settings/
 """
 
-from pathlib import Path
+#INSTALANDO VARIABLES DE ENTORNO
+import environ
+import os
 
+env = environ.Env(
+    # set casting, default value
+    DEBUG=(bool, False)
+)
+
+# Set the project base directory
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+# Take environment variables from .env file
+environ.Env.read_env(os.path.join(BASE_DIR, '.env')) #Cambiar para produccion
+
+# SECURITY WARNING: don't run with debug turned on in production!
+# False if not in os.environ because of casting above
+DEBUG = env('DEBUG')
+
+# SECURITY WARNING: keep the secret key used in production secret!
+#SECRET_KEY = 'django-insecure-pbfwo%(a1b4uu+1+4mhwm)$m7d64)^v9lx6$mg5qz0!k9pr5y8'
+SECRET_KEY = env('SECRET_KEY')
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-pbfwo%(a1b4uu+1+4mhwm)$m7d64)^v9lx6$mg5qz0!k9pr5y8'
-
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
 
 ALLOWED_HOSTS = []
+CORS_ORIGIN_ALLOW_ALL = True
+# CORS_ORIGIN_WHITELIST = (
+#   'http://localhost:3000',
+# )
 
 
 # Application definition
-
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -37,26 +53,23 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'corsheaders',
 
     #Libs Instaladas
     'rest_framework',
     'rest_framework_swagger',
+    'django_seed',
+    'django_q',
+    'notifications',
 
     #Libs de Autenticacion
     'rest_framework.authtoken',
-
-    #My Apps
-    'custom.authentication',
-    'custom.administrator',
-    'core.base',
-
-    #Familiarizacion
-
-    #Formacion Complementaria
-    'core.formacion_complementaria.base.apps.BaseFormacionComplementariaConfig'
-
-
 ]
+from helpers import AutoImporter
+excludeApps = [
+    'AppConfig',
+]
+INSTALLED_APPS += AutoImporter().loadApps(excludeApps)
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -66,6 +79,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
 
     #Custom Middlewares
     'crum.CurrentRequestUserMiddleware'
@@ -160,7 +174,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTH_USER_MODEL = 'authentication.DirectoryUser'
 
 AUTHENTICATION_BACKENDS = [
-    'custom.authentication.backend.DirectorioLocalAuthBackend',#Cambiar a Produccion
+    'custom.authentication.backend.DirectorioOnlineAuthBackend',#Autenticacion en Directorio Online
+    'custom.authentication.backend.DirectorioLocalAuthBackend',#Autenticacion en Directorio Local
 ]
 
 REST_FRAMEWORK = {
@@ -186,3 +201,62 @@ SWAGGER_SETTINGS = {
         },
     'USE_SESSION_AUTH':False
 }
+
+LOGGING = {
+    'version': 1, #Version del Gestor de Registros
+    'disable_existing_loggers': False, #Deshabilitar los registros predeterminados
+    'handlers': { #Configurar los gestores
+        'file':
+            {
+                'class': 'logging.FileHandler',
+                'filename': 'registro.log',
+                'formatter':'verbose'
+            },
+        'telegram':
+            {
+                'class':'custom.logging.TelegramLogHandler',
+                'channel':env('TELEGRAM_CHANNEL'),
+                'token':env('TELEGRAM_TOKEN'),
+                'level':'ERROR',
+                'formatter':'telegram-format',
+            }
+    },
+    'loggers': {
+        '': {
+            'level': 'DEBUG',
+            'handlers': ['file','telegram'],
+        },
+    },
+    'formatters': { #Formatos del Log
+        'verbose': {
+            'format': '{name} {levelname} {asctime} {module} {process:d} {thread:d} {message}',
+            'style': '{',
+        },
+        'simple': {
+            'format': '{levelname} {message}',
+            'style': '{',
+        },
+        'telegram-format':{
+            'class':'custom.logging.TelegramFormater'
+        }
+    },
+}
+
+Q_CLUSTER = {
+    'name': 'CanteraJovenCUJAE',
+    'workers':1,
+    'timeout':60,
+    'recycle':500,
+    'compress':True,
+    'queue_limit':500,
+    'save_limit':250,
+    'max_attempts':3,
+    'label': 'Tareas de Cantera Joven CUJAE',
+    'orm':'default'
+}
+
+# EMAIL_HOST = env('EMAIL_HOST')
+# EMAIL_PORT = env('EMAIL_PORT')
+# EMAIL_HOST_USER = env('EMAIL_HOST_USER')
+# EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
+# EMAIL_USE_TLS = env('EMAIL_USE_TLS')

@@ -31,8 +31,6 @@ class LogoutAPIView(APIView):
         Token.objects.filter(user=user).delete()
         return Response({'detail':'Sesion Cerrada Correctamente'},HTTP_200_OK)
 
-
-
 class DirectoryUserAPIKeyView(mixins.DestroyModelMixin,
                               mixins.ListModelMixin,
                               mixins.CreateModelMixin,

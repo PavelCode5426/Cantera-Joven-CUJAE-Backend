@@ -16,10 +16,13 @@ Including another URLconf
 from django.urls import path, include
 from rest_framework_swagger.views import get_swagger_view
 
-
-api_routers_v1 = [
-    path('auth/',include('custom.authentication.urls',namespace='Authentication')),
+from helpers import AutoImporter
+excludeURLs = [
+    'config.*',
+    'custom.administrator.urls'
 ]
+api_routers_v1 = AutoImporter().loadUrls(excludeURLs)
+
 
 api_routers = [
     #Cargando las Versiones de APIS
@@ -34,4 +37,3 @@ urlpatterns = api_routers + [
     # Configurando Swagger Open API
     path('', swaggerSchema, name='doc_swagger'),
 ]
-
