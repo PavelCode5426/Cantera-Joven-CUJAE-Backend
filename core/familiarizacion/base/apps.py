@@ -18,3 +18,4 @@ class FamiliarizacionBaseConfig(AppConfig):
                      )
         except Exception as e:
             pass
+
