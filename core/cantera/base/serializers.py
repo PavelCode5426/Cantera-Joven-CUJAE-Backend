@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from custom.authentication.directorio.estudiante import obtenerEstudiantes
-from core.base.models import modelosUsuario
+from core.base.models import modelosUsuario, modelosSimple
 
 
 class ImportarFromDirectorioSerializer(serializers.Serializer):
@@ -21,6 +21,7 @@ class ImportarEstudianteSerializer(ImportarFromDirectorioSerializer):
     def create(self, validated_data):
         lis = list()
         for estudiante_dic in validated_data['estudiantes']:
+            area, created = modelosSimple.Area.objects.get_or_create(nombre=estudiante_dic['area'])
             data = dict(
                 directorioID=estudiante_dic['id'],
                 first_name = estudiante_dic['first_name'],
@@ -28,7 +29,8 @@ class ImportarEstudianteSerializer(ImportarFromDirectorioSerializer):
                 username = estudiante_dic['username'],
                 email = estudiante_dic['email'],
                 direccion = estudiante_dic['direccion'],
-                anno_academico = estudiante_dic['anno']
+                anno_academico = estudiante_dic['anno'],
+                area = area,
             )
             estudiante = modelosUsuario.Estudiante.objects.update_or_create(directorioID=data['directorioID'],defaults=data)[0]
             lis.append(estudiante)

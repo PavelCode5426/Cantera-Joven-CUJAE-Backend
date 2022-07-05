@@ -8,4 +8,6 @@ router = routers.SimpleRouter()
 
 urlpatterns = [
     path('estudiante/sin-aval',views.ListEstudiantesSinAval.as_view()),
+    path('area/estudiantes',views.ListEstudiantesDelArea.as_view()),
+    path('area/esttudiantes/sin-aval',views.ListEstudinatesDelAreaSinAval.as_view()),
 ]
