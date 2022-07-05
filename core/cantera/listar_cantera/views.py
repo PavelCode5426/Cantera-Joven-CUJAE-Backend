@@ -6,13 +6,15 @@ from core.base.models import modelosUsuario, modelosSimple
 from . import serializers
 from ...formacion_complementaria.gestionar_solicitar_tutor.views import CustomListAPIView
 from rest_framework.response import Response
-
+from core.base.permissions import IsJefeArea
 
 class ListEstudiantesSinAval(ListAPIView):
+    permission_classes = [IsJefeArea]
     serializer_class = serializers.EstudianteSerializer
     queryset = modelosUsuario.Estudiante.objects.filter(aval=None).all()
 
 class ListEstudiantesDelArea(CustomListAPIView):
+    permission_classes = [IsJefeArea]
     serializer_class = serializers.EstudianteSerializer
     def list(self, request, *args, **kwargs):
         area = self.get_area()
@@ -21,6 +23,7 @@ class ListEstudiantesDelArea(CustomListAPIView):
         return Response(serializer.data,HTTP_200_OK)
 
 class ListEstudinatesDelAreaSinAval(CustomListAPIView):
+    permission_classes = [IsJefeArea]
     serializer_class = serializers.EstudianteSerializer
     def list(self, request,areaID=None):
         area = get_object_or_404(modelosSimple.Area,pk=areaID) if areaID else self.get_area()

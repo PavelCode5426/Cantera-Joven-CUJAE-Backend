@@ -112,23 +112,22 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
 
+#DATABASES = {
+#   'default': {
+#        'ENGINE': 'django.db.backends.sqlite3',
+#        'NAME': BASE_DIR + '/database/db.sqlite3',
+
+
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR + '/database/db.sqlite3',
-  }
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'proyectoDB',
+        'USER': 'postgres',
+        'PASSWORD': '1234',
+        'HOST': 'localhost',
+        'PORT': '5433',
+    }
 }
-
-#DATABASES = {
- #       'default': {
-  #          'ENGINE': 'django.db.backends.postgresql_psycopg2',
-   #         'NAME': 'projectDB',
-    #        'USER': 'postgres',
-     #       'PASSWORD': '1234',
-      #      'HOST': 'localhost',
-       #     'PORT': '5432',
-        #}
-    #}
 
 # Password validation
 # https://docs.djangoproject.com/en/4.0/ref/settings/#auth-password-validators
@@ -255,8 +254,14 @@ Q_CLUSTER = {
     'orm':'default'
 }
 
-# EMAIL_HOST = env('EMAIL_HOST')
-# EMAIL_PORT = env('EMAIL_PORT')
-# EMAIL_HOST_USER = env('EMAIL_HOST_USER')
-# EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
-# EMAIL_USE_TLS = env('EMAIL_USE_TLS')
+#EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+#EMAIL_HOST = env('smtp.gmail.com')
+#EMAIL_PORT = env('587')
+#EMAIL_HOST_USER = env('staminainvestingoficial@gmail.com')
+#EMAIL_HOST_PASSWORD = env('uxgltkqrsxwdjpw')
+#EMAIL_USE_TLS = env('True')
+
+# Custom setting. To email
+#RECIPIENT_ADDRESS = env('staminainvestingoficial@gmail.com')
+
+

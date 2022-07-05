@@ -6,9 +6,11 @@ from .serializers import UserAvalSerializer
 from core.base.models import modelosUsuario
 from custom.authentication import models as authModels
 from core.formacion_complementaria.gestionar_solicitar_tutor.serializers import GraduadoSerializer
+from core.base.permissions import IsJefeArea, IsTutor
 
 # Create your views here.
 class ObtenerCrearActualizarAval(CreateAPIView,RetrieveUpdateAPIView):
+    #permission_classes = [IsTutor, IsJefeArea]
     serializer_class = UserAvalSerializer
     lookup_url_kwarg = ['usuario']
 
@@ -33,5 +35,6 @@ class ObtenerCrearActualizarAval(CreateAPIView,RetrieveUpdateAPIView):
         return Response(serializer.errors,HTTP_400_BAD_REQUEST)
 
 class ObtenerGraduadosSinAval(ListAPIView):
+    #permission_classes = [IsTutor, IsJefeArea]
     serializer_class = GraduadoSerializer
     queryset = modelosUsuario.Graduado.objects.filter(aval=None).all()

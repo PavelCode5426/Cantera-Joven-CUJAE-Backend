@@ -3,13 +3,19 @@ from notifications.models import Notification
 from notifications.signals import notify
 
 from custom.authentication.models import DirectoryUser
+from custom.authentication.serializer import DirectoryUserSerializer
 
 
 class NotificationSerializer(serializers.ModelSerializer):
+    sender = serializers.SerializerMethodField('get_sender')
+
+    def get_sender(self,obj):
+        return DirectoryUserSerializer(obj.actor).data
+
     class Meta:
         model = Notification
-        #fields = ['id','level','verb','description','data','timestamp']
-        fields = '__all__' #TODO Cambiar esto por el de arriba
+        fields = ['id','level','verb','description','data','timestamp','sender', 'unread']
+        depth = 1
 
 class EnviarNotificacionMasivaSerializer(serializers.Serializer):
     texto = serializers.CharField(required=True)

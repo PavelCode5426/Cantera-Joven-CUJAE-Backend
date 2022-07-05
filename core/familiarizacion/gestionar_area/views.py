@@ -6,13 +6,16 @@ from . import serializers
 from core.base.models import modelosSimple,modelosPlanificacionFamiliarizarcion,modelosUsuario
 from rest_framework.viewsets import mixins, GenericViewSet
 from rest_framework.generics import ListCreateAPIView, ListAPIView, RetrieveAPIView, get_object_or_404
+from core.base.permissions import IsJefeArea, IsVicerrector, IsDirectorRH
 
 
 class ListarObtenerArea(mixins.ListModelMixin,mixins.RetrieveModelMixin,GenericViewSet):
+    #permission_classes = [IsDirectorRH, IsVicerrector]
     serializer_class = serializers.AreaSerializer
     queryset = modelosSimple.Area.objects.all()
 
 class ListarCrearPreubicacionLaboralAdelantadaAPIView(ListCreateAPIView):
+    #permission_classes = [IsDirectorRH, IsVicerrector, IsJefeArea]
     queryset = modelosPlanificacionFamiliarizarcion.UbicacionLaboralAdelantada.objects.filter(esPreubicacion=True).all()
     serializer_class = serializers.PreubicacionLaboralAdelantadaSerializer
 
@@ -37,6 +40,7 @@ class ListarCrearPreubicacionLaboralAdelantadaAPIView(ListCreateAPIView):
         return Response(data,HTTP_200_OK)
 
 class AceptarRechazarUbicacionLaboralAdelantadaAPIView(APIView):
+    #permission_classes = [IsVicerrector]
     serializer_class = serializers.SendNotificationSerializer
     def post(self,request):
         serializador = self.serializer_class(data=request.data)

@@ -2,10 +2,10 @@ from custom.authentication.models import DirectoryUser
 from core.base.models.modelosSimple import Area
 
 _usuarios = [
-    {'id':1,'email':'perezpavel5426@gmailm.com','username':'pperez','password':'1234','first_name':'Pavel','last_name':'Perez Gonzalez','area':'Informatica'},
-    {'id':2,'email':'lauramendezdelpino@gmail.commm','username':'laura','password':'1234','first_name':'Laura','last_name':'Mendez del Pino','area':'Informatica'},
-    {'id':3,'email':'aramays@gmail.commm','username':'ara','password':'1234','first_name':'Aramays','last_name':'Morales Duran','area':'Civil'},
-    {'id':4,'email':'monik@gmail.commm','username':'mony','password':'1234','first_name':'Monik','last_name':'Montoto Montene','area':'Civil'},
+    {'id':1,'email':'perezpavel5426@gmailm.com','username':'pperez','password':'1234','first_name':'Pavel','last_name':'Perez Gonzalez','area':'Informatica', 'roles': 'Jefe de Area'},
+    {'id':2,'email':'lauramendezdelpino@gmail.commm','username':'laura','password':'1234','first_name':'Laura','last_name':'Mendez del Pino','area':'Informatica', 'roles': ['Tutor', 'Vicerrector']},
+    {'id':3,'email':'aramays@gmail.commm','username':'ara','password':'1234','first_name':'Aramays','last_name':'Morales Duran','area':'Civil', 'roles': 'Director Recursos Humanos'},
+    {'id':4,'email':'monik@gmail.commm','username':'mony','password':'1234','first_name':'Monik','last_name':'Montoto Montene','area':'Civil', 'roles': ['Tutor','Jefe de Area']},
 ]
 
 def authenticate(username,password):
@@ -24,13 +24,16 @@ def update_or_create_user(userData, permissions=[]):
     userData['area'] = Area.objects.get_or_create(nombre=userData['area'])[0] if 'area' in userData else None
     userData['directorioID'] = userData.pop('id')
     userData['email'] = DirectoryUser.objects.normalize_email(userData['email'])
+    #permissions['roles']= DirectoryUser.objects.normalize_roles()['roles']
     __user = DirectoryUser.objects.update_or_create(directorioID=userData['directorioID'], defaults=userData)[0]
+
     return __user
 
 def update_user(userData,permissions=[]):
     userData['area'] = Area.objects.get_or_create(nombre=userData['area'])[0] if 'area' in userData else None
     userData['directorioID'] = userData.pop('id')
     userData['email'] = DirectoryUser.objects.normalize_email(userData['email'])
+    #permissions['roles'] = DirectoryUser.objects.normalize_roles()['roles']
     user = DirectoryUser.objects.filter(directorioID=userData['directorioID']).update(**userData)
     return user
 

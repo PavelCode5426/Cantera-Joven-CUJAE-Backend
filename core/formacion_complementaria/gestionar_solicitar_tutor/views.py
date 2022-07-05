@@ -11,6 +11,7 @@ from custom.authentication import models as authModels
 from core.base.models import modelosUsuario,modelosSimple
 from . import serializers
 from core.base.models.modelosTutoria import SolicitudTutorExterno
+from core.base.permissions import IsJefeArea, IsTutor, IsGraduado
 
 class CustomListAPIView(ListAPIView):
     def get_area(self):
@@ -19,6 +20,7 @@ class CustomListAPIView(ListAPIView):
 
 class ListTutoresArea(CustomListAPIView):
     """Lista los Tutores del Area"""
+    permission_classes = [IsJefeArea]
     serializer_class = authSerializers.DirectoryUserSerializer
     def list(self, request, *args, **kwargs):
         area = self.get_area()
@@ -27,6 +29,7 @@ class ListTutoresArea(CustomListAPIView):
         return Response(serializer.data,HTTP_200_OK)
 
 class ListGraduadosDelArea(CustomListAPIView):
+    permission_classes = [IsJefeArea, IsTutor]
     serializer_class = serializers.GraduadoSerializer
     def list(self, request, *args, **kwargs):
         area = self.get_area()
@@ -35,6 +38,7 @@ class ListGraduadosDelArea(CustomListAPIView):
         return Response(serializer.data,HTTP_200_OK)
 
 class ListGraduadosSinTutor(CustomListAPIView):
+    permission_classes = [IsJefeArea, IsTutor]
     serializer_class = serializers.GraduadoSerializer
     def list(self, request, *args, **kwargs):
         area = self.get_area()
@@ -44,10 +48,12 @@ class ListGraduadosSinTutor(CustomListAPIView):
         return Response(serializer.data, HTTP_200_OK)
 
 class ListGraduadosSinAval(CustomListAPIView):
+    permission_classes = [IsJefeArea, IsTutor]
     serializer_class = serializers.GraduadoSerializer
     queryset = modelosUsuario.Graduado.objects.filter(aval=None)
 
 class ListGraduadosDelAreaSinAval(CustomListAPIView):
+    permission_classes = [IsJefeArea, IsTutor]
     serializer_class = serializers.GraduadoSerializer
     def list(self, request,areaID=None):
         area = get_object_or_404(modelosSimple.Area,pk=areaID) if areaID else self.get_area()
@@ -58,6 +64,7 @@ class ListGraduadosDelAreaSinAval(CustomListAPIView):
 #TODO Falta proteger la ruta
 #Solamente tendran acceso los graduados o jefes de area
 class ListTutoresGraduado(ListAPIView):
+    permission_classes = [IsJefeArea, IsGraduado]
     """Lista los Tutores del Graduado"""
     serializer_class = serializers.TutoresDelGraduadoSerializer
 
@@ -77,6 +84,7 @@ class ListTutoresGraduado(ListAPIView):
 #TODO Falta proteger la ruta
 #Solamente tendran acceso los tutores o jefes de area
 class ListGraduadosTutor(ListAPIView):
+    permission_classes = [IsJefeArea, IsTutor]
     """Lista los Graduados del Tutor"""
     serializer_class = serializers.GraduadosDelTutorSerializer
 
@@ -93,6 +101,7 @@ class ListGraduadosTutor(ListAPIView):
 #TODO Falta proteger la ruta
 #Solamente tendra acceso a solicitar y asignar el jefe de area.
 class AsignarSolicitarTutores(CreateAPIView):
+    permission_classes = [IsJefeArea]
     serializer_class = serializers.AsignarSolicitarTutorSerializer
 
     def create(self, request, graduado):
@@ -113,6 +122,7 @@ class AsignarSolicitarTutores(CreateAPIView):
         return Response(result,HTTP_200_OK)
 
 class SolicitudesTutorEnviadas(ListAPIView):
+    permission_classes = [IsJefeArea]
     serializer_class = serializers.SolicitudTutorExternoSerializer
     def get_queryset(self):
         area = self.request.user.area
@@ -120,6 +130,7 @@ class SolicitudesTutorEnviadas(ListAPIView):
         return query
 
 class SolicitudesTutorPendientes(ListAPIView):
+    permission_classes = [IsJefeArea]
     serializer_class = serializers.SolicitudTutorExternoSerializer
     def get_queryset(self):
         area = self.request.user.area
@@ -127,6 +138,7 @@ class SolicitudesTutorPendientes(ListAPIView):
         return query
 
 class SolicitudesTutorRecibidas(ListAPIView):
+    permission_classes = [IsJefeArea]
     serializer_class = serializers.SolicitudTutorExternoSerializer
     def get_queryset(self):
         area = self.request.user.area
@@ -134,6 +146,7 @@ class SolicitudesTutorRecibidas(ListAPIView):
         return query
 
 class ObtenerResponderSolicitudesTutor(RetrieveAPIView, CreateAPIView):
+    permission_classes = [IsJefeArea]
     serializer_class = serializers.SolicitudTutorExternoSerializer
     lookup_url_kwarg = ('solicitudID')
     lookup_field = 'pk'
