@@ -42,3 +42,16 @@ configuracion = [
 for config in configuracion:
     modelosSimple.Configuracion.objects.update_or_create(llave=config['llave'],defaults=config)
 
+from django.contrib.auth.models import Group
+
+roles = [
+    {'nombre':'Tutor'},
+    {'nombre':'Jefe de Area'},
+    {'nombre':'Director Recursos Humanos'},
+    {'nombre':'Vicerrector'},
+    {'nombre':'Estudiante'},
+    {'nombre':'Graduado'},
+    {'nombre':'Posible Graduado'},
+]
+for Group in roles:
+    Group.objects.update_or_create()
