@@ -1,3 +1,4 @@
+from django.core.exceptions import ObjectDoesNotExist
 from django.utils.timezone import now
 from rest_framework import serializers
 from core.base.models.modelosTutoria import GraduadoTutor,SolicitudTutorExterno
@@ -33,7 +34,15 @@ class AsignarSolicitarTutorSerializer(serializers.Serializer):
 
     def is_valid(self, raise_exception=False):
         is_valid = super().is_valid(raise_exception)
-        if is_valid and not ('areas_solicitadas' in self.initial_data or 'tutores' in self.initial_data):
+        has_aval = False
+        try:
+            has_aval = self.initial_data['graduado'].aval
+        except ObjectDoesNotExist:
+            self._errors.setdefault('graduado', 'Es requerido tener aval para otorgar tutores')
+
+        if is_valid \
+                and (not ('areas_solicitadas' in self.initial_data or 'tutores' in self.initial_data) \
+                or not (len(self.initial_data['areas_solicitadas']) or len(self.initial_data['tutores']))):
             self._errors.setdefault('detail','Necesita declara al menos un atributo')
         elif is_valid:
             area = self.initial_data['graduado'].area
@@ -41,14 +50,14 @@ class AsignarSolicitarTutorSerializer(serializers.Serializer):
             if 'tutores' in self.initial_data:
                 ids = set(self.initial_data['tutores'])
                 tutores = DirectoryUser.objects.filter(pk__in=ids,area=area,graduado=None,posiblegraduado=None,estudiante=None).all()
-                if len(tutores) is not len(ids):
+                if len(tutores) is not len(ids) or not len(ids):
                     self._errors.setdefault('tutores', 'Se han seleccionado tutores incorrectamente')
                 else:self._validated_data['tutores'] = tutores
 
             if 'areas_solicitadas' in self.initial_data:
                 ids = set(self.initial_data['areas_solicitadas'])
                 areas = Area.objects.filter(pk__in=ids).exclude(pk=area.pk).all()
-                if len(areas) is not len(ids):
+                if len(areas) is not len(ids) or not len(ids):
                     self._errors.setdefault('areas_solicitadas', 'Se han seleccionado areas incorrectamente')
                 else: self._validated_data['areas_solicitadas']=areas
 
