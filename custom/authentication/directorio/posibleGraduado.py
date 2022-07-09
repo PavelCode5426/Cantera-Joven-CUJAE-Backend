@@ -9,6 +9,10 @@ __posiblesGraduados = [
      'lugarProcedencia':'Universidad Pedagogica de la Habana'},
     {'id':191,'email':'estudiante8@gmail.com','username':'amivilla','first_name':'Amy','last_name':'Villa','direccion':'La Habana 8976',
      'lugarProcedencia':'Universidad Pedagogica de la Habana'},
+    {'id':444,'email':'estudiante9@gmail.com','username':'lia','first_name':'Lia','last_name':'Garcia','direccion':'Ave 1era #100',
+     'lugarProcedencia':'Universidad Pedagogica de la Habana'},
+    {'id':555,'email':'estudiante8@gmail.com','username':'amivilla','first_name':'Amy','last_name':'Villa','direccion':'La Habana 8976',
+     'lugarProcedencia':'Universidad Pedagogica de la Habana'},
 ]
 
 def obtenerPosibleGraduado(id):

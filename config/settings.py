@@ -113,18 +113,18 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
 
 DATABASES = {
+    #'default': {
+     #   'ENGINE': 'django.db.backends.sqlite3',
+      #  'NAME': BASE_DIR + '/database/db.sqlite3',
+    # },
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR + '/database/db.sqlite3',
-    },
-    # 'default': {
-    #     'ENGINE': 'django.db.backends.postgresql_psycopg2',
-    #     'NAME': 'projectDB',
-    #     'USER': 'postgres',
-    #     'PASSWORD': '1234',
-    #     'HOST': 'localhost',
-    #     'PORT': '5432',
-    # }
+         'ENGINE': 'django.db.backends.postgresql_psycopg2',
+         'NAME': 'proyectoDB',
+         'USER': 'postgres',
+         'PASSWORD': '1234',
+         'HOST': 'localhost',
+         'PORT': '5433',
+     }
 }
 
 
@@ -252,9 +252,13 @@ Q_CLUSTER = {
     'label': 'Tareas de Cantera Joven CUJAE',
     'orm':'default'
 }
-
-# EMAIL_HOST = env('EMAIL_HOST')
-# EMAIL_PORT = env('EMAIL_PORT')
-# EMAIL_HOST_USER = env('EMAIL_HOST_USER')
-# EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
-# EMAIL_USE_TLS = env('EMAIL_USE_TLS')
+EMAIL_BACKEND="django.core.mail.backends.smtp.EmailBackend"
+#EMAIL_HOST = "smtp.gmail.com"
+#EMAIL_PORT = 587
+#EMAIL_HOST_USER = "staminainvestingoficial@gmail.com"
+#EMAIL_HOST_PASSWORD = "uxgltkqrsrxwdjpw"
+EMAIL_USE_TLS = True
+EMAIL_HOST = 'smtp.mailtrap.io'
+EMAIL_HOST_USER = '37b2ba9a1d8146'
+EMAIL_HOST_PASSWORD = 'c8bfa6035e7dd0'
+EMAIL_PORT = '2525'
