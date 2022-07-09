@@ -252,9 +252,13 @@ Q_CLUSTER = {
     'label': 'Tareas de Cantera Joven CUJAE',
     'orm':'default'
 }
-
-# EMAIL_HOST = env('EMAIL_HOST')
-# EMAIL_PORT = env('EMAIL_PORT')
-# EMAIL_HOST_USER = env('EMAIL_HOST_USER')
-# EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
-# EMAIL_USE_TLS = env('EMAIL_USE_TLS')
+EMAIL_BACKEND="django.core.mail.backends.smtp.EmailBackend"
+#EMAIL_HOST = "smtp.gmail.com"
+#EMAIL_PORT = 587
+#EMAIL_HOST_USER = "staminainvestingoficial@gmail.com"
+#EMAIL_HOST_PASSWORD = "uxgltkqrsrxwdjpw"
+EMAIL_USE_TLS = True
+EMAIL_HOST = 'smtp.mailtrap.io'
+EMAIL_HOST_USER = '37b2ba9a1d8146'
+EMAIL_HOST_PASSWORD = 'c8bfa6035e7dd0'
+EMAIL_PORT = '2525'
