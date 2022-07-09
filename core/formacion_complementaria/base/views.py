@@ -2,13 +2,23 @@ from rest_framework.generics import ListCreateAPIView,RetrieveAPIView
 from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST
 
+from core.base.models.modelosUsuario import Graduado
 from core.formacion_complementaria.base.serializers import ImportarGraduadoSerializer
-from custom.authentication.directorio.graduado import obtenerGraduados,obtenerGraduado
+from custom.authentication.directorio.graduado import obtenerGraduados, obtenerGraduado, obtenerTodosGraduados
+
 
 class GraduadosEnDirectorio(ListCreateAPIView):
     def list(self, request):
-        graduados = obtenerGraduados()
-        return Response(graduados,HTTP_200_OK)
+        graduados = obtenerTodosGraduados()
+        sinIncorporar = list()
+
+        for graduado in graduados:
+            try:
+                Graduado.objects.get(directorioID=graduado['id'])
+            except Graduado.DoesNotExist:
+                sinIncorporar.append(graduado)
+
+        return Response(sinIncorporar,HTTP_200_OK)
 
     def create(self, request):
         data = request.data

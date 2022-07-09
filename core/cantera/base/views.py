@@ -2,13 +2,22 @@ from rest_framework.generics import ListCreateAPIView,RetrieveAPIView
 from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST, HTTP_404_NOT_FOUND
 
-from custom.authentication.directorio.estudiante import obtenerEstudiante,obtenerEstudiantes
+from core.base.models.modelosUsuario import Estudiante
+from custom.authentication.directorio.estudiante import obtenerEstudiante, obtenerEstudiantes, obtenerTodosEstudiantes
 from .serializers import ImportarEstudianteSerializer
 
 class EstudiantesEnDirectorio(ListCreateAPIView):
     def list(self, request):
-        items = obtenerEstudiantes()
-        return Response(items,HTTP_200_OK)
+        estudiantes = obtenerTodosEstudiantes()
+        sinIncorporar = list()
+
+        for estudiante in estudiantes:
+            try:
+                Estudiante.objects.get(directorioID=estudiante['id'])
+            except Estudiante.DoesNotExist:
+                sinIncorporar.append(estudiante)
+
+        return Response(sinIncorporar,HTTP_200_OK)
     def create(self, request):
         data = request.data
         serializer = ImportarEstudianteSerializer(data=data)

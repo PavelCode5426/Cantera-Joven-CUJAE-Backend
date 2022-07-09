@@ -14,7 +14,7 @@ class NotificationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Notification
-        fields = ['id','level','verb','description','data','timestamp','sender', 'unread']
+        fields = ['id','level','verb','description','data','unread','timestamp','sender']
         depth = 1
 
 class EnviarNotificacionMasivaSerializer(serializers.Serializer):
