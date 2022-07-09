@@ -1,6 +1,16 @@
 from rest_framework import permissions
 
 
+#roles = [
+#    {'nombre':'Tutor'},
+ #   {'nombre':'Jefe de Area'},
+  #  {'nombre':'Director Recursos Humanos'},
+   # {'nombre':'Vicerrector'},
+    #{'nombre':'Estudiante'},
+    #{'nombre':'Graduado'},
+    #{'nombre':'Posible Graduado'},
+#]
+
 class IsTutor(permissions.BasePermission):
 
     def has_permission(self, request, view):

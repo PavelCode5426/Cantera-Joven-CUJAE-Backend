@@ -45,13 +45,13 @@ for config in configuracion:
 from django.contrib.auth.models import Group
 
 roles = [
-    {'roles':'Tutor'},
-    {'roles':'Jefe de Area'},
-    {'roles':'Director Recursos Humanos'},
-    {'roles':'Vicerector'},
-    {'roles':'Estudiante'},
-    {'roles':'Graduado'},
-    {'roles':'Posible Graduado'},
+    {'nombre':'Tutor'},
+    {'nombre':'Jefe de Area'},
+    {'nombre':'Director Recursos Humanos'},
+    {'nombre':'Vicerrector'},
+    {'nombre':'Estudiante'},
+    {'nombre':'Graduado'},
+    {'nombre':'Posible Graduado'},
 ]
-for grupo in roles:
+for Group in roles:
     Group.objects.update_or_create()

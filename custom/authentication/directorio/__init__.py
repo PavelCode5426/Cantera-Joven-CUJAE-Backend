@@ -1,5 +1,6 @@
 from custom.authentication.models import DirectoryUser
 from core.base.models.modelosSimple import Area
+from django.contrib.auth.models import Group
 
 _usuarios = [
     {'id':1,'email':'perezpavel5426@gmailm.com','username':'pperez','password':'1234','first_name':'Pavel','last_name':'Perez Gonzalez','area':'Informatica', 'roles': 'Jefe de Area'},
@@ -24,8 +25,11 @@ def update_or_create_user(userData, permissions=[]):
     userData['area'] = Area.objects.get_or_create(nombre=userData['area'])[0] if 'area' in userData else None
     userData['directorioID'] = userData.pop('id')
     userData['email'] = DirectoryUser.objects.normalize_email(userData['email'])
-    #permissions['roles']= DirectoryUser.objects.normalize_roles()['roles']
+    permissions['roles'] = DirectoryUser.objects.normalize_roles()['roles']
     __user = DirectoryUser.objects.update_or_create(directorioID=userData['directorioID'], defaults=userData)[0]
+    __user.roles.delete()
+    if 'roles' in userData:
+        userData['roles'] = Group.objects.get_or_create(nombre=userData['roles'])[0]
 
     return __user
 
@@ -33,7 +37,6 @@ def update_user(userData,permissions=[]):
     userData['area'] = Area.objects.get_or_create(nombre=userData['area'])[0] if 'area' in userData else None
     userData['directorioID'] = userData.pop('id')
     userData['email'] = DirectoryUser.objects.normalize_email(userData['email'])
-    #permissions['roles'] = DirectoryUser.objects.normalize_roles()['roles']
     user = DirectoryUser.objects.filter(directorioID=userData['directorioID']).update(**userData)
     return user
 
