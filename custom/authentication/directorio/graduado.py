@@ -18,7 +18,6 @@ def obtenerGraduado(id):
     from . import obtenerPorID
     return obtenerPorID(__graduados, id)
 
-
 def obtenerGraduados(listIDs=[]):
     from . import obtenerPorIDs
     return obtenerPorIDs(__graduados, listIDs)
