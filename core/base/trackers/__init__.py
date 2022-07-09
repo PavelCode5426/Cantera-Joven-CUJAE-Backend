@@ -1,7 +1,10 @@
 from custom.logging.tracker import modelTracker
 from core.base import models
+from custom.authentication import models as authModels
 
 def registerModels():
+    modelTracker.register(authModels.DirectoryUserAPIKey)
+
     modelTracker.register(models.modelosUsuario.Estudiante)
     modelTracker.register(models.modelosUsuario.Graduado)
     modelTracker.register(models.modelosUsuario.PosibleGraduado)

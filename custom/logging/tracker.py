@@ -11,7 +11,7 @@ class ModelsTracker:
         for registerModel in self.models:
             if isinstance(model,registerModel):
                 return True
-            return False
+        return False
 
 
 modelTracker = ModelsTracker()
