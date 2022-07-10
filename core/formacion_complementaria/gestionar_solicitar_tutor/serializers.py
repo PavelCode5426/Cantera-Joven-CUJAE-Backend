@@ -12,7 +12,7 @@ from custom.authentication.models import DirectoryUser
 class GraduadoSerializer(serializers.ModelSerializer):
     class Meta:
         model = Graduado
-        fields = ('id','username','first_name','last_name','email','esExterno','esNivelSuperior','aval')
+        fields = ('id','username','first_name','last_name','email','direccion','esExterno','esNivelSuperior','aval')
 
 class TutoresDelGraduadoSerializer(serializers.ModelSerializer):
     tutor = DirectoryUserSerializer()

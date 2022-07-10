@@ -30,7 +30,8 @@ class CustomAuthTokenSerializer(AuthTokenSerializer):
 class DirectoryUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = DirectoryUser
-        fields = ('id','username','first_name','last_name','email')
+        depth = 1
+        fields = ('id','username','first_name','last_name','email','direccion','area')
 
 
 class DirectoryUserAPIKeySerializer(serializers.ModelSerializer):
