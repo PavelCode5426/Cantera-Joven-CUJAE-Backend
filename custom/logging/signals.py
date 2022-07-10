@@ -24,13 +24,14 @@ def post_delete_action_logging(sender, instance, **kwargs):
 
     if not is_in and modelTracker.is_register(instance):
         user = request.user if request else None
-        LogEntry.objects.log_action(
-            user_id=user.pk if user else None,
-            content_type_id=get_content_type_for_model(instance).pk,
-            object_id=instance.pk,
-            object_repr=str(instance),
-            action_flag=DELETION,
-        )
+        if user:
+            LogEntry.objects.log_action(
+                user_id=user.pk,
+                content_type_id=get_content_type_for_model(instance).pk,
+                object_id=instance.pk,
+                object_repr=str(instance),
+                action_flag=DELETION,
+            )
 
 def post_save_action_logging(sender,instance,created,*args,**kwargs):
     request = get_current_request()
@@ -53,10 +54,11 @@ def post_save_action_logging(sender,instance,created,*args,**kwargs):
         action = ADDITION if created else CHANGE
 
         user = request.user if request else None
-        LogEntry.objects.log_action(
-            user_id=user.pk if user else None,
-            content_type_id=get_content_type_for_model(instance).pk,
-            object_id=instance.pk,
-            object_repr=str(instance),
-            action_flag=action,
-        )
+        if user:
+            LogEntry.objects.log_action(
+                user_id=user.pk,
+                content_type_id=get_content_type_for_model(instance).pk,
+                object_id=instance.pk,
+                object_repr=str(instance),
+                action_flag=action,
+            )
