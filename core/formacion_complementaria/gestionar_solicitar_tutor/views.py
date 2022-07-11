@@ -39,7 +39,7 @@ class ListGraduadosSinTutor(CustomListAPIView):
     def list(self, request, *args, **kwargs):
         area = self.get_area()
         #FILTRAR PARA QUE NO TENGA TUTOR
-        graduados = modelosUsuario.Graduado.objects.filter(area=area)
+        graduados = modelosUsuario.Graduado.objects.filter(area=area,tutores=None)
         serializer = self.serializer_class(graduados, many=True)
         return Response(serializer.data, HTTP_200_OK)
 
