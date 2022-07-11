@@ -57,7 +57,7 @@ class AsignarSolicitarTutorSerializer(serializers.Serializer):
             if 'areas_solicitadas' in self.initial_data:
                 ids = set(self.initial_data['areas_solicitadas'])
                 areas = Area.objects.filter(pk__in=ids).exclude(pk=area.pk).all()
-                if len(areas) is not len(ids) or not len(ids):
+                if len(areas) is not len(ids):
                     self._errors.setdefault('areas_solicitadas', 'Se han seleccionado areas incorrectamente')
                 else: self._validated_data['areas_solicitadas']=areas
 
