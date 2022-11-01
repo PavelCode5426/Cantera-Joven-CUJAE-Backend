@@ -10,9 +10,12 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.0/ref/settings/
 """
 
-#INSTALANDO VARIABLES DE ENTORNO
-import environ
 import os
+
+# INSTALANDO VARIABLES DE ENTORNO
+import environ
+
+from custom.applicationloader.helper import AppsLoader
 
 env = environ.Env(
     # set casting, default value
@@ -24,14 +27,14 @@ env = environ.Env(
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # Take environment variables from .env file
-environ.Env.read_env(os.path.join(BASE_DIR, '.env')) #Cambiar para produccion
+environ.Env.read_env(os.path.join(BASE_DIR, '.env'))  # Cambiar para produccion
 
 # SECURITY WARNING: don't run with debug turned on in production!
 # False if not in os.environ because of casting above
-DEBUG = env('DEBUG')
+DEBUG = env('DEBUG', default=False)
 
 # SECURITY WARNING: keep the secret key used in production secret!
-#SECRET_KEY = 'django-insecure-pbfwo%(a1b4uu+1+4mhwm)$m7d64)^v9lx6$mg5qz0!k9pr5y8'
+# SECRET_KEY = 'django-insecure-pbfwo%(a1b4uu+1+4mhwm)$m7d64)^v9lx6$mg5qz0!k9pr5y8'
 SECRET_KEY = env('SECRET_KEY')
 
 # Quick-start development settings - unsuitable for production
@@ -55,21 +58,19 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'corsheaders',
 
-    #Libs Instaladas
+    # Libs Instaladas
     'rest_framework',
     'rest_framework_swagger',
     'django_seed',
     'django_q',
     'notifications',
+    'django_filters',
 
-    #Libs de Autenticacion
+    # Libs de Autenticacion
     'rest_framework.authtoken',
+
+    # 'custom.applicationloader'
 ]
-from helpers import AutoImporter
-excludeApps = [
-    'AppConfig',
-]
-INSTALLED_APPS += AutoImporter().loadApps(excludeApps)
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -81,7 +82,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'corsheaders.middleware.CorsMiddleware',
 
-    #Custom Middlewares
+    # Custom Middlewares
     'crum.CurrentRequestUserMiddleware'
 ]
 
@@ -90,7 +91,9 @@ ROOT_URLCONF = 'config.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [
+            os.path.join(BASE_DIR, 'core/notificacion/template')
+        ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -107,7 +110,6 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'config.wsgi.application'
-
 
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
@@ -127,7 +129,6 @@ DATABASES = {
     }
 }
 
-
 # Password validation
 # https://docs.djangoproject.com/en/4.0/ref/settings/#auth-password-validators
 
@@ -146,7 +147,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/4.0/topics/i18n/
 
@@ -157,7 +157,6 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 
 USE_TZ = True
-
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.0/howto/static-files/
@@ -172,14 +171,14 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTH_USER_MODEL = 'authentication.DirectoryUser'
 
 AUTHENTICATION_BACKENDS = [
-    'custom.authentication.backend.DirectorioOnlineAuthBackend',#Autenticacion en Directorio Online
-    'custom.authentication.backend.DirectorioLocalAuthBackend',#Autenticacion en Directorio Local
+    'custom.authentication.backend.DirectorioOnlineAuthBackend',  # Autenticacion en Directorio Online
+    'custom.authentication.backend.DirectorioLocalAuthBackend',  # Autenticacion en Directorio Local
 ]
 
 REST_FRAMEWORK = {
     # Use Django's standard `django.contrib.authentication` permissions,
     # or allow read-only access for unauthenticated users.
-    'DEFAULT_SCHEMA_CLASS':'rest_framework.schemas.coreapi.AutoSchema',
+    'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema',
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
     ],
@@ -187,45 +186,54 @@ REST_FRAMEWORK = {
         'custom.authentication.backend.APIKeyAuthentication',
         'custom.authentication.backend.BearerAuthentication'
     ),
+    'DEFAULT_FILTER_BACKENDS': [
+        'django_filters.rest_framework.DjangoFilterBackend',
+        'rest_framework.filters.SearchFilter',
+        'rest_framework.filters.OrderingFilter',
+    ],
+    'DEFAULT_PAGINATION_CLASS': 'core.base.pagination.StandardResultsSetPagination',
+    'DEFAULT_METADATA_CLASS': 'core.base.metadata.MinimalMetadata'
 }
 
 SWAGGER_SETTINGS = {
     "exclude_url_names": ['doc_swagger'],
-    "exclude_namespaces": ['admin','doc_swagger'],
+    "exclude_namespaces": ['admin', 'doc_swagger'],
     "SECURITY_DEFINITIONS":
         {
-            'JWT': {'type':'apiKey','in':'header','name':'Auth JWT'},
-            'Token': {'type':'apiKey','in':'header','name':'Auth Token'},
+            'Api Key': {"type": "apiKey", "name": "api-key", "in": "header"},
+            'Bearer Token': {'type': 'apiKey', 'name': 'Bearer', 'in': 'header'},
         },
-    'USE_SESSION_AUTH':False
+    'USE_SESSION_AUTH': False,
+    'JSON_EDITOR': True,
+    "is_authenticated": False,
 }
 
 LOGGING = {
-    'version': 1, #Version del Gestor de Registros
-    'disable_existing_loggers': False, #Deshabilitar los registros predeterminados
-    'handlers': { #Configurar los gestores
+    'version': 1,  # Version del Gestor de Registros
+    'disable_existing_loggers': False,  # Deshabilitar los registros predeterminados
+    'handlers': {  # Configurar los gestores
         'file':
             {
                 'class': 'logging.FileHandler',
                 'filename': 'registro.log',
-                'formatter':'verbose'
+                'formatter': 'verbose'
             },
         'telegram':
             {
-                'class':'custom.logging.TelegramLogHandler',
-                'channel':env('TELEGRAM_CHANNEL'),
-                'token':env('TELEGRAM_TOKEN'),
-                'level':'ERROR',
-                'formatter':'telegram-format',
+                'class': 'custom.logging.TelegramLogHandler',
+                'channel': env('TELEGRAM_CHANNEL'),
+                'token': env('TELEGRAM_TOKEN'),
+                'level': 'ERROR',
+                'formatter': 'telegram-format',
             }
     },
     'loggers': {
         '': {
             'level': 'DEBUG',
-            'handlers': ['file','telegram'],
+            'handlers': ['file', 'telegram'],
         },
     },
-    'formatters': { #Formatos del Log
+    'formatters': {  # Formatos del Log
         'verbose': {
             'format': '{name} {levelname} {asctime} {module} {process:d} {thread:d} {message}',
             'style': '{',
@@ -234,27 +242,32 @@ LOGGING = {
             'format': '{levelname} {message}',
             'style': '{',
         },
-        'telegram-format':{
-            'class':'custom.logging.TelegramFormater'
+        'telegram-format': {
+            'class': 'custom.logging.TelegramFormater'
         }
     },
 }
 
 Q_CLUSTER = {
     'name': 'CanteraJovenCUJAE',
-    'workers':1,
-    'timeout':60,
-    'recycle':500,
-    'compress':True,
-    'queue_limit':500,
-    'save_limit':250,
-    'max_attempts':3,
+    'workers': 1,
+    'timeout': 60,
+    'recycle': 500,
+    'compress': True,
+    'queue_limit': 500,
+    'save_limit': 250,
+    'max_attempts': 3,
     'label': 'Tareas de Cantera Joven CUJAE',
-    'orm':'default'
+    'orm': 'default'
 }
 
-# EMAIL_HOST = env('EMAIL_HOST')
-# EMAIL_PORT = env('EMAIL_PORT')
-# EMAIL_HOST_USER = env('EMAIL_HOST_USER')
-# EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
-# EMAIL_USE_TLS = env('EMAIL_USE_TLS')
+DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL ', default=None)
+EMAIL_HOST = env('EMAIL_HOST', default=None)
+EMAIL_PORT = env('EMAIL_PORT', default=None)
+EMAIL_HOST_USER = env('EMAIL_HOST_USER', default=None)
+EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD', default=None)
+EMAIL_USE_TLS = env('EMAIL_USE_TLS', default=True)
+
+apps_loader = AppsLoader()
+apps_loader.load()
+INSTALLED_APPS += apps_loader.get_apps()

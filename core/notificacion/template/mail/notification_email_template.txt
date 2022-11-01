@@ -1,0 +1,6 @@
+
+Notificaciones sin leer:
+
+{% for notificacion in notificaciones %}
+    * {{ notificacion }}
+{% endfor %}

@@ -14,22 +14,25 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.urls import path, include
-from rest_framework_swagger.views import get_swagger_view
+from rest_framework.schemas import get_schema_view
 
-from helpers import AutoImporter
+from custom.applicationloader.helper import UrlsLoader
+
 excludeURLs = [
     'config.*',
     'custom.administrator.urls'
 ]
-api_routers_v1 = AutoImporter().loadUrls(excludeURLs)
 
+urls_loader = UrlsLoader(excludeURLs)
+urls_loader.load()
+api_routers_v1 = urls_loader.get_urls()
 
 api_routers = [
-    #Cargando las Versiones de APIS
-    path('api/v1/',include(api_routers_v1))
+    # Cargando las Versiones de APIS
+    path('api/v1/', include(api_routers_v1))
 ]
 
-swaggerSchema = get_swagger_view(title='Cantera Joven CUJAE',patterns=api_routers)
+swaggerSchema = get_schema_view(title='Cantera Joven CUJAE', patterns=api_routers, urlconf='config.urls')
 urlpatterns = api_routers + [
     # Configurando Admin
     path('', include('custom.administrator.urls')),

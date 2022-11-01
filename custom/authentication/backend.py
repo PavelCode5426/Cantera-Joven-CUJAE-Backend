@@ -2,25 +2,28 @@ from django.contrib.auth.backends import ModelBackend
 from rest_framework.authentication import TokenAuthentication
 
 from custom.authentication.directorio.autenticacion import Autenticacion
-from . import directorio
 from custom.authentication.models import DirectoryUser, DirectoryUserAPIKey
+from . import directorio
+
 
 class DirectorioLocalAuthBackend(ModelBackend):
 
-    def authenticate(self,request,username,password,**kwargs):
+    def authenticate(self, request, username, password, **kwargs):
         user = None
         data = directorio.authenticate(username, password)
         if data:
-            user = directorio.update_or_create_user(data['user'], data['permissions'])
+            user = directorio.update_or_create_user(data)
         return user
+
     def get_user(self, user_id):
         try:
             return DirectoryUser.objects.get(pk=user_id)
         except DirectoryUser.DoesNotExist:
             return None
 
+
 class DirectorioOnlineAuthBackend(ModelBackend):
-    def authenticate(self,request,username,password,**kwargs):
+    def authenticate(self, request, username, password, **kwargs):
         user = None
         data = None
         autentication = Autenticacion()
@@ -43,6 +46,7 @@ class DirectorioOnlineAuthBackend(ModelBackend):
 
 class BearerAuthentication(TokenAuthentication):
     keyword = 'Bearer'
+
 
 class APIKeyAuthentication(TokenAuthentication):
     keyword = 'api-key'

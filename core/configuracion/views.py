@@ -1,13 +1,17 @@
+from rest_framework.generics import ListCreateAPIView, UpdateAPIView
 from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK
-from rest_framework.generics import ListCreateAPIView,UpdateAPIView
-from . import serializers
+
+from core.base import permissions
 from core.base.models import modelosSimple
+from . import serializers
 
 
 # Create your views here.
 
-class GestionarConfiguracion(ListCreateAPIView,UpdateAPIView):
+
+class GestionarConfiguracion(ListCreateAPIView, UpdateAPIView):
+    permission_classes = [permissions.IsDirectorRecursosHumanos]
     serializer_class = serializers.ConfigurationSerializer
     queryset = modelosSimple.Configuracion.objects.all()
 
@@ -16,8 +20,7 @@ class GestionarConfiguracion(ListCreateAPIView,UpdateAPIView):
         for configItem in self.get_queryset():
             list.setdefault(configItem.llave,
                             {
-                                'id':configItem.id,
-                                'valor':configItem.valor
+                                'id': configItem.id,
+                                'valor': configItem.valor
                             })
-        return Response(list,HTTP_200_OK)
-
+        return Response(list, HTTP_200_OK)
