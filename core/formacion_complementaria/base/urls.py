@@ -1,12 +1,15 @@
 from django.urls import path
 
 # Create your views here.
-from core.formacion_complementaria.base.views import GraduadosEnDirectorio, ObtenerGraduadoEnDirectorio
+from core.formacion_complementaria.base.views import GraduadosEnDirectorio, \
+    ListGraduadosDelArea
 
 app_name = 'BaseFormacionComplementaria'
 
 urlpatterns = [
-    # TODO IDENTICO QUE EN EL ESTUDIANTE
     path('directorio/graduado', GraduadosEnDirectorio.as_view()),
-    path('directorio/graduado/<int:graduadoID>', ObtenerGraduadoEnDirectorio.as_view()),
+    path('directorio/graduado/<int:graduadoID>', GraduadosEnDirectorio.as_view()),
+
+    # OBTIENE TODOS LOS GRADUADOS DEL AREA
+    path('area/<int:areaID>/graduados', ListGraduadosDelArea.as_view()),
 ]

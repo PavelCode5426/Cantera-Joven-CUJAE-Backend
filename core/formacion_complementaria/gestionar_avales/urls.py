@@ -1,14 +1,14 @@
 from django.urls import path
+from rest_framework import routers
 
-from core.formacion_complementaria.gestionar_avales.views import ObtenerGraduadosSinAval
-from .views import ObtenerCrearActualizarAval
+from .views import ObtenerCrearActualizarAval, PlantillaAvalModelViewSet
 
 # Create your views here.
 app_name = 'GestionarAval'
 
-urlpatterns = [
-    # TODO QUITAR LOS GRADUADOS SIN AVAL Y PONERLO EN UN FILTRO POR LOS GRADUADOS
+router = routers.SimpleRouter()
+router.register('plantilla-aval', PlantillaAvalModelViewSet, 'PlantillaAval')
 
-    path('user/<int:usuario>/aval', ObtenerCrearActualizarAval.as_view()),
-    path('graduado/sin-aval', ObtenerGraduadosSinAval.as_view()),
-]
+urlpatterns = [
+                  path('user/<int:usuario>/aval', ObtenerCrearActualizarAval.as_view()),
+              ] + router.get_urls()

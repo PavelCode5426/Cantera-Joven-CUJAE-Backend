@@ -34,15 +34,17 @@ for dimension in elementos:
     modelosSimple.Dimension.objects.get_or_create(dimension, **dimension)
 
 configuracion = [
-    {'llave': 'auto_importar_estudiante', 'valor': True},
-    {'llave': 'auto_importar_posible_graduado', 'valor': True},
-    {'llave': 'auto_importar_graduado', 'valor': True},
-    {'llave': 'auto_actualizar_usuario', 'valor': True},
-    {'llave': 'enviar_estado_notificaciones', 'valor': True},
+    {'etiqueta': 'auto_importar_estudiante', 'valor': False},
+    {'etiqueta': 'auto_importar_posible_graduado', 'valor': True},
+    {'etiqueta': 'auto_importar_graduado', 'valor': True},
+    {'etiqueta': 'auto_actualizar_usuario', 'valor': True},
+    {'etiqueta': 'enviar_estado_notificaciones', 'valor': True},
 ]
 
 for config in configuracion:
-    modelosSimple.Configuracion.objects.update_or_create(llave=config['llave'], defaults=config)
+    create, element = modelosSimple.Configuracion.objects.get_or_create(defaults=config, etiqueta=config['etiqueta'])
+    if not create:
+        element.update(**config)
 
 roles = [
     {'name': 'Jefe de Area'},
