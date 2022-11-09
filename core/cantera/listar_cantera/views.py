@@ -5,8 +5,15 @@ from rest_framework.status import HTTP_200_OK
 
 from core.base.models import modelosUsuario, modelosSimple
 from . import serializers
+from ...base.models.modelosSimple import Area
 from ...base.permissions import IsDirectorRecursosHumanos, IsJefeArea
-from ...formacion_complementaria.gestionar_solicitar_tutor.views import CustomListAPIView
+
+
+class CustomListAPIView(ListAPIView):
+
+    def get_area(self):
+        area = Area.objects.get(pk=1)
+        return area
 
 
 class ListEstudiantesSinAval(ListAPIView):

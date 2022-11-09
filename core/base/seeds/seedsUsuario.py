@@ -31,3 +31,4 @@ fake_data = {
     'usuario': lambda x: modelosUsuario.Graduado.objects.filter(aval=None).order_by('?').first()
 }
 seeder.add_entity(modelosUsuario.Aval, 5, fake_data)
+seeder.add_entity(modelosUsuario.PlantillaAval, 5)

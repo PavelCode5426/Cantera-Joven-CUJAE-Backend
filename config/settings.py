@@ -192,7 +192,8 @@ REST_FRAMEWORK = {
         'rest_framework.filters.OrderingFilter',
     ],
     'DEFAULT_PAGINATION_CLASS': 'core.base.pagination.StandardResultsSetPagination',
-    'DEFAULT_METADATA_CLASS': 'core.base.metadata.MinimalMetadata'
+    'DEFAULT_METADATA_CLASS': 'core.base.metadata.MinimalMetadata',
+    'EXCEPTION_HANDLER': 'core.base.exceptions.custom_exception_handler'
 }
 
 SWAGGER_SETTINGS = {

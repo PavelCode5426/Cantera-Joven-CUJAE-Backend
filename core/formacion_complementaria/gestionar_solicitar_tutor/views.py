@@ -1,161 +1,143 @@
 from django.db.models import Q
-from django.utils.timezone import now
+from rest_framework.generics import ListAPIView, CreateAPIView
 from rest_framework.generics import get_object_or_404, RetrieveAPIView
-from rest_framework.generics import ListAPIView,CreateAPIView
 from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST
 
-from core.base.models.modelosUsuario import Graduado
+from core.base.models.modelosTutoria import SolicitudTutorExterno, GraduadoTutor
+from core.formacion_complementaria.base.permissions import IsSameAreaPermissions, GraduateOfSameAreaPermissions, \
+    TutorOfSameAreaPermissions, IsSameTutorWhoRequestPermissions, IsSameGraduateWhoRequestPermissions
 from custom.authentication import serializer as authSerializers
-from custom.authentication import models as authModels
-from core.base.models import modelosUsuario,modelosSimple
+from custom.authentication.models import DirectoryUser
 from . import serializers
-from core.base.models.modelosTutoria import SolicitudTutorExterno
+from .exceptions import PreviouslyAnsweredRequestException
+from .filters import SolicitudTutorFilterSet, TutoriaFilterSet
+from .permissions import SendOrReciveSolicitudTutorExternoPermissions
+from ...base.permissions import IsJefeArea
 
-class CustomListAPIView(ListAPIView):
-    def get_area(self):
-        area = self.request.user.area
-        return area
 
-class ListTutoresArea(CustomListAPIView):
-    """Lista los Tutores del Area"""
+class TutoresPorAreaListAPIView(ListAPIView):
+    """
+    Lista los Tutores del Area, solamente tendran acceso los jefes de area, podiendo ver solamente en su area.
+    """
     serializer_class = authSerializers.DirectoryUserSerializer
-    def list(self, request, *args, **kwargs):
-        area = self.get_area()
-        usuarios = authModels.DirectoryUser.objects.filter(area=area,graduado=None,posiblegraduado=None,estudiante=None)
-        serializer = self.serializer_class(usuarios,many=True)
-        return Response(serializer.data,HTTP_200_OK)
+    permission_classes = (IsSameAreaPermissions, IsJefeArea)
 
-class ListGraduadosDelArea(CustomListAPIView):
-    serializer_class = serializers.GraduadoSerializer
-    def list(self, request, *args, **kwargs):
-        area = self.get_area()
-        graduados = modelosUsuario.Graduado.objects.filter(area=area)
-        serializer = self.serializer_class(graduados,many=True)
-        return Response(serializer.data,HTTP_200_OK)
+    def get_queryset(self):
+        areaID = self.kwargs['areaID']
+        return DirectoryUser.objects.filter(area=areaID, graduado=None, posiblegraduado=None, estudiante=None).all()
 
-class ListGraduadosSinTutor(CustomListAPIView):
-    serializer_class = serializers.GraduadoSerializer
-    def list(self, request, *args, **kwargs):
-        area = self.get_area()
-        #FILTRAR PARA QUE NO TENGA TUTOR
-        graduados = modelosUsuario.Graduado.objects.filter(area=area,tutores=None)
-        serializer = self.serializer_class(graduados, many=True)
-        return Response(serializer.data, HTTP_200_OK)
 
-class ListGraduadosSinAval(CustomListAPIView):
-    serializer_class = serializers.GraduadoSerializer
-    queryset = modelosUsuario.Graduado.objects.filter(aval=None)
-
-class ListGraduadosDelAreaSinAval(CustomListAPIView):
-    serializer_class = serializers.GraduadoSerializer
-    def list(self, request,areaID=None):
-        area = get_object_or_404(modelosSimple.Area,pk=areaID) if areaID else self.get_area()
-        graduados = modelosUsuario.Graduado.objects.filter(aval=None,area=area).all()
-        serializer = self.get_serializer(graduados,many=True)
-        return Response(serializer.data,HTTP_200_OK)
-
-#TODO Falta proteger la ruta
-#Solamente tendran acceso los graduados o jefes de area
-class ListTutoresGraduado(ListAPIView):
-    """Lista los Tutores del Graduado"""
+class TutoresPorGraduadoListAPIView(ListAPIView):
+    """
+    Lista los Tutores del Graduado. Solamente tienen acceso el mismo graduado o los jefes de area del graduado.
+    """
     serializer_class = serializers.TutoresDelGraduadoSerializer
+    permission_classes = (GraduateOfSameAreaPermissions, (IsJefeArea | IsSameGraduateWhoRequestPermissions))
+    filterset_class = TutoriaFilterSet
 
-    def list(self, request, graduado=None, **kwargs):
-        if graduado:
-            graduado = get_object_or_404(modelosUsuario.Graduado,pk=graduado)
-        else:
-            try:
-                graduado = request.user.graduado
-            except modelosUsuario.Graduado.DoesNotExist:
-                return Response({'detail':'No cuenta con datos de graduado'},HTTP_400_BAD_REQUEST)
+    def get_queryset(self):
+        graduado = self.kwargs['graduado']
+        return GraduadoTutor.objects.filter(graduado=graduado, fechaRevocado=None).order_by('-fechaAsignado').all()
 
-        tutores = graduado.tutores.filter(fechaRevocado=None).all()
-        serializer = self.serializer_class(tutores,many=True)
-        return Response(serializer.data,HTTP_200_OK)
 
-#TODO Falta proteger la ruta
-#Solamente tendran acceso los tutores o jefes de area
-class ListGraduadosTutor(ListAPIView):
-    """Lista los Graduados del Tutor"""
-    serializer_class = serializers.GraduadosDelTutorSerializer
+class TutoradosPorTutorListAPIView(ListAPIView):
+    """
+    Lista los Graduados del Tutor, solamente tendran acceso los jefes de area de su area y el propio tutor
+    """
+    serializer_class = serializers.TutoradosDelTutorSerializer
+    permission_classes = (TutorOfSameAreaPermissions, (IsJefeArea | IsSameTutorWhoRequestPermissions))
+    filterset_class = TutoriaFilterSet
 
-    def list(self, request, tutor=None, **kwargs):
-        if tutor:
-            tutor = get_object_or_404(authModels.DirectoryUser, pk=tutor)
-        else:
-            tutor = request.user
+    def get_queryset(self):
+        tutor = self.kwargs['tutor']
+        return GraduadoTutor.objects.filter(tutor=tutor, fechaRevocado=None).order_by('-fechaAsignado').all()
 
-        graduados = tutor.graduados.filter(fechaRevocado=None).all()
-        serializer = self.serializer_class(graduados, many=True)
-        return Response(serializer.data, HTTP_200_OK)
 
-#TODO Falta proteger la ruta
-#Solamente tendra acceso a solicitar y asignar el jefe de area.
 class AsignarSolicitarTutores(CreateAPIView):
-    serializer_class = serializers.AsignarSolicitarTutorSerializer
+    """
+    Permite asignar y solicitar un tutor a un graduado. Solamente tendra acceso el jefe de area
+    perteneciente al area del graduado que se le asignara tutores o solicitara tutores.
 
-    def create(self, request, graduado):
-        area = self.request.user.area
-        graduado = get_object_or_404(Graduado,pk=graduado,area=area)
+    Esta interfaz modifica por completo los tutores asignando solamente los que se pasen en la lista.
+    En caso de querer eliminar un tutor simplemente no lo envie en la lista.
+
+    """
+    serializer_class = serializers.AsignarSolicitarTutorSerializer
+    permission_classes = (GraduateOfSameAreaPermissions, IsJefeArea)
+
+    def create(self, request, graduado, **kwargs):
         data = request.data
-        data.setdefault('graduado',graduado)
+        data.setdefault('graduado', graduado)
         serializer = serializers.AsignarSolicitarTutorSerializer(data=data)
         if not serializer.is_valid():
-            return Response(serializer.errors,HTTP_400_BAD_REQUEST)
+            return Response(serializer.errors, HTTP_400_BAD_REQUEST)
 
-        result = serializer.create(serializer.validated_data)
+        result = serializer.save()
         if 'tutores' in result:
             result['tutores'] = 'Tutores asignados correctamente'
-        if 'areas_solicitadas' in result:
-            result['areas_solicitadas'] = 'Tutores externos solicitados correctamente'
+        if 'solicitudes' in result:
+            result['solicitudes'] = 'Tutores externos solicitados correctamente'
 
-        return Response(result,HTTP_200_OK)
+        return Response(result, HTTP_200_OK)
 
-class SolicitudesTutorEnviadas(ListAPIView):
-    serializer_class = serializers.SolicitudTutorExternoSerializer
+
+class SolicitudesTutorListAPIView(ListAPIView):
+    """
+    Permite listar y filtrar todas las solicitudes de tutor recibidas y enviadas. Esta interfaz solamente sera
+    accesible para los jefes de area.
+
+    """
+    serializer_class = serializers.SolicitudTutorExternoWithoutMotivoSerializer
+    filterset_class = SolicitudTutorFilterSet
+    permission_classes = (IsJefeArea,)
+
     def get_queryset(self):
         area = self.request.user.area
-        query = SolicitudTutorExterno.objects.filter(graduado__area=area).order_by('-fechaCreado').all()
+        query = SolicitudTutorExterno.objects.filter(Q(graduado__area=area) | Q(area=area)) \
+            .order_by('-fechaCreado').all()
         return query
 
-class SolicitudesTutorPendientes(ListAPIView):
-    serializer_class = serializers.SolicitudTutorExternoSerializer
-    def get_queryset(self):
-        area = self.request.user.area
-        query = SolicitudTutorExterno.objects.filter(graduado__area=area,fechaRespuesta=None).order_by('-fechaCreado').all()
-        return query
-
-class SolicitudesTutorRecibidas(ListAPIView):
-    serializer_class = serializers.SolicitudTutorExternoSerializer
-    def get_queryset(self):
-        area = self.request.user.area
-        query = SolicitudTutorExterno.objects.filter(area=area).order_by('-fechaCreado').all()
-        return query
 
 class ObtenerResponderSolicitudesTutor(RetrieveAPIView, CreateAPIView):
+    """
+    Permite obtener y responder las solicitudes de tutor, solamente pueden acceder a las solicitudes los jefes de area
+    que la reciban o la envie.
+    En el caso de responder la solicitud solamente podran responderla quien la recibieron.
+
+
+    """
     serializer_class = serializers.SolicitudTutorExternoSerializer
+    permission_classes = (SendOrReciveSolicitudTutorExternoPermissions, IsJefeArea)
     lookup_url_kwarg = ('solicitudID')
     lookup_field = 'pk'
 
     def get_area(self):
         return self.request.user.area
-    def get_queryset(self):
-        area = self.get_area()
-        query = SolicitudTutorExterno.objects.filter(Q(graduado__area=area)|Q(area=area),pk=self.kwargs['solicitudID'])
-        return query
-    def create(self, request,solicitudID):
-        area = self.get_area()
-        solicitud = get_object_or_404(SolicitudTutorExterno, area=area, pk=self.kwargs['solicitudID'])
-        if solicitud.respuesta is not None:
-            return Response({'detail': 'Solicitud respondida anteriormente'}, HTTP_400_BAD_REQUEST)
-        data = request.data
-        data['area']=area
-        serializer = serializers.ResponderSolicitudSerializer(data=data)
-        if not serializer.is_valid():
-            return Response(serializer.errors,HTTP_400_BAD_REQUEST)
-        validated_data = serializer.validated_data
-        validated_data['solicitud'] = solicitud
-        solicitud = serializer.create(validated_data)
-        return Response({'detail':'Solicitud {resp} correctamente'.format(resp='aceptada' if solicitud.respuesta else 'rechazada')},HTTP_200_OK)
 
+    def get_object(self):
+        solicitud = self.kwargs['solicitud'] if 'solicitud' in self.kwargs else None
+        if not solicitud:
+            solicitud = get_object_or_404(SolicitudTutorExterno, pk=self.kwargs['solicitudID'])
+        return solicitud
+
+    def create(self, request, solicitud, **kwargs):
+        """
+        RESPONDER LA SOLICITUD DE TUTOR.
+        """
+        if solicitud.respuesta is not None:
+            raise PreviouslyAnsweredRequestException
+
+        data = request.data
+        data['area'] = self.get_area()
+        data['solicitud'] = solicitud
+
+        serializer = serializers.ResponderSolicitudSerializer(data=data)
+
+        if not serializer.is_valid():
+            return Response(serializer.errors, HTTP_400_BAD_REQUEST)
+
+        solicitud = serializer.save()
+
+        return Response({'detail': 'Solicitud {resp} correctamente'.format(
+            resp='aceptada' if solicitud.respuesta else 'rechazada')}, HTTP_200_OK)

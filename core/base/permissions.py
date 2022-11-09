@@ -43,3 +43,11 @@ class IsEstudiante(IsRole):
 
 class IsGraduado(IsRole):
     role_name = ['Graduado']
+
+
+class IsSameUserWhoRequestPermissions(CustomBasePermission):
+    URL_KWARGS_KEY = 'ID'
+
+    def __has_permission(self, request, view):
+        has_permissions = view.kargs[self.URL_KWARGS_KEY] == request.user.pk
+        return has_permissions

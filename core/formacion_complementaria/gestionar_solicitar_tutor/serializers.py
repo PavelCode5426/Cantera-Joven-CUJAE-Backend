@@ -1,65 +1,69 @@
-from django.core.exceptions import ObjectDoesNotExist
+from crum import get_current_user
 from django.utils.timezone import now
 from rest_framework import serializers
-from core.base.models.modelosTutoria import GraduadoTutor,SolicitudTutorExterno
-from core.base.models.modelosUsuario import Graduado
-from core.base.models.modelosSimple import Area
-from core.formacion_complementaria.gestionar_solicitar_tutor.helpers import get_tutor
-from custom.authentication.serializer import DirectoryUserSerializer
+
+from core.base.models.modelosTutoria import GraduadoTutor, SolicitudTutorExterno
+from core.formacion_complementaria.gestionar_solicitar_tutor.helpers import get_all_tutors
 from custom.authentication.models import DirectoryUser
+from custom.authentication.serializer import DirectoryUserSerializer
+from .exceptions import SelectedGraduateHaveNotAvalException, SelectedTutorNotFoundInArea, \
+    SelectedTutorPreviuslyAssigned
+from ..base.serializers import GraduadoSerializer
+from ...base.models.modelosSimple import Area
 
-
-class GraduadoSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Graduado
-        fields = ('id','username','first_name','last_name','email','direccion','esExterno','esNivelSuperior','aval')
 
 class TutoresDelGraduadoSerializer(serializers.ModelSerializer):
     tutor = DirectoryUserSerializer()
+
     class Meta:
         model = GraduadoTutor
         exclude = ['graduado']
         deph = 1
 
-class GraduadosDelTutorSerializer(serializers.ModelSerializer):
+
+class TutoradosDelTutorSerializer(serializers.ModelSerializer):
     graduado = GraduadoSerializer()
+
     class Meta:
         model = GraduadoTutor
         exclude = ['tutor']
         deph = 1
 
+
+class SolicitudSerializer(serializers.Serializer):
+    area = serializers.PrimaryKeyRelatedField(queryset=Area.objects.all())
+    motivo_solicitud = serializers.CharField()
+
+    def validate_area(self, value):
+        user = get_current_user()
+        if hasattr(user, 'area') and value == user.area:
+            raise serializers.ValidationError('No puede solicitar un tutor de su misma area')
+        return value
+
+
 class AsignarSolicitarTutorSerializer(serializers.Serializer):
-    tutores = serializers.PrimaryKeyRelatedField(many=True,read_only=True)
-    areas_solicitadas = serializers.PrimaryKeyRelatedField(many=True,read_only=True)
+    tutores = serializers.PrimaryKeyRelatedField(many=True, queryset=get_all_tutors())
+    solicitudes = SolicitudSerializer(many=True, required=False)
 
     def is_valid(self, raise_exception=False):
         is_valid = super().is_valid(raise_exception)
-        has_aval = False
-        try:
-            has_aval = self.initial_data['graduado'].aval
-        except ObjectDoesNotExist:
-            self._errors.setdefault('graduado', 'Es requerido tener aval para otorgar tutores')
 
-        if is_valid \
-                and (not ('areas_solicitadas' in self.initial_data or 'tutores' in self.initial_data) \
-                or not (len(self.initial_data['areas_solicitadas']) or len(self.initial_data['tutores']))):
-            self._errors.setdefault('detail','Necesita declara al menos un atributo')
-        elif is_valid:
-            area = self.initial_data['graduado'].area
-            self._validated_data['graduado']=self.initial_data['graduado']
-            if 'tutores' in self.initial_data:
-                ids = set(self.initial_data['tutores'])
-                tutores = DirectoryUser.objects.filter(pk__in=ids,area=area,graduado=None,posiblegraduado=None,estudiante=None).all()
-                if len(tutores) is not len(ids) or not len(ids):
-                    self._errors.setdefault('tutores', 'Se han seleccionado tutores incorrectamente')
-                else:self._validated_data['tutores'] = tutores
+        if is_valid:
 
-            if 'areas_solicitadas' in self.initial_data:
-                ids = set(self.initial_data['areas_solicitadas'])
-                areas = Area.objects.filter(pk__in=ids).exclude(pk=area.pk).all()
-                if len(areas) is not len(ids):
-                    self._errors.setdefault('areas_solicitadas', 'Se han seleccionado areas incorrectamente')
-                else: self._validated_data['areas_solicitadas']=areas
+            if not hasattr(self.initial_data['graduado'], 'aval'):
+                raise SelectedGraduateHaveNotAvalException
+
+            gradudado = self.initial_data['graduado']
+            area = gradudado.area
+            self._validated_data['graduado'] = self.initial_data['graduado']
+
+            # COMPROBAR QUE TODOS LOS TUTORES SON DE LA MISMA AREA
+            tutores_externos_no_revocados = DirectoryUser.objects \
+                .filter(tutorados__graduado=gradudado, tutorados__fechaRevocado__isnull=True) \
+                .exclude(area=area).all()
+            for tutor in self._validated_data['tutores']:
+                if tutor.area != area and not (tutor in tutores_externos_no_revocados):
+                    raise SelectedTutorNotFoundInArea
 
         return not bool(self._errors)
 
@@ -69,27 +73,33 @@ class AsignarSolicitarTutorSerializer(serializers.Serializer):
 
         if 'tutores' in validated_data:
             tutores = validated_data['tutores']
-            graduado.tutores.exclude(tutor__in=tutores).update(fechaRevocado=now())
-            tutoresList = list()
-            for tutor in tutores:
-                tutoresList.append(graduado.tutores.get_or_create(tutor=tutor,graduado=graduado,fechaRevocado=None))
-            result['tutores'] = tutoresList
+            graduado.tutores.exclude(tutor__in=tutores, fechaRevocado__isnull=True).update(fechaRevocado=now())
 
-        if 'areas_solicitadas' in validated_data:
-            areas = validated_data['areas_solicitadas']
-            graduado.solicitudes.filter(area__in=areas,fechaRespuesta=None).update(fechaCreado=now())
-            solicitudesList = list()
-            for area in areas:
-                solicitudesList.append(graduado.solicitudes.get_or_create(area=area,graduado=graduado))
-            result['areas_solicitadas'] = solicitudesList
+            for tutor in tutores:
+                data = dict(tutor=tutor)
+                graduado.tutores.get_or_create(defaults=data, tutor=tutor, fechaRevocado=None)
+            result['tutores'] = tutores
+
+        if 'solicitudes' in validated_data:
+            solicitudes = list()
+            for solicitud in validated_data['solicitudes']:
+                data = dict(**solicitud, graduado=graduado, fechaCreado=now())
+                solicitudes.append(
+                    SolicitudTutorExterno.objects.update_or_create(
+                        defaults=data,
+                        area=solicitud['area'],
+                        graduado=graduado
+                    ))
+            result['solicitudes'] = solicitudes
 
         return result
 
+
 class SolicitudTutorExternoSerializer(serializers.ModelSerializer):
-    area = serializers.SerializerMethodField()
+    # area = serializers.SerializerMethodField(method_name='area_name')
     graduado = GraduadoSerializer()
 
-    def get_area(self,instance):
+    def area_name(self, instance):
         return instance.area.nombre
 
     class Meta:
@@ -97,34 +107,55 @@ class SolicitudTutorExternoSerializer(serializers.ModelSerializer):
         fields = '__all__'
         depth = 1
 
+
+class SolicitudTutorExternoWithoutMotivoSerializer(SolicitudTutorExternoSerializer):
+    class Meta:
+        model = SolicitudTutorExterno
+        exclude = ('motivo_respuesta', 'motivo_solicitud')
+        depth = 1
+
+
 class ResponderSolicitudSerializer(serializers.Serializer):
-    asignar = serializers.PrimaryKeyRelatedField(read_only=True,default=None,allow_null=True)
+    tutores = serializers.PrimaryKeyRelatedField(many=True, queryset=get_all_tutors())
+    motivo_respuesta = serializers.CharField()
 
     def is_valid(self, raise_exception=False):
         is_valid = super().is_valid()
 
-        if is_valid and self.initial_data['asignar']:
-            tutor = get_tutor(self.initial_data['asignar'],area=self.initial_data['area'])
-            if not tutor:
-                self._errors['asignar']='Tutor no encontrado'
-            else:
-                self._validated_data['asignar']=tutor
+        # COMPROBAR QUE TODOS LOS TUTORES SON DE LA MISMA AREA
+        area = self.initial_data['area']
+        solicitud = self.initial_data['solicitud']
+        graduado = solicitud.graduado
+
+        tutores_asignados_del_area = DirectoryUser.objects.filter(tutorados__graduado=graduado,
+                                                                  tutorados__fechaRevocado__isnull=True,
+                                                                  area=area).all()
+        for tutor in self._validated_data['tutores']:
+            if tutor.area != area:
+                raise SelectedTutorNotFoundInArea
+            elif tutor in tutores_asignados_del_area:
+                raise SelectedTutorPreviuslyAssigned
+
+        self._validated_data['area'] = area
+        self._validated_data['solicitud'] = solicitud
+        self._validated_data['graduado'] = graduado
 
         return not bool(self._errors)
+
     def create(self, validated_data):
         solicitud = validated_data['solicitud']
-        solicitud.respuesta = 'asignar'in validated_data and validated_data['asignar'] is not None
+        graduado = validated_data['graduado']
+        tutores = validated_data['tutores']
+        motivo_respuesta = validated_data['motivo_respuesta']
+
+        solicitud.motivo_respuesta = motivo_respuesta
         solicitud.fechaRespuesta = now()
-
-        if solicitud.respuesta:
-            tutor = validated_data['asignar']
-            solicitud.graduado.tutores.create(tutor=tutor,graduado=solicitud.graduado,fechaRevocado=None)
-
+        solicitud.respuesta = len(tutores)
         solicitud.save()
+
+        asignar_tutores = list()
+        for tutor in tutores:
+            asignar_tutores.append(GraduadoTutor(tutor=tutor, graduado=graduado))
+        GraduadoTutor.objects.bulk_create(asignar_tutores)
+
         return solicitud
-
-
-
-
-
-
