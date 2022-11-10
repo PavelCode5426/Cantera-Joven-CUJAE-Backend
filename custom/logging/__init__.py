@@ -1,18 +1,19 @@
+import logging
+
 from telegram import Bot
 
-import logging
 logger = logging.getLogger(__name__)
+
 
 class TelegramFormater(logging.Formatter):
     def format(self, record):
-
         text_format = "Nivel: {levelname} \n" \
                       "Fecha: {asctime} \n" \
                       "Usuario: {user} \n" \
                       "Metodo: {method} \n" \
                       "URL: {path_info} \n" \
-                      "Mensaje: {message} \n"\
-                      "Pila de Traseo: {stacktrace} \n"\
+                      "Mensaje: {message} \n" \
+                      "Pila de Traseo: {stacktrace} \n" \
             .format(
             levelname=record.levelname,
             asctime=record.asctime,
@@ -25,19 +26,21 @@ class TelegramFormater(logging.Formatter):
 
         return text_format
 
+
 class TelegramLogHandler(logging.Handler):
     channel = None
     token = None
 
-    def __init__(self,channel,token,*args,**kwargs):
+    def __init__(self, channel, token, *args, **kwargs):
         self.channel = channel
         self.token = token
-        super().__init__(*args,**kwargs)
+        super().__init__(*args, **kwargs)
 
     def emit(self, record):
         try:
-            bot = Bot(token=self.token)
-            message = self.format(record)[:4000]
-            bot.send_message(self.channel,message,disable_web_page_preview=True)
+            if self.channel and self.token:
+                bot = Bot(token=self.token)
+                message = self.format(record)[:4000]
+                bot.send_message(self.channel, message, disable_web_page_preview=True)
         except Exception as e:
             print(e)

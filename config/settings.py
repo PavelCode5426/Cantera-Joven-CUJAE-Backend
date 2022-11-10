@@ -19,7 +19,8 @@ from custom.applicationloader.helper import AppsLoader
 
 env = environ.Env(
     # set casting, default value
-    DEBUG=(bool, False)
+    DEBUG=(bool, False),
+    SECRET_KEY=(str, 'django-insecure-pbfwo%(a1b4uu+1+4mhwm)$m7d64)^v9lx6$mg5qz0!k9pr5y8')
 )
 
 # Set the project base directory
@@ -27,7 +28,8 @@ env = environ.Env(
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # Take environment variables from .env file
-environ.Env.read_env(os.path.join(BASE_DIR, '.env'))  # Cambiar para produccion
+# Si encuentra el archivo combina las variables de entorno por las del archivo
+environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 
 # SECURITY WARNING: don't run with debug turned on in production!
 # False if not in os.environ because of casting above
@@ -69,7 +71,6 @@ INSTALLED_APPS = [
     # Libs de Autenticacion
     'rest_framework.authtoken',
 
-    # 'custom.applicationloader'
 ]
 
 MIDDLEWARE = [
@@ -115,17 +116,13 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
 
 DATABASES = {
-    # 'default': {
-    #     'ENGINE': 'django.db.backends.sqlite3',
-    #     'NAME': BASE_DIR + '/database/db.sqlite3',
-    # },
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'cantera-joven-cujae',
-        'USER': 'postgres',
-        'PASSWORD': '1234',
-        'HOST': 'localhost',
-        'PORT': '5432',
+        'HOST': env('DATABASE_HOST'),
+        'PORT': env('DATABASE_PORT'),
+        'NAME': env('DATABASE_NAME'),
+        'USER': env('DATABASE_USER'),
+        'PASSWORD': env('DATABASE_PASSWORD'),
     }
 }
 
@@ -216,14 +213,14 @@ LOGGING = {
         'file':
             {
                 'class': 'logging.FileHandler',
-                'filename': 'registro.log',
+                'filename': env('LOG_FILE', default='app.log'),
                 'formatter': 'verbose'
             },
         'telegram':
             {
                 'class': 'custom.logging.TelegramLogHandler',
-                'channel': env('TELEGRAM_CHANNEL'),
-                'token': env('TELEGRAM_TOKEN'),
+                'channel': env('TELEGRAM_CHANNEL', default=None),
+                'token': env('TELEGRAM_TOKEN', default=None),
                 'level': 'ERROR',
                 'formatter': 'telegram-format',
             }
