@@ -45,6 +45,10 @@ class IsGraduado(IsRole):
     role_name = ['Graduado']
 
 
+class IsVicerrector(IsRole):
+    role_name = ['Vicerrector']
+
+
 class IsSameUserWhoRequestPermissions(CustomBasePermission):
     URL_KWARGS_KEY = 'ID'
 

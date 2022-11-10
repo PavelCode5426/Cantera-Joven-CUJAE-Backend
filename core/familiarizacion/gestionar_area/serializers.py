@@ -35,7 +35,6 @@ class PreubicacionLaboralAdelantadaSerializer(serializers.Serializer):
         finally:
             preubicacion.save()
 
-
         return preubicacion
 
 class SendNotificationSerializer(serializers.Serializer):

@@ -7,7 +7,9 @@ from rest_framework.viewsets import mixins, GenericViewSet
 from core.base.helpers import notificar_al_DRH
 from core.base.models import modelosSimple, modelosPlanificacionFamiliarizarcion, modelosUsuario
 from . import serializers
-from ...base.permissions import IsDirectorRecursosHumanos, IsJefeArea
+from .filters import PosibleGraduadoPreubicadoFilterSet
+from ...base.models.modelosPlanificacionFamiliarizarcion import UbicacionLaboralAdelantada
+from ...base.permissions import IsDirectorRecursosHumanos, IsJefeArea, IsVicerrector
 
 
 class ListarObtenerArea(mixins.ListModelMixin, mixins.RetrieveModelMixin, GenericViewSet):
@@ -43,7 +45,7 @@ class ListarCrearPreubicacionLaboralAdelantadaAPIView(ListCreateAPIView):
 
 
 class AceptarRechazarUbicacionLaboralAdelantadaAPIView(APIView):
-    permission_classes = [IsJefeArea]
+    permission_classes = [IsVicerrector]
     serializer_class = serializers.SendNotificationSerializer
 
     def post(self, request):
@@ -73,17 +75,31 @@ class AceptarRechazarUbicacionLaboralAdelantadaAPIView(APIView):
         return response
 
 
+
+class ListarObtenerPosibleGraduadoListAPIView(ListAPIView):
+    """ Permite listar y filtrar los posibles graduados si están ubicados o no laboralmente. Esta interfaz solamente sera
+        accesible para los jefes de area y el director de recursos humanos. """
+
+    permission_classes = [IsDirectorRecursosHumanos]
+    serializer_class = serializers.PosibleGraduadoSerializer
+    filterset_class = PosibleGraduadoPreubicadoFilterSet
+
+    def get_queryset(self):
+        posiblegraduado = self.kwargs['posiblegraduado']
+        return UbicacionLaboralAdelantada.objects.filter(posiblegraduado=posiblegraduado, esPreubicacion=True).order_by('-fechaAsignado').all()
+
+
+"""
 class ListarObtenerPosibleGraduadoGenericViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, GenericViewSet):
     permission_classes = [IsJefeArea | IsDirectorRecursosHumanos]
     serializer_class = serializers.PosibleGraduadoSerializer
     queryset = modelosUsuario.PosibleGraduado.objects.all()
-
-
+    
 class ListarPosibleGraduadoNoPreubicadoAPIView(ListAPIView):
     permission_classes = [IsDirectorRecursosHumanos]
     serializer_class = serializers.PosibleGraduadoSerializer
     queryset = modelosUsuario.PosibleGraduado.objects.filter(ubicacionlaboraladelantada=None).all()
-
+"""
 
 class ListarUbicacionesPosibleGraduado(ListAPIView):
     permission_classes = [IsDirectorRecursosHumanos]
@@ -95,3 +111,4 @@ class ListarUbicacionesPosibleGraduado(ListAPIView):
 
         data = self.get_serializer(ubicaciones, many=True).data
         return Response(data, HTTP_200_OK)
+
