@@ -55,3 +55,18 @@ class IsSameUserWhoRequestPermissions(CustomBasePermission):
     def __has_permission(self, request, view):
         has_permissions = view.kargs[self.URL_KWARGS_KEY] == request.user.pk
         return has_permissions
+
+
+class IsSameAreaPermissions(CustomBasePermission):
+
+    def __has_permission(self, request, view):
+        areaID = view.kwargs['areaID']
+        has_permissions = request.user.area_id == areaID
+
+        return has_permissions
+
+    def has_permission(self, request, view):
+        has_permission = super().has_permission(request, view) and self.__has_permission(request, view)
+        is_superuser = request.user.is_superuser
+
+        return has_permission or is_superuser

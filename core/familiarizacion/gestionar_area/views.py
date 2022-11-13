@@ -9,7 +9,7 @@ from core.base.models import modelosSimple, modelosPlanificacionFamiliarizarcion
 from . import serializers
 from .filters import PosibleGraduadoPreubicadoFilterSet
 from ...base.models.modelosPlanificacionFamiliarizarcion import UbicacionLaboralAdelantada
-from ...base.permissions import IsDirectorRecursosHumanos, IsJefeArea, IsVicerrector
+from ...base.permissions import IsDirectorRecursosHumanos, IsJefeArea, IsVicerrector, IsSameAreaPermissions
 
 
 class ListarObtenerArea(mixins.ListModelMixin, mixins.RetrieveModelMixin, GenericViewSet):
@@ -81,7 +81,7 @@ class ListarObtenerPosibleGraduadoListAPIView(ListAPIView):
         accesible para los jefes de area y el director de recursos humanos. """
 
     permission_classes = [IsDirectorRecursosHumanos]
-    serializer_class = serializers.PosibleGraduadoSerializer
+    serializer_class = serializers.PreubicacionLaboralAdelantadaModelSerializer
     filterset_class = PosibleGraduadoPreubicadoFilterSet
 
     def get_queryset(self):
@@ -111,4 +111,19 @@ class ListarUbicacionesPosibleGraduado(ListAPIView):
 
         data = self.get_serializer(ubicaciones, many=True).data
         return Response(data, HTTP_200_OK)
+
+
+class PreubicadosPorAreaListAPIView(ListAPIView):
+    """ Permite listar y filtrar los posibles graduados si están ubicados a un area. Esta interfaz solamente sera
+        accesible para los jefes de area y el director de recursos humanos. Permisos para que el jefe de area que
+        vea el area de la que el es el jefe """
+
+    permission_classes = [IsSameAreaPermissions | IsDirectorRecursosHumanos | IsJefeArea]
+    serializer_class = serializers.PreubicacionLaboralAdelantadaModelSerializer
+    filterset_class = PosibleGraduadoPreubicadoFilterSet
+
+    def get_queryset(self):
+        areaID = self.kwargs['areaID']
+        posiblegraduado = self.kwargs['posiblegraduado']
+        return UbicacionLaboralAdelantada.objects.filter(posiblegraduado=posiblegraduado, area = areaID, esPreubicacion=True).all()
 
