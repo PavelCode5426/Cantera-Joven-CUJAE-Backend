@@ -1,29 +1,12 @@
 from django.contrib.auth.models import Group
 
 from core.base.models import modelosSimple
+from custom.authentication.LDAP.sigenu_ldap import SIGENU_LDAP
 
-elementos = [
-    {'nombre': 'Informatica'},
-    {'nombre': 'Civil'},
-    {'nombre': 'Industrial'},
-    {'nombre': 'Vicerectoria'},
-    {'nombre': 'Decanato'},
-    {'nombre': 'Recursos Humanos'},
-    {'nombre': 'Quimica'},
-    {'nombre': 'Electrica'},
-    {'nombre': 'Mantenimiento'},
-]
+elementos = SIGENU_LDAP().areas()
 for area in elementos:
+    area = dict(nombre=area['name'], distinguishedName=area['distinguishedName'])
     modelosSimple.Area.objects.get_or_create(area, **area)
-
-elementos = [
-    {'nombre': 'Universidad de la Habana'},
-    {'nombre': 'Universidad de Ciencias Informaticas'},
-    {'nombre': 'Universidad Tecnologica de la Habana'},
-    {'nombre': 'Universidad Pedagogica de la Habana'},
-]
-for lugar_procedencia in elementos:
-    modelosSimple.LugarProcedencia.objects.get_or_create(lugar_procedencia, **lugar_procedencia)
 
 elementos = [
     {'nombre': 'Dimension Politica Ideologica'},

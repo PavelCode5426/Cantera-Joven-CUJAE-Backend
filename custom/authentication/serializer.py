@@ -4,6 +4,7 @@ from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
 from rest_framework.authtoken.serializers import AuthTokenSerializer
 
+from core.familiarizacion.gestionar_area.serializers import AreaSerializer
 from .models import DirectoryUser, DirectoryUserAPIKey
 
 
@@ -27,17 +28,22 @@ class CustomAuthTokenSerializer(AuthTokenSerializer):
 
 
 class DirectoryUserSerializer(serializers.ModelSerializer):
+    area = AreaSerializer()
+
     class Meta:
         model = DirectoryUser
         depth = 1
-        fields = ('id', 'username', 'first_name', 'last_name', 'email', 'direccion', 'area')
+        fields = ('id', 'username', 'first_name', 'last_name', 'email', 'direccion', 'cargo', 'telefono', 'carnet',
+                  'directorioID', 'area')
 
 
 class DirectoryUserWithRolesSerializer(DirectoryUserSerializer):
     class Meta:
         model = DirectoryUser
         depth = 1
-        fields = ('id', 'username', 'first_name', 'last_name', 'email', 'direccion', 'area', 'groups')
+        exclude = ('user_permissions', 'date_joined', 'is_active', 'is_staff', 'is_superuser', 'last_login')
+        # fields = ('id', 'username', 'first_name', 'last_name', 'email', 'direccion', 'cargo', 'telefono', 'carnet',
+        #           'directorioID', 'area', 'groups')
 
 
 class DirectoryUserAPIKeySerializer(serializers.ModelSerializer):

@@ -40,9 +40,9 @@ services:
       EMAIL_HOST_PASSWORD: tesis
 
       #CONFIGURAR SIGUENU
-      #SIGENU_HOST:
-      #SIGENU_USERNAME:
-      #SIGENU_PASSWORD:
+      SIGENU_HOST: https://sigenu.cujae.edu.cu/sigenu-ldap-cujae/ldap/
+      SIGENU_USERNAME:
+      SIGENU_PASSWORD:
 
       #CONFIGURACION PARA TRAZAS Y ERRORES
       LOG_FILE: app.log

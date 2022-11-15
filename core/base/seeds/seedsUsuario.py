@@ -18,11 +18,6 @@ seeder.add_entity(authModels.DirectoryUser, 20, fake_data)
 fake_data_1 = dict(**fake_data)
 seeder.add_entity(modelosUsuario.Graduado, 10, fake_data_1)
 
-fake_data_2 = dict(**fake_data,
-                   **{'lugarProcedencia': lambda x: modelosSimple.LugarProcedencia.objects.order_by('?').first()})
-fake_data_2.pop('area')
-seeder.add_entity(modelosUsuario.PosibleGraduado, 5, fake_data_2)
-
 fake_data_3 = dict(**fake_data, **{'anno_academico': lambda x: random.randint(1, 5)})
 fake_data_3.pop('area')
 seeder.add_entity(modelosUsuario.Estudiante, 5, fake_data_3)

@@ -266,6 +266,10 @@ EMAIL_HOST_USER = env('EMAIL_HOST_USER', default=None)
 EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD', default=None)
 EMAIL_USE_TLS = env('EMAIL_USE_TLS', default=True)
 
+SIGENU_URL = env('SIGENU_URL', default=None)
+SIGENU_USERNAME = env('SIGENU_USERNAME', default=None)
+SIGENU_PASSWORD = env('SIGENU_PASSWORD', default=None)
+
 apps_loader = AppsLoader()
 apps_loader.load()
 INSTALLED_APPS += apps_loader.get_apps()
