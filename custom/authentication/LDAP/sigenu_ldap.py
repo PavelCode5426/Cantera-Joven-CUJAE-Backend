@@ -29,7 +29,8 @@ class SIGENU_LDAP(object):
             url=f'{self.base_url}/{url}',
             auth=auth,
             params=query_params,
-            json=data
+            json=data,
+            verify=False
         )
 
     def login(self, username: str, password: str):

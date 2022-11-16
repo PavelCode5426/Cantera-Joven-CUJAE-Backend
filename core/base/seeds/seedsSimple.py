@@ -3,7 +3,30 @@ from django.contrib.auth.models import Group
 from core.base.models import modelosSimple
 from custom.authentication.LDAP.sigenu_ldap import SIGENU_LDAP
 
-elementos = SIGENU_LDAP().areas()
+elementos = []
+try:
+    elementos = SIGENU_LDAP().areas()
+except Exception as e:
+    print(e)
+    elementos = [
+        {
+            "name": 'Facultad de Arquitectura',
+            "distinguishedName": 'OU=Facultad de Arquitectura,DC=cujae,DC=edu,DC=cu'
+        },
+        {
+            "name": 'Facultad de Ingenieria Civil',
+            "distinguishedName": 'OU=Facultad de Ingenieria Civil,DC=cujae,DC=edu,DC=cu'
+        },
+        {
+            "name": 'Facultad de Ingenieria Electrica',
+            "distinguishedName": 'OU=Facultad de Ingenieria Electrica,DC=cujae,DC=edu,DC=cu'
+        },
+        {
+            "name": 'Facultad de Ingenieria Informatica',
+            "distinguishedName": 'OU=Facultad de Ingenieria Informatica,DC=cujae,DC=edu,DC=cu'
+        },
+    ]
+
 for area in elementos:
     area = dict(nombre=area['name'], distinguishedName=area['distinguishedName'])
     modelosSimple.Area.objects.get_or_create(area, **area)
@@ -32,6 +55,7 @@ for config in configuracion:
 roles = [
     {'name': 'Jefe de Area'},
     {'name': 'Director de Recursos Humanos'},
+    {'name': 'Especialista de Recursos Humanos'},
     {'name': 'Tutor'},
     {'name': 'Estudiante'},
     {'name': 'Posible Graduado'},

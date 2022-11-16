@@ -30,7 +30,7 @@ class DirectorioOnlineAuthBackend(ModelBackend):
             if user_data:
                 user = manager.update_or_insert_user(user_data)
         except Exception as e:
-            pass
+            print(e)
 
         return user
 
