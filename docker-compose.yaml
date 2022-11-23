@@ -6,15 +6,17 @@ services:
     image: postgres:14-alpine
     environment:
       POSTGRES_DB: db_formacion_jovenes
-      POSTGRES_USER: admin
-      POSTGRES_PASSWORD: 1234
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root
     ports:
       - 5432:5423
 
 
   api:
     container_name: sistema-formacion-jovenes-backend
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
     working_dir: /code
     command:
       - python manage.py makemigrations
@@ -29,8 +31,8 @@ services:
       DATABASE_HOST: database
       DATABASE_PORT: 5432
       DATABASE_NAME: db_formacion_jovenes
-      DATABASE_USER: admin
-      DATABASE_PASSWORD: 1234
+      DATABASE_USER: root
+      DATABASE_PASSWORD: root
 
       #CONFIGURACION DEL CORREO
       DEFAULT_FROM_EMAIL: tesis@ceis.cujae.edu.cu
@@ -40,9 +42,9 @@ services:
       EMAIL_HOST_PASSWORD: tesis
 
       #CONFIGURAR SIGUENU
-      #SIGENU_HOST:
-      #SIGENU_USERNAME:
-      #SIGENU_PASSWORD:
+      SIGENU_HOST: https://sigenu.cujae.edu.cu/sigenu-ldap-cujae/ldap/
+      SIGENU_USERNAME:
+      SIGENU_PASSWORD:
 
       #CONFIGURACION PARA TRAZAS Y ERRORES
       LOG_FILE: app.log
@@ -54,3 +56,5 @@ services:
       - database
     ports:
       - 8000:8000
+
+

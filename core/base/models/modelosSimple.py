@@ -8,11 +8,7 @@ class Alertas(abstractModels.AbtractUserForeignKey):
 
 
 class Area(abstractModels.AbstractNameEntity):
-    pass
-
-
-class LugarProcedencia(abstractModels.AbstractNameEntity):
-    pass
+    distinguishedName = models.CharField(max_length=255)
 
 
 class PropuestaMovimiento(abstractModels.AbstractNameEntity):

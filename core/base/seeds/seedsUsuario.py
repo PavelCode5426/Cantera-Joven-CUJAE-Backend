@@ -5,30 +5,40 @@ from core.base.models import modelosUsuario
 from custom.authentication import models as authModels
 from . import seeder
 
-fake_data = {
-    'area': lambda x: modelosSimple.Area.objects.order_by('?').first(),
-    'is_superuser': False,
-    'is_staff': False,
-    'direccion': lambda x: seeder.faker.address(),
-    'directorioID': lambda x: random.randint(50, 1000)
-}
-seeder.add_entity(authModels.DirectoryUser, 20, fake_data)
 
-# Me daba error si volvia a asignar la variables y asi funciona.
-fake_data_1 = dict(**fake_data)
-seeder.add_entity(modelosUsuario.Graduado, 10, fake_data_1)
+def fake_data_func_user():
+    def random_dni():
+        dni = ''
+        for i in range(0, 11):
+            dni += str(random.randint(0, 9))
+        return dni
 
-fake_data_2 = dict(**fake_data,
-                   **{'lugarProcedencia': lambda x: modelosSimple.LugarProcedencia.objects.order_by('?').first()})
-fake_data_2.pop('area')
-seeder.add_entity(modelosUsuario.PosibleGraduado, 5, fake_data_2)
+    return {
+        'area': lambda x: modelosSimple.Area.objects.order_by('?').first(),
+        'is_superuser': False,
+        'is_staff': False,
+        'direccion': lambda x: seeder.faker.address(),
+        'carnet': lambda x: random_dni(),
+        'telefono': lambda x: seeder.faker.phone_number()
+    }
 
-fake_data_3 = dict(**fake_data, **{'anno_academico': lambda x: random.randint(1, 5)})
-fake_data_3.pop('area')
-seeder.add_entity(modelosUsuario.Estudiante, 5, fake_data_3)
 
-fake_data = {
+def fake_data_func_estudiante():
+    result = fake_data_func_user()
+    result.pop('area')
+    return {**result, 'anno_academico': lambda x: random.randint(1, 5)}
+
+
+fake_data_aval = {
     'usuario': lambda x: modelosUsuario.Graduado.objects.filter(aval=None).order_by('?').first()
 }
-seeder.add_entity(modelosUsuario.Aval, 5, fake_data)
+
+seeder.add_entity(authModels.DirectoryUser, 100, fake_data_func_user())
+
+seeder.add_entity(modelosUsuario.Graduado, 100, fake_data_func_user())
+
+seeder.add_entity(modelosUsuario.Estudiante, 50, fake_data_func_estudiante())
+
+seeder.add_entity(modelosUsuario.Aval, 50, fake_data_aval)
+
 seeder.add_entity(modelosUsuario.PlantillaAval, 5)

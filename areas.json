@@ -1,0 +1,269 @@
+[
+      {
+            "area": {
+                  "distinguishedName": "CN=apiread,DC=cujae,DC=edu,DC=cu",
+                  "name": "API Test Read"
+            },
+            "subareas": []
+      },
+      {
+            "area": {
+                  "distinguishedName": "CN=logs,DC=cujae,DC=edu,DC=cu",
+                  "name": "LOGS LOGS"
+            },
+            "subareas": []
+      },
+      {
+            "area": {
+                  "distinguishedName": "CN=querys,DC=cujae,DC=edu,DC=cu",
+                  "name": "Querys LDAP"
+            },
+            "subareas": []
+      },
+      {
+            "area": {
+                  "distinguishedName": "OU=Area Central,DC=cujae,DC=edu,DC=cu",
+                  "name": "Area Central"
+            },
+            "subareas": [
+                  "CENTRO DE  ESTUDIOS  DE  REFERENCIA PARA LA  EDUCACI\u00d3N DE AVANZA"
+            ]
+      },
+      {
+            "area": {
+                  "distinguishedName": "OU=Centro de Aislamiento,DC=cujae,DC=edu,DC=cu",
+                  "name": "Centro de Aislamiento"
+            },
+            "subareas": []
+      },
+      {
+            "area": {
+                  "distinguishedName": "CN=Computers,DC=cujae,DC=edu,DC=cu",
+                  "name": "Computers"
+            },
+            "subareas": []
+      },
+      {
+            "area": {
+                  "distinguishedName": "OU=Facultad de Arquitectura,DC=cujae,DC=edu,DC=cu",
+                  "name": "Facultad de Arquitectura"
+            },
+            "subareas": [
+                  "FACULTAD DE ARQUITECTURA.  SECRETAR\u00cdA DE FACULTAD  ",
+                  "FACULTAD DE ARQUITECTURA.  DEPARTAMENTO  TECNOLOG\u00cdA   Y ECONOMIA",
+                  "FACULTAD DE ARQUITECTURA    ",
+                  "  DEPARTAMENTO  DE INFORMATIZACI\u00d3N Y COMUNICACIONES",
+                  " DEPARTAMENTO DISE\u00d1O ARQUITECT\u00d3NICO Y URBANO ",
+                  "  DEPARTAMENTO DE ARQUITECTURA Y URBANISMO"
+            ]
+      },
+      {
+            "area": {
+                  "distinguishedName": "OU=Facultad de Ingenieria Civil,DC=cujae,DC=edu,DC=cu",
+                  "name": "Facultad de Ingenieria Civil"
+            },
+            "subareas": [
+                  " DEPARTAMENTO DE INFORMATIZACI\u00d3N Y COMUNICACIONES ",
+                  "FACULTAD DE INGENIERIA CIVIL. DEPARTAMENTO DE GEOCIENCIAS   ",
+                  "FACULTAD DE INGENIER\u00cdA CIVIL. SECRETAR\u00cdA DE  FACULTAD.   ",
+                  "FACULTAD DE INGENIER\u00cdA CIVIL    ",
+                  " CENTRO DE EST DE CONST Y ARQUITEC TROPICAL. DPTO CONTRUCCIONES ",
+                  "Unknown",
+                  "DIRECCI\u00d3N DE COMUNICACI\u00d3N INSTITUCIONAL. GRUPO EDITORIAL   ",
+                  " CENTRO DE EST DE CONST Y ARQUITEC TROPICAL.",
+                  " CENTRO  DE EST DE CONST Y ARQUITEC TROPICAL. DPTO  DE ESTRUCTUR",
+                  " CENTRO DE INVESTIGACIONES HIDR\u00c1ULICAS. DPTO DE INGENIER\u00cdA HIDR\u00c1",
+                  " CENTRO DE INVESTIGACIONES HIDR\u00c1ULICAS",
+                  "VICERRECTOR C. GRUPO OBSERVATORIO SOCIAL"
+            ]
+      },
+      {
+            "area": {
+                  "distinguishedName": "OU=Facultad de Ingenieria Electrica,DC=cujae,DC=edu,DC=cu",
+                  "name": "Facultad de Ingenieria Electrica"
+            },
+            "subareas": [
+                  " DEPARTAMENTO DE INFORMATIZACI\u00d3N Y COMUNICACIONES",
+                  "FACULTAD DE INGENER\u00cdA EL\u00c9CTRICA. SECRETAR\u00cdA DE FACULTAD",
+                  "FACULTAD DE INGENER\u00cdA EL\u00c9CTRICA",
+                  " CENTRO DE INVESTIGACIONES Y PRUEBAS ELECTROENERG\u00c9TICAS",
+                  " DEPARTAMENTO DE INGENIER\u00cdA EL\u00c9CTRICA",
+                  "Direccion de Inversiones",
+                  " CENTRO DE INVESTIGACIONES Y PRUEBAS ELEC.GRUPO LABORATORIO DOCE"
+            ]
+      },
+      {
+            "area": {
+                  "distinguishedName": "OU=Facultad de Ingenieria Industrial,DC=cujae,DC=edu,DC=cu",
+                  "name": "Facultad de Ingenieria Industrial"
+            },
+            "subareas": [
+                  "DIRECCI\u00d3N DE FORMACI\u00d3N DE PREGRADO",
+                  " CENTRO DE ESTUDIOS DE T\u00c9CNICAS DE DIRECCI\u00d3N",
+                  "FACULTAD DE INGENIER\u00cdA INDUSTRIAL. SECRETAR\u00cdA DE  FACULTAD.  ",
+                  "Departamento de  Ingenieria  Industrial",
+                  " DEPARTAMENTO DE INFORM\u00c1TICA EMPRESARIAL",
+                  "DIRECCI\u00d3N DE RESIDENCIA ESTUDIANTIL. GRUPO T\u00c9CNICO LABORATORIO 1",
+                  " DEPARTAMENTO DE INFORMATIZACI\u00d3N Y COMUNICACIONES",
+                  "Direcci\u00f3n de Planificaci\u00f3n",
+                  "FACULTAD DE INGENIER\u00cdA INDUSTRIAL    ",
+                  "INSTITUTO DE CIENCIAS B\u00c1SICAS. DEPARTAMENTO GR\u00c1FICA"
+            ]
+      },
+      {
+            "area": {
+                  "distinguishedName": "OU=Facultad de Ingenieria Informatica,DC=cujae,DC=edu,DC=cu",
+                  "name": "Facultad de Ingenieria Informatica"
+            },
+            "subareas": [
+                  " DEP DE INTELIG ARTIFICIAL E INFRAESTRUCTURA DE SIST INFORMAT",
+                  " FILIAL MUNICIPAL DE 10 DE OCTUBRE. SECRETAR\u00cdA DE FILIAL",
+                  " DEPARTAMENTO DE INGENIER\u00cdA DE SOFTWARE",
+                  "DIRECCI\u00d3N CONTABILIDAD  Y FINANZAS. GRUPO DE CONTABILIDAD GENERA",
+                  " DEPARTAMENTO DE INFORMATIZACI\u00d3N Y COMUNICACIONES",
+                  " FILIAL MUNICIPAL DE 10 DE OCTUBRE",
+                  "FACULTAD DE INGENIER\u00cdA INFORM\u00c1TICA. SECRETAR\u00cdA DE FACULTAD",
+                  "FACULTAD DE INGENIER\u00cdA INFORM\u00c1TICA",
+                  " DEPARTAMENTO DE  INFORMATIZACI\u00d3N Y COMUNICACIONES",
+                  "Departamento de Informatizacion y Comunicaciones"
+            ]
+      },
+      {
+            "area": {
+                  "distinguishedName": "OU=Facultad de Ingenieria Mecanica,DC=cujae,DC=edu,DC=cu",
+                  "name": "Facultad de Ingenieria Mecanica"
+            },
+            "subareas": [
+                  "Departamento de F\u00edsica",
+                  "FACULTAD DE INGENIER\u00cdA MEC\u00c1NICA. SECRETAR\u00cdA  DE FACULTAD   ",
+                  "DIRECCI\u00d3N DE RELACIONES INTERNACIONALES    ",
+                  " CENTRO DE ESTUDIOS DE INNOVACI\u00d3N Y  MANTENIMIENTO.   ",
+                  "FACULTAD DE INGENIER\u00cdA MEC\u00c1NICA. DEPARTAMENTO DE METALURG\u00cdA",
+                  " DEPARTAMENTO MEC\u00c1NICA  APLICADA   ",
+                  " DEPARTAMENTO DE INFORMATIZACI\u00d3N Y COMUNICACIONES",
+                  "FACULTAD DE INGENIER\u00cdA MEC\u00c1NICA    ",
+                  " CENTRO DE ESTUDIOS DE TECNOLOG\u00cdA  ENERG\u00c9TICA Y  RENOVABLE",
+                  " DEPARTAMENTO  T\u00c9CNICO  CONSTRUCCI\u00d3N DE  MAQUINARIAS   "
+            ]
+      },
+      {
+            "area": {
+                  "distinguishedName": "OU=Facultad de Ingenieria Quimica,DC=cujae,DC=edu,DC=cu",
+                  "name": "Facultad de Ingenieria Quimica"
+            },
+            "subareas": [
+                  " DEPARTAMENTO DE INGENIER\u00cdA  QU\u00cdMICA   ",
+                  "Vicerrector c",
+                  "FACULTAD DE INGENIER\u00cdA  QU\u00cdMICA. SECRETAR\u00cdA  DE FACULTAD  ",
+                  "Unknown",
+                  "Direccion Extension Universitaria",
+                  " CENTRO DE ESTUDIOS DE INGENIER\u00cdA DE  PROCESOS. GRUPO LABORATORI",
+                  " DEPARTAMENTO DE  INFORMATIZACI\u00d3N Y COMUNICACIONES",
+                  "FACULTAD DE INGENIER\u00cdA QU\u00cdMICA    ",
+                  " DEPARTAMENTO DE  FUNDAMENTOS  QUIMICOS-BIOL. LABORATORIO DOCENT",
+                  "Departamento de Ingenieria  Quimica  Laboratorio",
+                  " CENTRO DE ESTUDIOS DE INGENIERIA DE PROCESOS.",
+                  " DEPARTAMENTO  DE FUNDAMENTOS  QU\u00cdMICOS BIOL\u00d3GICOS   ",
+                  " DEPARTAMENTO DE INGENIER\u00cdA  QU\u00cdMICA. GRUPO LABORATORIO "
+            ]
+      },
+      {
+            "area": {
+                  "distinguishedName": "OU=Facultad de Ingenieria en Automatica y Biomedica,DC=cujae,DC=edu,DC=cu",
+                  "name": "Facultad de Ingenieria en Automatica y Biomedica"
+            },
+            "subareas": [
+                  "Departamento de F\u00edsica",
+                  " DEPARTAMENTO DE BIOINGENER\u00cdA",
+                  "Centro de Estudios de Telecomunicaciones e Inform\u00e1tica",
+                  " DEPARTAMENTO DE INFORMATIZACI\u00d3N Y COMUNICACIONES",
+                  "OFICINA VICERRECTOR  B. GRUPO DE GESTI\u00d3N DE PROYECTOS",
+                  " SECRETAR\u00cdA DE FACULTAD",
+                  "Decanato",
+                  "DIRECCI\u00d3N ALOJAMIENTO. BRIGADA ALOJAMIENTO 2",
+                  "FACULTAD DE INGENIER\u00cdA EN AUTOM\u00c1TICA Y BIOM\u00c9DICA.",
+                  " DEPARTAMENTO DE AUTOM\u00c1TICA "
+            ]
+      },
+      {
+            "area": {
+                  "distinguishedName": "OU=Facultad de Ingenieria en Telecomunicaciones y Electronica,DC=cujae,DC=edu,DC=cu",
+                  "name": "Facultad de Ingenieria en Telecomunicaciones y Electronica"
+            },
+            "subareas": [
+                  " DEPARTAMENTO DE TELECOMUNICACIONES ",
+                  " CENTRO DE INVEST EN MICROELECTR\u00d3NICA. DPTO DE INVESTIGACI\u00d3N",
+                  "FACULTAD DE INGENIER\u00cdA EN TELEC Y ELEC",
+                  " DEPARTAMENTO DE INFORMATIZACI\u00d3N Y COMUNICACIONES",
+                  " CENTRO DE ESTUDIOS DE TELECOMUNICACIONES E INFORM\u00c1TICA",
+                  " DEPARTAMENTO DE PROTOTIPOS",
+                  "FACULTAD DE ARQUITECTURA    ",
+                  " CENTRO DE INVEST EN MIC. DPTO DE MICROELEC",
+                  " CENTRO DE INVEST EN MICROELECTR\u00d3NICA. DPTO DE MICROELEC",
+                  " CENTRO DE INVEST EN MICROELECTR\u00d3NICA",
+                  "FACULTAD DE INGENIER\u00cdA EN TELEC Y ELEC. SECRETAR\u00cdA DE FACULTAD "
+            ]
+      },
+      {
+            "area": {
+                  "distinguishedName": "OU=Instituto Ciencias Basicas,DC=cujae,DC=edu,DC=cu",
+                  "name": "Instituto Ciencias Basicas"
+            },
+            "subareas": [
+                  "INSTITUTO DE CIENCIAS B\u00c1SICAS. DIRECCI\u00d3N DE HISTORIA Y MARXISMO ",
+                  "INSTITUTO DE CIENCIAS B\u00c1SICAS. GRUPO T\u00c9CNICO",
+                  "INSTITUTO DE CIENCIAS B\u00c1SICAS. DEPARTAMENTO DE F\u00cdSICA. GRUPO LAB",
+                  "INSTITUTO DE CIENCIAS B\u00c1SICAS. DEPARTAMENTO DE F\u00cdSICA",
+                  "INSTITUTO DE CIENCIAS B\u00c1SICAS",
+                  "INSTITUTO DE CIENCIAS B\u00c1SICAS. CENTRO DE ESTUDIOS DE MATEM\u00c1TICOS",
+                  "INSTITUTO DE CIENCIAS B\u00c1SICAS. CENTRO DE  IDIOMAS",
+                  "INSTITUTO DE CIENCIAS B\u00c1SICAS. DEPARTAMENTO DE QU\u00cdMICA B\u00c1SICA",
+                  "INSTITUTO DE CIENCIAS B\u00c1SICAS. DEPARTAMENTO DE ENSE\u00d1ANZA MILITAR",
+                  "INSTITUTO DE CIENCIAS B\u00c1SICAS. DEPARTAMENTO GR\u00c1FICA"
+            ]
+      },
+      {
+            "area": {
+                  "distinguishedName": "OU=Temporal,DC=cujae,DC=edu,DC=cu",
+                  "name": "Temporal"
+            },
+            "subareas": [
+                  "CENTRO DE ESTUDIOS COMPLEJO DE INVESTIGACIONES TECNOL\u00d3GICAS INTE"
+            ]
+      },
+      {
+            "area": {
+                  "distinguishedName": "CN=Users,DC=cujae,DC=edu,DC=cu",
+                  "name": "Users"
+            },
+            "subareas": []
+      },
+      {
+            "area": {
+                  "distinguishedName": "CN=VPN_ACCESS,DC=cujae,DC=edu,DC=cu",
+                  "name": "VPN_ACCESS"
+            },
+            "subareas": []
+      },
+      {
+            "area": {
+                  "distinguishedName": "OU=DG%20de%20ICI,OU=Area%20Central,DC=cujae,DC=edu,DC=cu",
+                  "name": "DG de ICI Area Central"
+            },
+            "subareas": [
+                  "DIRECCI\u00d3N GENERAL DE INFORMACI\u00d3N, COMUNICACI\u00d3N E INFORMATIZACI\u00d3N",
+                  "DIRECCI\u00d3N DE COMUNICACI\u00d3N INSTITUCIONAL",
+                  "DIRECCI\u00d3N DE INFORMACI\u00d3N CIENT\u00cdFICA T\u00c9CNICA. GRUPO SERVICIOS PRO",
+                  "DIRECCI\u00d3N DE SERVICIOS DE LAS TECNOLOG\u00cdAS DE LA INF. Y LAS COMUN",
+                  "DIRECCI\u00d3N DE COMUNICACI\u00d3N INSTITUCIONAL. GRUPO COMUNICACI\u00d3N",
+                  "DIRECCI\u00d3N DE COMUNICACI\u00d3N INSTITUCIONAL. GRUPO AUDIOVISUALES  ",
+                  "DIRECCI\u00d3N DE INFORMACI\u00d3N CIENT\u00cdFICA T\u00c9CNICA. GRUPO SERVICIOS DE ",
+                  "DIRECCI\u00d3N DE COMUNICACI\u00d3N INSTITUCIONAL. GRUPO EDITORIAL   ",
+                  "DIRECCI\u00d3N DE INFORMACI\u00d3N CIENT\u00cdFICA T\u00c9CNICA. GRUPO INFORMATIZACI",
+                  "DIRECCI\u00d3N DE INFORMACI\u00d3N CIENT\u00cdFICA T\u00c9CNICA    ",
+                  "DIRECCI\u00d3N DE SERVICIOS A  EQUIPOS INFORM\u00c1TICOS",
+                  "DIRECCI\u00d3N DE SERVICIOS DE LAS TECNOLOG\u00cdAS DE LA INFORMACI\u00d3N  Y L",
+                  "DIRECCI\u00d3N DE INFORMACI\u00d3N CIENT\u00cdFICA T\u00c9CNICA. GRUPO PROCESAMIENTO"
+            ]
+      }
+]

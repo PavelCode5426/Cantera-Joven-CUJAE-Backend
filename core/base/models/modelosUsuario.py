@@ -2,7 +2,6 @@ from django.db import models
 
 from custom.authentication import models as authModels
 from . import modelosAbstractos as abstractModel
-from . import modelosSimple as simpleModels
 
 
 class Estudiante(authModels.DirectoryUser):
@@ -21,7 +20,6 @@ class Graduado(authModels.DirectoryUser):
 
 
 class PosibleGraduado(authModels.DirectoryUser):
-    lugarProcedencia = models.ForeignKey(simpleModels.LugarProcedencia, on_delete=models.RESTRICT)
     evaluacionFamiliarizacion = models.ForeignKey('Evaluacion', on_delete=models.RESTRICT, null=True, blank=True)
 
     class Meta:
