@@ -43,20 +43,20 @@ class SIGENU_LDAP(object):
         return self.__request('search-all', 'POST', data=option.__dict__)
 
     def areas(self):
-        return self.__request('areas', 'GET')
+        return self.__request('areas', 'GET').json()
 
     def workers_by_area(self, distinguishedName: str):
-        return self.__request('workers', 'GET', query_params=dict(area=distinguishedName))
+        return self.__request('workers', 'GET', query_params=dict(area=distinguishedName)).json()
 
     def persons_by_area(self, distinguishedName: str):
-        return self.__request('persons', 'GET', query_params=dict(area=distinguishedName))
+        return self.__request('persons', 'GET', query_params=dict(area=distinguishedName)).json()
 
     def persons(self):
-        areas = self.areas().json()[6:7]
+        areas = self.areas()
         persons = list()
         count = 1
         for area in areas:
-            people = self.persons_by_area(area['distinguishedName']).json()
+            people = self.persons_by_area(area['distinguishedName'])
             print(count)
             count += 1
             persons += people
@@ -95,3 +95,23 @@ class SIGENU_LDAP(object):
         json.dump(clear_list, out_file, indent=6, sort_keys=True)
         out_file.close()
         return clear_list
+
+    def all_areas(self):
+        areas = self.areas()
+        elements = []
+
+        for area in areas:
+            subareas = set()
+
+            persons = self.persons_by_area(area['distinguishedName'])
+
+            for person in persons:
+                if 'department' in person:
+                    subareas.add(person['department'])
+
+            elements.append({
+                'area': area,
+                'subareas': list(subareas)
+            })
+
+        return elements

@@ -45,6 +45,21 @@ class LDAPManager:
 
         return (user, area)
 
+    def all_persons_from_area(self, distinguishedName: str):
+        return self.sigenu_ldap.persons_by_area(distinguishedName)
+
+    def all_students_from_area(self, distinguishedName: str):
+        persons = self.all_persons_from_area(distinguishedName)
+        return persons
+
+    def all_pgraduate_from_area(self, distinguishedName: str):
+        persons = self.all_persons_from_area(distinguishedName)
+        return persons
+
+    def all_graduates_from_area(self, distinguishedName: str):
+        persons = self.sigenu_ldap.workers_by_area(distinguishedName)
+        return persons
+
     def update_or_insert_user(self, userData: dict):
         # TODO Falta que los datos del Directorio, borrar codigo, es de prueba
         user, area = self.search_by_dni(userData['identification'])
