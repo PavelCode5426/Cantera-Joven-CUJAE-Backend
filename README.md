@@ -74,4 +74,10 @@ py manage.py migrate
 py manage.py runserver
 ```
 
+9. Levantar proceso de tareas asincronas
+
+```shell
+py manage.py qcluster
+```
+
 ### Despliegue con Docker

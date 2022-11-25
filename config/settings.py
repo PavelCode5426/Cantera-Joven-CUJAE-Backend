@@ -123,6 +123,9 @@ DATABASES = {
         'NAME': env('DATABASE_NAME'),
         'USER': env('DATABASE_USER'),
         'PASSWORD': env('DATABASE_PASSWORD'),
+    } if env('DATABASE_HOST', default=None) else {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR + '/database/db.sqlite3',
     }
 }
 

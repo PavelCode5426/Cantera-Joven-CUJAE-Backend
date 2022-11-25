@@ -13,3 +13,20 @@ COPY . .
 
 #Corremos el comando de instalacion de dependencias.
 RUN pip install -r requirements.txt
+
+RUN python manage.py makemigrations
+
+RUN python manage.py migrate
+
+EXPOSE 8000
+
+#Configura las variables de entorno por defecto
+ENV DEBUG FALSE
+ENV LOG_FILE app.log
+
+CMD [
+"python", "manage.py" ,"runserver" ,"0.0.0.0:8000",
+"&",
+"python" ,"manage.py","qcluster"
+]
+

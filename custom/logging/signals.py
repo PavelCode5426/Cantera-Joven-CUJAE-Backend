@@ -1,16 +1,18 @@
-from django.contrib.admin.options import get_content_type_for_model
-from .tracker import modelTracker
-from django.contrib.admin.models import *
 from crum import get_current_request
+from django.contrib.admin.models import *
+from django.contrib.admin.options import get_content_type_for_model
+
+from .tracker import modelTracker
 
 EXCLUDE_URLS = ['/admin']
+
 
 def post_delete_action_logging(sender, instance, **kwargs):
     request = get_current_request()
     is_in = False
 
     if request:
-        path_url:str = request.path
+        path_url: str = request.path
         ite = iter(EXCLUDE_URLS)
 
         try:
@@ -33,7 +35,8 @@ def post_delete_action_logging(sender, instance, **kwargs):
                 action_flag=DELETION,
             )
 
-def post_save_action_logging(sender,instance,created,*args,**kwargs):
+
+def post_save_action_logging(sender, instance, created, *args, **kwargs):
     request = get_current_request()
     is_in = False
 
@@ -59,6 +62,6 @@ def post_save_action_logging(sender,instance,created,*args,**kwargs):
                 user_id=user.pk,
                 content_type_id=get_content_type_for_model(instance).pk,
                 object_id=instance.pk,
-                object_repr=str(instance),
+                object_repr=str(instance.__dict__),
                 action_flag=action,
             )

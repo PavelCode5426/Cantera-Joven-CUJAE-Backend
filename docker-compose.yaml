@@ -17,11 +17,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    working_dir: /code
-    command:
-      - python manage.py makemigrations
-      - python manage.py migrate
-      - python manage.py runserver 0.0.0.0:8000
     environment:
       #CONFIGURAR DJANGO
       DEBUG: True
