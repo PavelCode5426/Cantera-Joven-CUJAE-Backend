@@ -8,8 +8,9 @@ from core.base.helpers import notificar_al_DRH
 from core.base.models import modelosSimple, modelosPlanificacionFamiliarizarcion, modelosUsuario
 from . import serializers
 from .filters import PosibleGraduadoPreubicadoFilterSet
-from ...base.models.modelosPlanificacionFamiliarizarcion import UbicacionLaboralAdelantada
-from ...base.permissions import IsDirectorRecursosHumanos, IsJefeArea, IsVicerrector, IsSameAreaPermissions
+from ...base.models.modelosUsuario import PosibleGraduado
+from ...base.permissions import IsDirectorRecursosHumanos, IsJefeArea, IsVicerrector, IsSameAreaPermissions, \
+    IsSameUserWhoRequestPermissions, IsPosibleGraduado
 
 
 class ListarObtenerArea(mixins.ListModelMixin, mixins.RetrieveModelMixin, GenericViewSet):
@@ -19,8 +20,10 @@ class ListarObtenerArea(mixins.ListModelMixin, mixins.RetrieveModelMixin, Generi
 
 class ListarCrearPreubicacionLaboralAdelantadaAPIView(ListCreateAPIView):
     permission_classes = [IsDirectorRecursosHumanos]
-    queryset = modelosPlanificacionFamiliarizarcion.UbicacionLaboralAdelantada.objects.filter(esPreubicacion=True).all()
     serializer_class = serializers.PreubicacionLaboralAdelantadaSerializer
+
+    def get_queryset(self):
+        return modelosPlanificacionFamiliarizarcion.UbicacionLaboralAdelantada.objects.filter(esPreubicacion=True).all()
 
     def create(self, request):
         serializer = self.get_serializer(data=request.data, many=True)
@@ -31,11 +34,15 @@ class ListarCrearPreubicacionLaboralAdelantadaAPIView(ListCreateAPIView):
         return Response(serializer.errors, HTTP_400_BAD_REQUEST)
 
     def list(self, request):
+        # TODO OPTIMIZAR LAS CONSULTAS
         data = list()
         areas = modelosSimple.Area.objects.all()
         for area in areas:
-            posiblesGraduados = modelosUsuario.PosibleGraduado.objects.filter(ubicacionlaboraladelantada__area=area,
-                                                                              ubicacionlaboraladelantada__esPreubicacion=True).all()
+            posiblesGraduados = modelosUsuario.PosibleGraduado \
+                .objects.filter(ubicacionlaboraladelantada__area=area,
+                                ubicacionlaboraladelantada__esPreubicacion=True,
+                                evaluacion=None
+                                ).all()
             data.append({
                 'area': serializers.AreaSerializer(area).data,
                 'ubicados': serializers.PosibleGraduadoSerializer(posiblesGraduados, many=True).data
@@ -53,7 +60,6 @@ class AceptarRechazarUbicacionLaboralAdelantadaAPIView(APIView):
         if not serializador.is_valid():
             return Response(serializador.errors, HTTP_400_BAD_REQUEST)
 
-        response = None
         aceptada = serializador.validated_data.get('aceptada')
         notificacion = serializador.validated_data.get('mensaje')
 
@@ -75,42 +81,34 @@ class AceptarRechazarUbicacionLaboralAdelantadaAPIView(APIView):
         return response
 
 
-
 class ListarObtenerPosibleGraduadoListAPIView(ListAPIView):
     """ Permite listar y filtrar los posibles graduados si están ubicados o no laboralmente. Esta interfaz solamente sera
         accesible para los jefes de area y el director de recursos humanos. """
 
     permission_classes = [IsDirectorRecursosHumanos]
-    serializer_class = serializers.PreubicacionLaboralAdelantadaModelSerializer
+    serializer_class = serializers.PosibleGraduadoSerializer
     filterset_class = PosibleGraduadoPreubicadoFilterSet
 
     def get_queryset(self):
-        posiblegraduado = self.kwargs['posiblegraduado']
-        return UbicacionLaboralAdelantada.objects.filter(posiblegraduado=posiblegraduado, esPreubicacion=True).order_by('-fechaAsignado').all()
+        return PosibleGraduado.objects.filter(evaluacion=None).all()
 
-
-"""
-class ListarObtenerPosibleGraduadoGenericViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, GenericViewSet):
-    permission_classes = [IsJefeArea | IsDirectorRecursosHumanos]
-    serializer_class = serializers.PosibleGraduadoSerializer
-    queryset = modelosUsuario.PosibleGraduado.objects.all()
-    
-class ListarPosibleGraduadoNoPreubicadoAPIView(ListAPIView):
-    permission_classes = [IsDirectorRecursosHumanos]
-    serializer_class = serializers.PosibleGraduadoSerializer
-    queryset = modelosUsuario.PosibleGraduado.objects.filter(ubicacionlaboraladelantada=None).all()
-"""
 
 class ListarUbicacionesPosibleGraduado(ListAPIView):
-    permission_classes = [IsDirectorRecursosHumanos]
+    permission_classes = [
+        IsDirectorRecursosHumanos |
+        IsSameUserWhoRequestPermissions, IsPosibleGraduado |
+        IsSameAreaPermissions, IsJefeArea
+    ]
     serializer_class = serializers.PreubicacionLaboralAdelantadaModelSerializer
 
-    def list(self, request, posibleGraduado):
-        posibleGraduado = get_object_or_404(modelosUsuario.PosibleGraduado, pk=posibleGraduado)
+    def get_queryset(self):
+        posibleGraduado = get_object_or_404(modelosUsuario.PosibleGraduado, pk=self.kwargs['posibleGraduado'])
         ubicaciones = posibleGraduado.ubicacionlaboraladelantada_set.all()
+        return ubicaciones
 
-        data = self.get_serializer(ubicaciones, many=True).data
-        return Response(data, HTTP_200_OK)
+    # def list(self, request):
+    #     data = self.get_serializer(self.get_queryset(), many=True).data
+    #     return Response(data, HTTP_200_OK)
 
 
 class PreubicadosPorAreaListAPIView(ListAPIView):
@@ -118,12 +116,12 @@ class PreubicadosPorAreaListAPIView(ListAPIView):
         accesible para los jefes de area y el director de recursos humanos. Permisos para que el jefe de area que
         vea el area de la que el es el jefe """
 
-    permission_classes = [IsSameAreaPermissions | IsDirectorRecursosHumanos | IsJefeArea]
-    serializer_class = serializers.PreubicacionLaboralAdelantadaModelSerializer
+    permission_classes = [IsDirectorRecursosHumanos | IsSameAreaPermissions, IsJefeArea]
+    serializer_class = serializers.PosibleGraduadoSerializer
     filterset_class = PosibleGraduadoPreubicadoFilterSet
 
     def get_queryset(self):
         areaID = self.kwargs['areaID']
-        posiblegraduado = self.kwargs['posiblegraduado']
-        return UbicacionLaboralAdelantada.objects.filter(posiblegraduado=posiblegraduado, area = areaID, esPreubicacion=True).all()
-
+        # MUESTRA LOS YA UBICADOS EN EL AREA
+        return PosibleGraduado.objects.filter(ubicacionlaboraladelantada__area_id=areaID,
+                                              ubicacionlaboraladelantada__esPreubicacion=False).all()

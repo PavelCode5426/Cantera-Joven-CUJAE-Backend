@@ -1,6 +1,3 @@
-import json
-import random
-
 import requests
 from requests.auth import HTTPBasicAuth
 
@@ -34,12 +31,12 @@ class SIGENU_LDAP(object):
         )
 
     def login(self, username: str, password: str):
-        return self.__request('login', 'POST', data=dict(username=username, password=password))
+        return self.__request('full-login', 'POST', data=dict(username=username, password=password))
 
     def search_workers(self, option: SearchOption = SearchOption()):
         return self.__request('search', 'POST', data=option.__dict__)
 
-    def search_all(self, option: SearchOption = SearchOption()):
+    def search_persons(self, option: SearchOption = SearchOption()):
         return self.__request('search-all', 'POST', data=option.__dict__)
 
     def areas(self):
@@ -51,67 +48,22 @@ class SIGENU_LDAP(object):
     def persons_by_area(self, distinguishedName: str):
         return self.__request('persons', 'GET', query_params=dict(area=distinguishedName)).json()
 
-    def persons(self):
+    def all_persons(self):
         areas = self.areas()
         persons = list()
         count = 1
         for area in areas:
             people = self.persons_by_area(area['distinguishedName'])
-            print(count)
             count += 1
             persons += people
         return persons
 
-    def persons_titles(self):
-        persons = self.persons()
-        titles = set()
-
-        for person in persons:
-            title = person.get('title', None)
-            if title:
-                titles.add(title)
-
-        return titles
-
-    def all_persons_types(self):
-        persons = self.persons()
-
-        random.shuffle(persons)
-
-        clear_list = list()
-        while len(persons) > 0:
-            person = persons[0]
-
-            clear_list.append(person)
-
-            def filter_function(value):
-                value_keys = list(value.keys())
-                person_keys = list(person.keys())
-                return len(value_keys) != len(person_keys) or not all(item in person_keys for item in value_keys)
-
-            persons = list(filter(filter_function, persons))
-
-        out_file = open("persons.json", "w")
-        json.dump(clear_list, out_file, indent=6, sort_keys=True)
-        out_file.close()
-        return clear_list
-
-    def all_areas(self):
+    def all_workers(self):
         areas = self.areas()
-        elements = []
-
+        persons = list()
+        count = 1
         for area in areas:
-            subareas = set()
-
-            persons = self.persons_by_area(area['distinguishedName'])
-
-            for person in persons:
-                if 'department' in person:
-                    subareas.add(person['department'])
-
-            elements.append({
-                'area': area,
-                'subareas': list(subareas)
-            })
-
-        return elements
+            people = self.workers_by_area(area['distinguishedName'])
+            count += 1
+            persons += people
+        return persons

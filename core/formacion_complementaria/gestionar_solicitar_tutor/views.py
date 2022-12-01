@@ -5,7 +5,7 @@ from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST
 
 from core.base.models.modelosTutoria import SolicitudTutorExterno, GraduadoTutor
-from core.formacion_complementaria.base.permissions import IsSameAreaPermissions, GraduateOfSameAreaPermissions, \
+from core.formacion_complementaria.base.permissions import GraduateOfSameAreaPermissions, \
     TutorOfSameAreaPermissions, IsSameTutorWhoRequestPermissions, IsSameGraduateWhoRequestPermissions
 from custom.authentication import serializer as authSerializers
 from custom.authentication.models import DirectoryUser
@@ -13,7 +13,7 @@ from . import serializers
 from .exceptions import PreviouslyAnsweredRequestException
 from .filters import SolicitudTutorFilterSet, TutoriaFilterSet
 from .permissions import SendOrReciveSolicitudTutorExternoPermissions
-from ...base.permissions import IsJefeArea
+from ...base.permissions import IsJefeArea, IsSameAreaPermissions
 
 
 class TutoresPorAreaListAPIView(ListAPIView):

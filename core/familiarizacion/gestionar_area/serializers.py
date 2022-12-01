@@ -52,7 +52,8 @@ class SendNotificationSerializer(serializers.Serializer):
 class PosibleGraduadoSerializer(serializers.ModelSerializer):
     class Meta:
         model = modelosUsuario.PosibleGraduado
-        fields = ('id', 'username', 'first_name', 'last_name', 'email', 'direccion', 'lugarProcedencia')
+        fields = (
+        'id', 'username', 'first_name', 'last_name', 'email', 'direccion', 'telefono', 'carnet', 'directorioID')
         depth = 1
 
 

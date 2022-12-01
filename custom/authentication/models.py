@@ -49,7 +49,7 @@ USUARIO DEL DIRECTORIO DE LA CUJAE
 
 class DirectoryUser(AbstractUser):  # Abstract User Implementa AbstractBaseUser,PermissionsMixin Juntos
     area = models.ForeignKey("base.Area", on_delete=models.RESTRICT, null=True, blank=True)
-    direccion = models.CharField(max_length=255, blank=True)
+    direccion = models.CharField(max_length=255, blank=True, null=True)
     cargo = models.CharField(max_length=255, blank=True, null=True)
     telefono = models.CharField(max_length=255, blank=True, null=True)
     carnet = models.CharField(max_length=11)

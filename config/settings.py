@@ -59,6 +59,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'corsheaders',
+    'annoying',
 
     # Libs Instaladas
     'rest_framework',
@@ -123,9 +124,11 @@ DATABASES = {
         'NAME': env('DATABASE_NAME'),
         'USER': env('DATABASE_USER'),
         'PASSWORD': env('DATABASE_PASSWORD'),
+        'ATOMIC_REQUEST': True
     } if env('DATABASE_HOST', default=None) else {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR + '/database/db.sqlite3',
+        'ATOMIC_REQUEST': True,
     }
 }
 
@@ -160,7 +163,7 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.0/howto/static-files/
-
+MEDIA_ROOT = BASE_DIR + '/media'
 STATIC_URL = 'static/'
 
 # Default primary key field type

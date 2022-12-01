@@ -1,46 +1,44 @@
-from rest_framework.generics import ListCreateAPIView, RetrieveAPIView
+from rest_framework.generics import ListCreateAPIView
 from rest_framework.response import Response
-from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST, HTTP_404_NOT_FOUND
+from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST
 
-from core.base.models.modelosUsuario import Estudiante
-from custom.authentication.directorio.estudiante import obtenerEstudiante, obtenerTodosEstudiantes
+from core.base.permissions import IsJefeArea, IsSameAreaPermissions
+from custom.authentication.LDAP.ldap_manager import LDAPManager
+from custom.authentication.models import DirectoryUser
 from .serializers import ImportarEstudianteSerializer
-from ...base.permissions import IsDirectorRecursosHumanos
 
 
-class EstudiantesEnDirectorio(ListCreateAPIView):
-    permission_classes = [IsDirectorRecursosHumanos]
-    '''
-    TODO FILTRAR, PERO HAY QUE HABLAR CON PICAYO PARA SABER QUE RETORNA EL DIRECTORIO O EL SIGNU
-    '''
+class ImportarEstudiantesDirectorio(ListCreateAPIView):
+    permission_classes = (IsSameAreaPermissions, IsJefeArea)
 
-    def list(self, request):
-        estudiantes = obtenerTodosEstudiantes()
-        sinIncorporar = list()
+    # NO SE LE PUSO FILTRO PORQUE HARIA MAS COMPLEJA LA CONSULTA O TARDARIA MAS. EL FRONT QUE FILTRE
+    def list(self, request, **kwargs):
+        area = kwargs['area']
+        estudiantes = LDAPManager().all_students_from_area(area)
+        # PREGUNTO POR EL USUARIO Y NO POR EL ESTUDIANTE PORQUE ESTUDIANTE ES LO MENOS QUE PUEDES SER EN EL SISTEMA
+        # POR LO TANTO SI ESTAS EN EL SISTEMA ES PORQUE ERES ALGO DIFERENTE DE ESTUDIANTE O IGUAL A ESTUDIANTE
+        importados = DirectoryUser.objects.filter(directorioID__in=[est['areaId'] for est in estudiantes])
 
-        for estudiante in estudiantes:
+        sin_importar = []
+        for element in estudiantes:
+            found = False
+            it = iter(importados)
             try:
-                Estudiante.objects.get(directorioID=estudiante['id'])
-            except Estudiante.DoesNotExist:
-                sinIncorporar.append(estudiante)
+                while not found:
+                    elem = next(it)
+                    if elem.directorioID == element['areaId']:
+                        found = True
+            except StopIteration:  # SOLAMENTE SE LANZA CUANDO LLEGA AL FINAL
+                sin_importar.append(element)
 
-        return Response(sinIncorporar, HTTP_200_OK)
+        return Response(sin_importar, HTTP_200_OK)
 
-    def create(self, request):
+    def create(self, request, **kwargs):
         data = request.data
+        data['area'] = kwargs['area']
         serializer = ImportarEstudianteSerializer(data=data)
         if serializer.is_valid():
             serializer.create(serializer.validated_data)
             return Response({'detail': 'Estudiantes importados correctamente'}, HTTP_200_OK)
         else:
             return Response(serializer.errors, HTTP_400_BAD_REQUEST)
-
-
-class EstudianteEnDirectorio(RetrieveAPIView):
-    permission_classes = [IsDirectorRecursosHumanos]
-
-    def retrieve(self, request, estudianteID):
-        graduado = obtenerEstudiante(estudianteID)
-        if graduado:
-            return Response(graduado, HTTP_200_OK)
-        return Response({'detail': 'No encontrado'}, HTTP_404_NOT_FOUND)

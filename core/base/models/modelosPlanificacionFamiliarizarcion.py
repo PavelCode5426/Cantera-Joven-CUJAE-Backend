@@ -21,6 +21,6 @@ class ActividadFamiliarizacion(planModels.Actividad):
 
     LAS ACTIVIDADES GENERALES NO TENDRAN ASISTENCIA
     """
-    area = models.ForeignKey(simpleModels.Area, on_delete=models.RESTRICT, null=True, blank=True)
+    area = models.ForeignKey(simpleModels.Area, on_delete=models.RESTRICT, default=None, null=True, blank=True)
     esGeneral = models.BooleanField(default=True)
     asistencias = models.ManyToManyField(userModels.PosibleGraduado, related_name='asistencias')

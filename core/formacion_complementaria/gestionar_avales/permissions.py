@@ -6,7 +6,7 @@ from custom.authentication.models import DirectoryUser
 
 class IsAvalOwnerOrJefeArea(permissions.CustomBasePermission):
 
-    def __has_permission(self, request, view):
+    def _has_permission(self, request, view):
         has_permission = request.method in SAFE_METHODS
 
         if has_permission:

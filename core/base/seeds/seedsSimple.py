@@ -53,13 +53,13 @@ for config in configuracion:
         element.update(**config)
 
 roles = [
-    {'name': 'Jefe de Area'},
-    {'name': 'Director de Recursos Humanos'},
-    {'name': 'Especialista de Recursos Humanos'},
-    {'name': 'Tutor'},
-    {'name': 'Estudiante'},
-    {'name': 'Posible Graduado'},
-    {'name': 'Graduado'},
+    {'name': 'JEFE DE AREA'},
+    {'name': 'DIRECTOR DE RECURSOS HUMANOS'},
+    {'name': 'ESPECIALISTA DE RECURSOS HUMANOS'},
+    {'name': 'TUTOR'},
+    {'name': 'ESTUDIANTE'},
+    {'name': 'POSIBLE GRADUADO'},
+    {'name': 'GRADUADO'},
 ]
 
 for role in roles:

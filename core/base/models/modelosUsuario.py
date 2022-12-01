@@ -5,7 +5,7 @@ from . import modelosAbstractos as abstractModel
 
 
 class Estudiante(authModels.DirectoryUser):
-    anno_academico = models.PositiveSmallIntegerField()
+    anno_academico = models.PositiveSmallIntegerField(null=True, blank=True)
 
     class Meta:
         verbose_name = 'Estudiante'

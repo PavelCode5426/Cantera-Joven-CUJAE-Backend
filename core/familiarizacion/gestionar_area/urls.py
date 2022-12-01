@@ -10,15 +10,17 @@ from .views import ListarObtenerArea, ListarCrearPreubicacionLaboralAdelantadaAP
 app_name = 'GestionarArea'
 
 router = routers.SimpleRouter()
+router.register('area', ListarObtenerArea, 'Area')
 
 urlpatterns = [
                   path('posible-graduado', ListarObtenerPosibleGraduadoListAPIView.as_view()),
-                  path('posible-graduado/<int:posibleGraduado>/preubicacion',
+                  path('posible-graduado/<int:posibleGraduado>/preubicacion-laboral',
                        ListarUbicacionesPosibleGraduado.as_view()),
 
-                  path('area/preubicacion', ListarCrearPreubicacionLaboralAdelantadaAPIView.as_view()),
-                  path('area/preubicacion/aceptar-rechazar',
+                  path('preubicacion-laboral', ListarCrearPreubicacionLaboralAdelantadaAPIView.as_view()),
+                  path('preubicacion-laboral/aceptar-rechazar',
                        AceptarRechazarUbicacionLaboralAdelantadaAPIView.as_view()),
+
                   path('area/<int:areaID>/posibles-graduados', PreubicadosPorAreaListAPIView.as_view()),
 
               ] + router.urls

@@ -11,7 +11,7 @@ class SendOrReciveSolicitudTutorExternoPermissions(CustomBasePermission):
     COMPROBANDO QUE SEA QUIEN LA ENVIO O PARA QUIEN FUE ENVIADA.
     """
 
-    def __has_permission(self, request, view):
+    def _has_permission(self, request, view):
         solicitud = view.kwargs['solicitudID']
         area = request.user.area
 
@@ -28,9 +28,3 @@ class SendOrReciveSolicitudTutorExternoPermissions(CustomBasePermission):
             has_permissions = solicitud.area == area
 
         return has_permissions
-
-    def has_permission(self, request, view):
-        has_permission = super().has_permission(request, view) and self.__has_permission(request, view)
-        is_superuser = request.user.is_superuser
-
-        return has_permission or is_superuser
