@@ -44,7 +44,7 @@ class ImportarGraduadosDirectorio(ListCreateAPIView):
 
 
 class ImportarTutoresDirectorio(ListCreateAPIView):
-    permission_classes = (IsSameAreaPermissions, IsJefeArea)
+    permission_classes = (IsSameAreaPermissions, IsJefeArea | IsDirectorRecursosHumanos)
 
     # NO SE LE PUSO FILTRO PORQUE HARIA MAS COMPLEJA LA CONSULTA O TARDARIA MAS. EL FRONT QUE FILTRE
     def list(self, request, **kwargs):
@@ -79,7 +79,7 @@ class ImportarTutoresDirectorio(ListCreateAPIView):
 
 class ListGraduadosDelArea(ListAPIView):
     serializer_class = GraduadoSerializer
-    permission_classes = (IsSameAreaPermissions, IsJefeArea)
+    permission_classes = (IsSameAreaPermissions, IsJefeArea | IsDirectorRecursosHumanos)
     # FILTRADO
     filterset_class = GraduadoFilterSet
     search_fields = ('first_name', 'last_name', 'email', 'username')

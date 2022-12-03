@@ -16,9 +16,9 @@ class SolicitudTutorFilterSet(FilterSet):
     def is_enviada_filter(self, queryset, name, value):
         user = get_current_user()
         if value:
-            queryset = queryset.exclude(area=user.area)
+            queryset = queryset.exclude(area_id=user.area_id)
         else:
-            queryset = queryset.filter(area=user.area)
+            queryset = queryset.filter(area_id=user.area_id)
         return queryset
 
     class Meta:

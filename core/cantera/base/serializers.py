@@ -1,5 +1,6 @@
 from django.contrib.auth.models import Group
 from django.db import transaction
+from rest_framework import serializers
 
 from core.base.models.modelosUsuario import Estudiante
 from core.base.serializers import ImportarFromDirectorioSerializer
@@ -52,3 +53,18 @@ class ImportarEstudianteSerializer(ImportarFromDirectorioSerializer):
                 lis.append(estudiante)
         transaction.commit()
         return lis
+
+
+class EstudianteSerializer(serializers.ModelSerializer):
+    aval = serializers.SerializerMethodField()
+    plan = serializers.SerializerMethodField()
+
+    def get_aval(self, object):
+        return hasattr(object, 'aval')
+
+    def get_plan(self, object):
+        return hasattr(object, 'planformacioncantera')
+
+    class Meta:
+        model = Estudiante
+        fields = ('id', 'username', 'first_name', 'last_name', 'email', 'anno_academico', 'aval', 'plan')

@@ -10,6 +10,7 @@ from .exceptions import SelectedGraduateHaveNotAvalException, SelectedTutorNotFo
     SelectedTutorPreviuslyAssigned
 from ..base.serializers import GraduadoSerializer
 from ...base.models.modelosSimple import Area
+from ...familiarizacion.gestionar_area.serializers import AreaSerializer
 
 
 class TutoresDelGraduadoSerializer(serializers.ModelSerializer):
@@ -98,9 +99,7 @@ class AsignarSolicitarTutorSerializer(serializers.Serializer):
 class SolicitudTutorExternoSerializer(serializers.ModelSerializer):
     # area = serializers.SerializerMethodField(method_name='area_name')
     graduado = GraduadoSerializer()
-
-    def area_name(self, instance):
-        return instance.area.nombre
+    area = AreaSerializer()
 
     class Meta:
         model = SolicitudTutorExterno
@@ -109,6 +108,8 @@ class SolicitudTutorExternoSerializer(serializers.ModelSerializer):
 
 
 class SolicitudTutorExternoWithoutMotivoSerializer(SolicitudTutorExternoSerializer):
+    area = AreaSerializer()
+
     class Meta:
         model = SolicitudTutorExterno
         exclude = ('motivo_respuesta', 'motivo_solicitud')

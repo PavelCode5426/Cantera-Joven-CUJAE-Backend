@@ -13,7 +13,7 @@ from . import serializers
 from .exceptions import PreviouslyAnsweredRequestException
 from .filters import SolicitudTutorFilterSet, TutoriaFilterSet
 from .permissions import SendOrReciveSolicitudTutorExternoPermissions
-from ...base.permissions import IsJefeArea, IsSameAreaPermissions
+from ...base.permissions import IsJefeArea, IsSameAreaPermissions, IsDirectorRecursosHumanos
 
 
 class TutoresPorAreaListAPIView(ListAPIView):
@@ -38,7 +38,7 @@ class TutoresPorGraduadoListAPIView(ListAPIView):
 
     def get_queryset(self):
         graduado = self.kwargs['graduado']
-        return GraduadoTutor.objects.filter(graduado=graduado, fechaRevocado=None).order_by('-fechaAsignado').all()
+        return GraduadoTutor.objects.filter(graduado=graduado).order_by('-fechaAsignado').all()
 
 
 class TutoradosPorTutorListAPIView(ListAPIView):
@@ -46,12 +46,12 @@ class TutoradosPorTutorListAPIView(ListAPIView):
     Lista los Graduados del Tutor, solamente tendran acceso los jefes de area de su area y el propio tutor
     """
     serializer_class = serializers.TutoradosDelTutorSerializer
-    permission_classes = (TutorOfSameAreaPermissions, (IsJefeArea | IsSameTutorWhoRequestPermissions))
+    permission_classes = (TutorOfSameAreaPermissions | IsJefeArea | IsSameTutorWhoRequestPermissions)
     filterset_class = TutoriaFilterSet
 
     def get_queryset(self):
         tutor = self.kwargs['tutor']
-        return GraduadoTutor.objects.filter(tutor=tutor, fechaRevocado=None).order_by('-fechaAsignado').all()
+        return GraduadoTutor.objects.filter(tutor=tutor).order_by('-fechaAsignado').all()
 
 
 class AsignarSolicitarTutores(CreateAPIView):
@@ -86,15 +86,17 @@ class SolicitudesTutorListAPIView(ListAPIView):
     """
     Permite listar y filtrar todas las solicitudes de tutor recibidas y enviadas. Esta interfaz solamente sera
     accesible para los jefes de area.
+    
+    TODO TRATAR DE ARREGLAR PARA QUE NO FALLE LA CONSULTA CUANDO LA REALIZA UN DIRECTOR DE RECURSOS HUMANOS
 
     """
     serializer_class = serializers.SolicitudTutorExternoWithoutMotivoSerializer
     filterset_class = SolicitudTutorFilterSet
-    permission_classes = (IsJefeArea,)
+    permission_classes = (IsSameAreaPermissions, IsJefeArea | IsDirectorRecursosHumanos)
 
     def get_queryset(self):
-        area = self.request.user.area
-        query = SolicitudTutorExterno.objects.filter(Q(graduado__area=area) | Q(area=area)) \
+        area = self.kwargs['area'] if 'area' in self.kwargs else self.request.user.area_id
+        query = SolicitudTutorExterno.objects.filter(Q(graduado__area_id=area) | Q(area_id=area)) \
             .order_by('-fechaCreado').all()
         return query
 

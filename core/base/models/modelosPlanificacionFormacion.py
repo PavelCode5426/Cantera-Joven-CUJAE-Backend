@@ -20,7 +20,7 @@ class PlanFormacion(planModels.Plan):
     evaluacion = models.ForeignKey(EvaluacionFinal, on_delete=models.RESTRICT, null=True, blank=True)
 
 
-class PlanCantera(PlanFormacion):
+class PlanFormacionCantera(PlanFormacion):
     estudiante = models.ForeignKey(userModels.Estudiante, on_delete=models.RESTRICT)
 
 

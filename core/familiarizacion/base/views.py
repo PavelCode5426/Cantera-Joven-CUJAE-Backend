@@ -34,6 +34,6 @@ class ImportarPosiblesGraduadosDirectorio(ListCreateAPIView):
         serializer = ImportarPosibleGraduadoSerializer(data=data)
         if serializer.is_valid():
             serializer.create(serializer.validated_data)
-            return Response({'detail': 'Graduados importados correctamente'}, HTTP_200_OK)
+            return Response({'detail': 'Posibles graduados importados correctamente'}, HTTP_200_OK)
         else:
             return Response(serializer.errors, HTTP_400_BAD_REQUEST)

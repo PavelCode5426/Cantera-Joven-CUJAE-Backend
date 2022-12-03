@@ -16,7 +16,7 @@ urlpatterns = [
 
                   # Solicitudes de Tutor
                   path('graduado/<int:graduadoID>/asignar-solicitar', views.AsignarSolicitarTutores.as_view()),
-                  path('solicitud-tutor', views.SolicitudesTutorListAPIView.as_view()),
+                  path('area/<int:areaID>/solicitud-tutor', views.SolicitudesTutorListAPIView.as_view()),
                   path('solicitud-tutor/<int:solicitudID>', views.ObtenerResponderSolicitudesTutor.as_view()),
 
               ] + router.urls

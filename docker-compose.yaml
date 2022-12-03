@@ -4,6 +4,8 @@ services:
   database:
     container_name: sistema-formacion-jovenes-database
     image: postgres:14-alpine
+    volumes:
+      - db_data:/var/lib/postgresql
     environment:
       POSTGRES_DB: db_formacion_jovenes
       POSTGRES_USER: root
@@ -46,10 +48,16 @@ services:
       #NO CONFIGURAR EN CASO DE NO QUERER UTILIZAR TELEGRAM
       TELEGRAM_CHANNEL: 1001550325467
       TELEGRAM_TOKEN: 5250171383:AAGcKpubG_xVjAjg4XVZNWlWP8pCvZib5vw
-
+    volumes:
+      - api_data:/media
+    links:
+      - database
     depends_on:
       - database
     ports:
       - 8050:8000
 
+volumes:
+  api_data:
+  db_data:
 

@@ -1,11 +1,14 @@
-from rest_framework.generics import ListCreateAPIView
+from rest_framework.generics import ListCreateAPIView, get_object_or_404, ListAPIView
 from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST
 
-from core.base.permissions import IsJefeArea, IsSameAreaPermissions
+from core.base.permissions import IsJefeArea, IsSameAreaPermissions, IsDirectorRecursosHumanos
 from custom.authentication.LDAP.ldap_manager import LDAPManager
 from custom.authentication.models import DirectoryUser
-from .serializers import ImportarEstudianteSerializer
+from .filters import EstudianteFilterSet
+from .serializers import ImportarEstudianteSerializer, EstudianteSerializer
+from ...base.models.modelosSimple import Area
+from ...base.models.modelosUsuario import Estudiante
 
 
 class ImportarEstudiantesDirectorio(ListCreateAPIView):
@@ -42,3 +45,15 @@ class ImportarEstudiantesDirectorio(ListCreateAPIView):
             return Response({'detail': 'Estudiantes importados correctamente'}, HTTP_200_OK)
         else:
             return Response(serializer.errors, HTTP_400_BAD_REQUEST)
+
+
+class ListEstudiantesDelArea(ListAPIView):
+    serializer_class = EstudianteSerializer
+    permission_classes = (IsSameAreaPermissions, IsJefeArea | IsDirectorRecursosHumanos)
+    filterset_class = EstudianteFilterSet
+    search_fields = ('first_name', 'last_name', 'email', 'username')
+    ordering_fields = '__all__'
+
+    def get_queryset(self):
+        area = get_object_or_404(Area, pk=self.kwargs['areaID'])
+        return Estudiante.objects.filter(area=area).distinct()

@@ -6,7 +6,7 @@ from rest_framework.viewsets import ModelViewSet
 from core.base.models import modelosUsuario
 from core.base.permissions import IsDirectorRecursosHumanos
 from custom.authentication import models as authModels
-from .permissions import IsAvalOwnerOrJefeArea
+from .permissions import IsAvalOwner, IsAvalOwnerTutorOrJefeArea
 from .serializers import UserAvalSerializer, PlantillaAvalSerializer
 
 
@@ -18,19 +18,19 @@ class PlantillaAvalModelViewSet(ModelViewSet):
 
 class ObtenerCrearActualizarAval(CreateAPIView, RetrieveUpdateAPIView):
     serializer_class = UserAvalSerializer
-    lookup_url_kwarg = ['usuario']
-    permission_classes = [IsAvalOwnerOrJefeArea | IsDirectorRecursosHumanos]
+    lookup_url_kwarg = ['usuarioID']
+    permission_classes = [IsAvalOwner | IsAvalOwnerTutorOrJefeArea | IsDirectorRecursosHumanos]
 
     def __get_usuario(self):
-        return self.kwargs.get('usuario', None)
+        return self.kwargs.get('usuarioID', None)
 
     def get_object(self):
         aval = get_object_or_404(modelosUsuario.Aval, usuario_id=self.__get_usuario())
         return aval
 
-    def create(self, request, usuario):
+    def create(self, request, usuarioID):
         data = request.data
-        usuario = get_object_or_404(authModels.DirectoryUser, pk=usuario)
+        usuario = get_object_or_404(authModels.DirectoryUser, pk=usuarioID)
         data.setdefault('usuario', usuario)
         serializer = self.get_serializer(data=data)
 

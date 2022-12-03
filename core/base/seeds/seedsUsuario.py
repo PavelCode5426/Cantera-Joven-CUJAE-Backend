@@ -33,12 +33,16 @@ fake_data_aval = {
     'usuario': lambda x: modelosUsuario.Graduado.objects.filter(aval=None).order_by('?').first()
 }
 
-seeder.add_entity(authModels.DirectoryUser, 100, fake_data_func_user())
+# CREAR USUARIO DE FIJO EN EL SISTEMA
 
-seeder.add_entity(modelosUsuario.Graduado, 100, fake_data_func_user())
+authModels.DirectoryUser.objects.create_superuser("Administrador", "Administrador", "admin@ceis.cujae.edu.cu", "admin")
 
-seeder.add_entity(modelosUsuario.Estudiante, 50, fake_data_func_estudiante())
+# seeder.add_entity(authModels.DirectoryUser, 100, fake_data_func_user())
 
-seeder.add_entity(modelosUsuario.Aval, 50, fake_data_aval)
+# seeder.add_entity(modelosUsuario.Graduado, 100, fake_data_func_user())
+
+# seeder.add_entity(modelosUsuario.Estudiante, 50, fake_data_func_estudiante())
+
+# seeder.add_entity(modelosUsuario.Aval, 50, fake_data_aval)
 
 seeder.add_entity(modelosUsuario.PlantillaAval, 5)

@@ -10,5 +10,5 @@ router = routers.SimpleRouter()
 router.register('plantilla-aval', PlantillaAvalModelViewSet, 'PlantillaAval')
 
 urlpatterns = [
-                  path('user/<int:usuario>/aval', ObtenerCrearActualizarAval.as_view()),
+                  path('user/<int:usuarioID>/aval', ObtenerCrearActualizarAval.as_view()),
               ] + router.get_urls()

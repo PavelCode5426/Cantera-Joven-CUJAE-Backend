@@ -23,7 +23,7 @@ from custom.authentication.models import DirectoryUser
 # COMPRUEBA QUE EL GRADUADO PASADO EN LA URL PERTENECE A LA MISMA AREA DE QUIEN CONSULTA
 class GraduateOfSameAreaPermissions(CustomBasePermission):
     def _has_permission(self, request, view):
-        graduado = view.kwargs.pop('graduadoID')
+        graduado = view.kwargs.get('graduadoID')
         graduado = get_object_or_404(Graduado, pk=graduado, area_id=request.user.area_id)
         view.kwargs['graduado'] = graduado
         has_permissions = graduado != None
@@ -33,7 +33,7 @@ class GraduateOfSameAreaPermissions(CustomBasePermission):
 # COMPRUEBA QUE EL TUTOR PASADO EN LA URL PERTENECE A LA MISMA AREA DE QUIEN CONSULTA
 class TutorOfSameAreaPermissions(CustomBasePermission):
     def _has_permission(self, request, view):
-        tutor = view.kwargs.pop('tutorID')
+        tutor = view.kwargs.get('tutorID')
         tutor = get_object_or_404(DirectoryUser, pk=tutor, area_id=request.user.area_id,
                                   graduado=None, posiblegraduado=None, estudiante=None)
         view.kwargs['tutor'] = tutor
