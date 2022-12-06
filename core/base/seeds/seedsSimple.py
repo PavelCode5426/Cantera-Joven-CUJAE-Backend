@@ -45,6 +45,8 @@ configuracion = [
     {'etiqueta': 'auto_importar_graduado', 'valor': True},
     {'etiqueta': 'auto_actualizar_usuario', 'valor': True},
     {'etiqueta': 'enviar_estado_notificaciones', 'valor': True},
+    {'etiqueta': 'enviar_estado_notificaciones', 'valor': True},
+    {'etiqueta': 'etapas_plan_formacion_complementaria', 'valor': 4},
 ]
 
 for config in configuracion:

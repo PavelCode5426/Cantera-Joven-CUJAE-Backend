@@ -26,7 +26,7 @@ class GraduateOfSameAreaPermissions(CustomBasePermission):
         graduado = view.kwargs.get('graduadoID')
         graduado = get_object_or_404(Graduado, pk=graduado, area_id=request.user.area_id)
         view.kwargs['graduado'] = graduado
-        has_permissions = graduado != None
+        has_permissions = graduado is not None
         return has_permissions
 
 
@@ -37,13 +37,27 @@ class TutorOfSameAreaPermissions(CustomBasePermission):
         tutor = get_object_or_404(DirectoryUser, pk=tutor, area_id=request.user.area_id,
                                   graduado=None, posiblegraduado=None, estudiante=None)
         view.kwargs['tutor'] = tutor
-        has_permissions = tutor != None
+        has_permissions = tutor is not None
         return has_permissions
 
 
 class IsSameGraduateWhoRequestPermissions(IsSameUserWhoRequestPermissions):
-    URL_KWARGS_KEY = 'graduateID'
+    URL_KWARGS_KEY = 'graduadoID'
+
+    def _has_permission(self, request, view):
+        has_permissions = super()._has_permission(request, view)
+        if has_permissions and not ('graduado' in view.kwargs):
+            pk = request.user.pk
+            view.kwargs['graduado'] = get_object_or_404(Graduado, pk=pk)
+        return has_permissions
 
 
 class IsSameTutorWhoRequestPermissions(IsSameUserWhoRequestPermissions):
     URL_KWARGS_KEY = 'tutorID'
+
+    def _has_permission(self, request, view):
+        has_permissions = super()._has_permission(request, view)
+        if has_permissions and not ('tutor' in view.kwargs):
+            pk = request.user.pk
+            view.kwargs['tutor'] = get_object_or_404(DirectoryUser, pk=pk)
+        return has_permissions

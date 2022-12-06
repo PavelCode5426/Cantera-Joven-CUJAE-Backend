@@ -22,10 +22,10 @@ class IsAvalOwnerTutorOrJefeArea(permissions.CustomBasePermission):
         user_route_lookup = view.kwargs.get('usuarioID')
 
         if request.method in SAFE_METHODS:
-            has_permission = permissions._user_has_role(user, ['JEFE DE AREA', 'TUTOR']) and \
+            has_permission = permissions.user_has_role(user, ['JEFE DE AREA', 'TUTOR']) and \
                              DirectoryUser.objects.filter(pk=user_route_lookup, area=user.area).exists()
         else:
-            has_permission = permissions._user_has_role(user, ['JEFE DE AREA']) and \
+            has_permission = permissions.user_has_role(user, ['JEFE DE AREA']) and \
                              DirectoryUser.objects.filter(pk=user_route_lookup, area=user.area).exists()
 
         return has_permission

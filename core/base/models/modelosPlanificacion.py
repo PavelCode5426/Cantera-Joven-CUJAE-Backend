@@ -8,7 +8,7 @@ from . import modelosSimple as simpleModels
 class Evaluacion(models.Model):
     texto = models.CharField(max_length=255)
     esSatisfactorio = models.BooleanField(default=True)
-    aprobadoPor = models.ForeignKey(authModels.DirectoryUser, models.RESTRICT)
+    aprobadoPor = models.ForeignKey(authModels.DirectoryUser, models.RESTRICT, null=True, blank=True)
 
 
 class Plan(models.Model):
@@ -23,11 +23,15 @@ class Plan(models.Model):
 
     estado = models.CharField(choices=Estados.choices, max_length=100, default=Estados.ENDESARROLLO)
 
+    @property
+    def is_approved(self):
+        return self.Estados.APROBADO == self.estado
+
 
 class Etapa(models.Model):
-    fechaInicio = models.DateTimeField()
-    fechaFin = models.DateTimeField()
-    plan = models.ForeignKey(Plan, on_delete=models.RESTRICT)
+    fechaInicio = models.DateTimeField(null=True, blank=True, default=None)
+    fechaFin = models.DateTimeField(null=True, blank=True, default=None)
+    plan = models.ForeignKey(Plan, on_delete=models.CASCADE, related_name='etapas')
 
 
 class Actividad(abstractModels.AbstractNameEntity):
@@ -39,6 +43,7 @@ class Actividad(abstractModels.AbstractNameEntity):
     responsable = models.ForeignKey(authModels.DirectoryUser, related_name='responsable', on_delete=models.RESTRICT)
     # participantes = models.ManyToManyField(authModels.DirectoryUser, related_name='participantes')
 
+    etapa = models.ForeignKey(Etapa, on_delete=models.CASCADE, related_name='tareas')
     actividadPadre = models.ForeignKey('Actividad', on_delete=models.RESTRICT)
 
 

@@ -9,7 +9,26 @@ class EtapaFormacion(planModels.Etapa):
     numero = models.PositiveSmallIntegerField(default=1)
     objetivo = models.CharField(max_length=255, null=True, blank=True, default=None)
     esProrroga = models.BooleanField(default=False)
-    evaluacion = models.ForeignKey(planModels.Evaluacion, on_delete=models.RESTRICT)
+    evaluacion = models.OneToOneField(planModels.Evaluacion, on_delete=models.RESTRICT, null=True, blank=True,
+                                      default=None)
+
+    @property
+    def graduado(self):
+        return PlanFormacionComplementaria.objects.get(pk=self.plan).graduado
+
+    @property
+    def estudiante(self):
+        return PlanFormacionCantera.objects.get(pk=self.plan).estudiante
+
+    @property
+    def evaluation_approved(self):
+        approved = False
+        try:
+            approved = self.evaluacion and self.evaluacion.aprobadoPor
+        except Exception:
+            pass
+
+        return approved
 
 
 class EvaluacionFinal(planModels.Evaluacion):
@@ -17,15 +36,25 @@ class EvaluacionFinal(planModels.Evaluacion):
 
 
 class PlanFormacion(planModels.Plan):
-    evaluacion = models.ForeignKey(EvaluacionFinal, on_delete=models.RESTRICT, null=True, blank=True)
+    evaluacion = models.OneToOneField(EvaluacionFinal, on_delete=models.RESTRICT, null=True, blank=True)
+
+    @property
+    def evaluation_approved(self):
+        approved = False
+        try:
+            approved = self.evaluacion and self.evaluacion.aprobadoPor
+        except Exception:
+            pass
+
+        return approved
 
 
 class PlanFormacionCantera(PlanFormacion):
-    estudiante = models.ForeignKey(userModels.Estudiante, on_delete=models.RESTRICT)
+    estudiante = models.OneToOneField(userModels.Estudiante, on_delete=models.RESTRICT)
 
 
 class PlanFormacionComplementaria(PlanFormacion):
-    graduado = models.ForeignKey(userModels.Graduado, on_delete=models.RESTRICT)
+    graduado = models.OneToOneField(userModels.Graduado, on_delete=models.RESTRICT)
 
 
 class ActividadFormacion(planModels.Actividad):
