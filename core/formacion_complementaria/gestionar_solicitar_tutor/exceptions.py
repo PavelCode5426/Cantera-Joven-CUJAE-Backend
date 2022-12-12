@@ -30,3 +30,9 @@ class PreviouslyAnsweredRequestException(APIException):
     status_code = status.HTTP_400_BAD_REQUEST
     default_detail = "Solicitud respondida anteriormente"
     default_code = 'previously_answered_request'
+
+
+class GraduateRequireAvalException(APIException):
+    status_code = status.HTTP_400_BAD_REQUEST
+    default_detail = 'Los graduados de nivel superior requieren aval antes de asignar tutor'
+    default_code = 'graduate_require_aval'

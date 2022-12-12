@@ -1,10 +1,9 @@
 from core.base.models.modelosSimple import Configuracion
+from core.configuracion.proxy import ConfigurationProxy
 
 
-def configValue(key):
-    val = None
-    val = Configuracion.objects.get(etiqueta=key).valor
-    return val
+def config(key):
+    return ConfigurationProxy().get(key)
 
 
 def create_update_configuration(label: str, value, validation: dict = None):
@@ -18,7 +17,7 @@ def create_update_configuration(label: str, value, validation: dict = None):
 def isConfigAvailable(key):
     def wrapper(function):
         def can(*args, **kwargs):
-            can = configValue(key)
+            can = config(key)
             if can:
                 function(*args, **kwargs)
 

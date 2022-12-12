@@ -1,11 +1,11 @@
 from django.contrib.auth.models import Group
 
 from core.base.models import modelosSimple
-from custom.authentication.LDAP.sigenu_ldap import SIGENU_LDAP
+from custom.authentication.LDAP.ldap_facade import LDAPFacade
 
 elementos = []
 try:
-    elementos = SIGENU_LDAP().areas()
+    elementos = LDAPFacade().all_areas()
 except Exception as e:
     print(e)
     elementos = [

@@ -5,7 +5,7 @@ import openpyxl
 from django.conf import settings
 
 from core.base.models.modelosSimple import Area
-from custom.authentication.LDAP.sigenu_ldap import SIGENU_LDAP, SearchOption
+from custom.authentication.LDAP.sigenu_ldap_services import SIGENU_LDAP_Services, SearchOption
 from custom.authentication.models import DirectoryUser
 
 GRADUATE_TEACHING_CATEGORIES = [
@@ -72,22 +72,27 @@ def is_cuadro(value):
     return bool(get_cuadro_excel_info(value))
 
 
-class LDAPManager:
+class LDAPFacade:
+
+    def __new__(cls, *args, **kwargs):
+        if not hasattr(cls, 'instance'):
+            cls.instance = super(LDAPFacade, cls).__new__(cls, *args, **kwargs)
+        return cls.instance
 
     def __init__(self):
-        self.sigenu_ldap = SIGENU_LDAP()
+        self.sigenu_ldap_service = SIGENU_LDAP_Services()
 
     def authentication(self, username, password):
         user = None
-        response = self.sigenu_ldap.login(username, password)
+        response = self.sigenu_ldap_service.login(username, password)
 
         if response.status_code == 200:
             user = response.json()
-            user = self.___parse_authentication_response(user)
+            user = self.__parse_authentication_response(user)
 
         return user
 
-    def ___parse_authentication_response(self, response):
+    def __parse_authentication_response(self, response):
         response = response['user']
         parse_response = dict(
             address=response['streetAddress'],
@@ -118,7 +123,7 @@ class LDAPManager:
         return parse_response
 
     def all_persons_from_area(self, distinguishedName: str):
-        return self.sigenu_ldap.persons_by_area(distinguishedName)
+        return self.sigenu_ldap_service.persons_by_area(distinguishedName)
 
     def all_students_from_area(self, distinguishedName: str):
         persons = self.all_persons_from_area(distinguishedName)
@@ -126,52 +131,41 @@ class LDAPManager:
         return persons
 
     def all_pgraduates(self):
-        persons = self.sigenu_ldap.all_persons()
+        persons = self.sigenu_ldap_service.all_persons()
         persons = list(filter(is_pgraduate, persons))
         return persons
 
     def all_graduates_from_area(self, distinguishedName: str):
-        persons = self.sigenu_ldap.workers_by_area(distinguishedName)
+        persons = self.sigenu_ldap_service.workers_by_area(distinguishedName)
         persons = list(filter(is_graduate, persons))
         return persons
 
     def all_graduates(self):
-        persons = self.sigenu_ldap.all_persons()
+        persons = self.sigenu_ldap_service.all_persons()
         persons = list(filter(is_graduate, persons))
         return persons
 
-    # def all_tutors_from_area(self, distinguishedName: str, search: SearchOption = None):
-    #
-    #     if search:
-    #         area_name = distinguishedName[3:distinguishedName.find(',')]
-    #         persons = self.sigenu_ldap.search_workers(search)
-    #         persons = list(filter(lambda x: x['area'] == area_name and is_tutor(x), persons))
-    #     else:
-    #         persons = self.sigenu_ldap.workers_by_area(distinguishedName)
-    #         persons = list(filter(is_tutor, persons))
-    #     return persons
-
     def all_tutors_from_area(self, distinguishedName: str):
 
-        persons = self.sigenu_ldap.workers_by_area(distinguishedName)
+        persons = self.sigenu_ldap_service.workers_by_area(distinguishedName)
         persons = list(filter(is_tutor, persons))
         return persons
 
     def all_persons_with_filter(self, search: SearchOption = None):
 
         if search:
-            persons = self.sigenu_ldap.search_persons(search)
+            persons = self.sigenu_ldap_service.search_persons(search)
         else:
-            persons = self.sigenu_ldap.all_persons()
+            persons = self.sigenu_ldap_service.all_persons()
 
         return persons
 
     def all_workers_with_filter(self, search: SearchOption = None):
 
         if search:
-            persons = self.sigenu_ldap.search_workers(search)
+            persons = self.sigenu_ldap_service.search_workers(search)
         else:
-            persons = self.sigenu_ldap.all_workers()
+            persons = self.sigenu_ldap_service.all_workers()
 
         return persons
 
@@ -191,8 +185,9 @@ class LDAPManager:
         return persons
 
     def all_areas(self):
-        return self.sigenu_ldap.areas()
+        return self.sigenu_ldap_service.areas()
 
+    # IMPLEMENTADO PARA PROBAR, BORRAR
     def all_areas_with_departments(self):
         areas = self.all_areas()
         elements = []
@@ -212,40 +207,6 @@ class LDAPManager:
             })
 
         return elements
-
-    def __all_persons_types(self):
-        persons = self.sigenu_ldap.all_persons()
-
-        random.shuffle(persons)
-
-        clear_list = list()
-        while len(persons) > 0:
-            person = persons[0]
-
-            clear_list.append(person)
-
-            def filter_function(value):
-                value_keys = list(value.keys())
-                person_keys = list(person.keys())
-                return len(value_keys) != len(person_keys) or not all(item in person_keys for item in value_keys)
-
-            persons = list(filter(filter_function, persons))
-
-        out_file = open("persons.json", "w")
-        json.dump(clear_list, out_file, indent=6, sort_keys=True)
-        out_file.close()
-        return clear_list
-
-    def __all_teachingCategories(self):
-        persons = self.sigenu_ldap.all_persons()
-        titles = set()
-
-        for person in persons:
-            title = person.get('teachingCategory', None)
-            if title:
-                titles.add(title)
-
-        return titles
 
     def get_person_roles(self, person_ldap_data: dict) -> list:
         roles = list()
@@ -302,24 +263,24 @@ class LDAPManager:
 
         return area
 
-    def update_or_insert_user(self, userData: dict):
+    def update_or_insert_user(self, user_data: dict):
         data = dict(
-            first_name=userData['name'],
-            last_name=userData['lastname'],
-            direccion=userData['address'],
-            cargo=None if 'teachingCategory' not in userData else userData['teachingCategory'],
-            carnet=userData['identification'],
-            directorioID=userData['areaId'],
-            telefono=userData['phone'],
-            email=userData['email'],
-            username=userData['user'],
+            first_name=user_data['name'],
+            last_name=user_data['lastname'],
+            direccion=user_data['address'],
+            cargo=None if 'teachingCategory' not in user_data else user_data['teachingCategory'],
+            carnet=user_data['identification'],
+            directorioID=user_data['areaId'],
+            telefono=user_data['phone'],
+            email=user_data['email'],
+            username=user_data['user'],
             area=self.update_or_insert_area({
-                'area': userData.get('area', None),
-                'department': userData.get('department', None)
+                'area': user_data.get('area', None),
+                'department': user_data.get('department', None)
             })
         )
 
-        user = DirectoryUser.objects.update_or_create(directorioID=data['directorioID'], defaults=data)[0]
+        user, created = DirectoryUser.objects.update_or_create(directorioID=data['directorioID'], defaults=data)
 
         # if is_student(userData):
         #     data['anno_academico'] = userData['studentYear']
@@ -332,3 +293,39 @@ class LDAPManager:
         #     model = PosibleGraduado
 
         return user
+
+    # METODOS PRIVADOS
+    # IMPLEMENTADO PARA PROBAR, BORRAR
+    def __all_persons_types(self):
+        persons = self.sigenu_ldap_service.all_persons()
+
+        random.shuffle(persons)
+
+        clear_list = list()
+        while len(persons) > 0:
+            person = persons[0]
+
+            clear_list.append(person)
+
+            def filter_function(value):
+                value_keys = list(value.keys())
+                person_keys = list(person.keys())
+                return len(value_keys) != len(person_keys) or not all(item in person_keys for item in value_keys)
+
+            persons = list(filter(filter_function, persons))
+
+        out_file = open("persons.json", "w")
+        json.dump(clear_list, out_file, indent=6, sort_keys=True)
+        out_file.close()
+        return clear_list
+
+    def __all_teachingCategories(self):
+        persons = self.sigenu_ldap_service.all_persons()
+        titles = set()
+
+        for person in persons:
+            title = person.get('teachingCategory', None)
+            if title:
+                titles.add(title)
+
+        return titles

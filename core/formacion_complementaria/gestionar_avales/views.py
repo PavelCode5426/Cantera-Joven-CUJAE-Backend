@@ -8,6 +8,7 @@ from core.base.permissions import IsDirectorRecursosHumanos
 from custom.authentication import models as authModels
 from .permissions import IsAvalOwner, IsAvalOwnerTutorOrJefeArea
 from .serializers import UserAvalSerializer, PlantillaAvalSerializer
+from ...base.generics import MultiplePermissionsView
 
 
 class PlantillaAvalModelViewSet(ModelViewSet):
@@ -16,7 +17,8 @@ class PlantillaAvalModelViewSet(ModelViewSet):
     pagination_class = None
 
 
-class ObtenerCrearActualizarAval(CreateAPIView, RetrieveUpdateAPIView):
+class ObtenerCrearActualizarAval(CreateAPIView, RetrieveUpdateAPIView, MultiplePermissionsView):
+    # TODO REVISAR LOS PERMISOS DE LOS AVALES
     serializer_class = UserAvalSerializer
     lookup_url_kwarg = ['usuarioID']
     permission_classes = [IsAvalOwner | IsAvalOwnerTutorOrJefeArea | IsDirectorRecursosHumanos]

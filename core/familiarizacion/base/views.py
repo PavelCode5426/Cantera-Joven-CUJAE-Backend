@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST
 
 from core.base.models.modelosUsuario import PosibleGraduado
-from custom.authentication.LDAP.ldap_manager import LDAPManager
+from custom.authentication.LDAP.ldap_facade import LDAPFacade
 from .serializers import ImportarPosibleGraduadoSerializer
 from ...base.permissions import IsDirectorRecursosHumanos
 
@@ -12,7 +12,7 @@ class ImportarPosiblesGraduadosDirectorio(ListCreateAPIView):
     permission_classes = [IsDirectorRecursosHumanos]
 
     def list(self, request, **kwargs):
-        pgraduados = LDAPManager().all_pgraduates()
+        pgraduados = LDAPFacade().all_pgraduates()
         importados = PosibleGraduado.objects.filter(directorioID__in=[pgrad['areaId'] for pgrad in pgraduados])
 
         sin_importar = []

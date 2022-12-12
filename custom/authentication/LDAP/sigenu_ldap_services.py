@@ -13,7 +13,7 @@ class SearchOption(object):
         self.email = email
 
 
-class SIGENU_LDAP(object):
+class SIGENU_LDAP_Services(object):
     def __init__(self):
         self.base_url = settings.SIGENU_URL
         self.username = settings.SIGENU_USERNAME

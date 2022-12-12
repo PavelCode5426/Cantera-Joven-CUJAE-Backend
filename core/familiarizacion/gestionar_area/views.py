@@ -116,7 +116,7 @@ class PreubicadosPorAreaListAPIView(ListAPIView):
         accesible para los jefes de area y el director de recursos humanos. Permisos para que el jefe de area que
         vea el area de la que el es el jefe """
 
-    permission_classes = [IsDirectorRecursosHumanos | IsSameAreaPermissions, IsJefeArea]
+    permission_classes = [IsVicerrector | IsDirectorRecursosHumanos | IsSameAreaPermissions, IsJefeArea]
     serializer_class = serializers.PosibleGraduadoSerializer
     filterset_class = PosibleGraduadoPreubicadoFilterSet
 

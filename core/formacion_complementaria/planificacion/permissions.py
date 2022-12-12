@@ -1,3 +1,4 @@
+from django.db.models import Q
 from django.shortcuts import get_object_or_404
 
 from core.base.models.modelosPlanificacionFormacion import PlanFormacionComplementaria
@@ -30,15 +31,27 @@ class IsGraduateTutorOrJefeAreaPermissions(CustomBasePermission):
 
 class PlanPermission:
     def _get_plan(self, view_kwargs: dict) -> PlanFormacionComplementaria:
+        plan = None
+        if 'plan' in view_kwargs:
+            return view_kwargs['plan']
+
         if 'planID' in view_kwargs:
             plan = get_object_or_404(PlanFormacionComplementaria, pk=view_kwargs['planID'])
         elif 'etapaID' in view_kwargs:
-            plan = get_object_or_404(PlanFormacionComplementaria, etapas__id=view_kwargs['etapaID'])
-        elif 'tareaID' in view_kwargs:
-            plan = get_object_or_404(PlanFormacionComplementaria, etapas__tareas_id=view_kwargs['tareaID'])
-        # elif 'evaluacionID' in view_kwargs:
+            plan = get_object_or_404(PlanFormacionComplementaria, etapas=view_kwargs['etapaID'])
+        elif 'actividadID' in view_kwargs:
+            plan = get_object_or_404(PlanFormacionComplementaria, etapas__actividades=view_kwargs['actividadID'])
+        elif 'evaluacionID' in view_kwargs:
+            plan = get_object_or_404(PlanFormacionComplementaria,
+                                     Q(etapas__evaluacion=view_kwargs['evaluacionID']) |
+                                     Q(evaluacion=view_kwargs['evaluacionID']))
 
+        self.add_plan_to_view(view_kwargs, plan)
         return plan
+
+    def add_plan_to_view(self, view_kwargs, plan):
+        view_kwargs.setdefault('plan', plan)
+        view_kwargs.setdefault('planID', plan.pk)
 
 
 class IsPlanGraduatePermissions(CustomBasePermission, PlanPermission):
@@ -47,7 +60,6 @@ class IsPlanGraduatePermissions(CustomBasePermission, PlanPermission):
         user = request.user
         plan = self._get_plan(view.kwargs)
 
-        view.kwargs.setdefault('plan', plan)
         has_permission = user.pk == plan.graduado.pk
         return has_permission
 

@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST
 
 from core.base.permissions import IsJefeArea, IsSameAreaPermissions, IsDirectorRecursosHumanos
-from custom.authentication.LDAP.ldap_manager import LDAPManager
+from custom.authentication.LDAP.ldap_facade import LDAPFacade
 from custom.authentication.models import DirectoryUser
 from .filters import EstudianteFilterSet
 from .serializers import ImportarEstudianteSerializer, EstudianteSerializer
@@ -17,7 +17,7 @@ class ImportarEstudiantesDirectorio(ListCreateAPIView):
     # NO SE LE PUSO FILTRO PORQUE HARIA MAS COMPLEJA LA CONSULTA O TARDARIA MAS. EL FRONT QUE FILTRE
     def list(self, request, **kwargs):
         area = kwargs['area']
-        estudiantes = LDAPManager().all_students_from_area(area)
+        estudiantes = LDAPFacade().all_students_from_area(area)
         # PREGUNTO POR EL USUARIO Y NO POR EL ESTUDIANTE PORQUE ESTUDIANTE ES LO MENOS QUE PUEDES SER EN EL SISTEMA
         # POR LO TANTO SI ESTAS EN EL SISTEMA ES PORQUE ERES ALGO DIFERENTE DE ESTUDIANTE O IGUAL A ESTUDIANTE
         importados = DirectoryUser.objects.filter(directorioID__in=[est['areaId'] for est in estudiantes])

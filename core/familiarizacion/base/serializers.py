@@ -4,7 +4,7 @@ from django.db import transaction
 
 from core.base.models.modelosUsuario import PosibleGraduado
 from core.base.serializers import ImportarFromDirectorioSerializer
-from custom.authentication.LDAP.ldap_manager import LDAPManager
+from custom.authentication.LDAP.ldap_facade import LDAPFacade
 from custom.authentication.models import DirectoryUser
 
 
@@ -14,7 +14,7 @@ class ImportarPosibleGraduadoSerializer(ImportarFromDirectorioSerializer):
         if is_valid:
             try:
                 pgraduados_carnet = set(self.initial_data['importar'])
-                pgraduados = LDAPManager().all_pgraduates()
+                pgraduados = LDAPFacade().all_pgraduates()
                 pgraduados = list(filter(lambda x: x['identification'] in pgraduados_carnet, pgraduados))
 
                 if len(pgraduados) != len(pgraduados_carnet):

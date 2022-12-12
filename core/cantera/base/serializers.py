@@ -4,7 +4,7 @@ from rest_framework import serializers
 
 from core.base.models.modelosUsuario import Estudiante
 from core.base.serializers import ImportarFromDirectorioSerializer
-from custom.authentication.LDAP.ldap_manager import LDAPManager
+from custom.authentication.LDAP.ldap_facade import LDAPFacade
 
 
 class ImportarEstudianteSerializer(ImportarFromDirectorioSerializer):
@@ -15,7 +15,7 @@ class ImportarEstudianteSerializer(ImportarFromDirectorioSerializer):
             try:
                 estudiantes_carnet = set(self.initial_data['importar'])
                 area = self.initial_data['area']
-                estudiantes = LDAPManager().all_students_from_area(area)
+                estudiantes = LDAPFacade().all_students_from_area(area)
                 estudiantes = list(filter(lambda x: x['identification'] in estudiantes_carnet, estudiantes))
 
                 if len(estudiantes) != len(estudiantes_carnet):

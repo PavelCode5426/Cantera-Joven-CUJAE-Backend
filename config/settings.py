@@ -14,6 +14,7 @@ import os
 
 # INSTALANDO VARIABLES DE ENTORNO
 import environ
+from django.conf.global_settings import MEDIA_ROOT
 
 from custom.applicationloader.helper import AppsLoader
 
@@ -94,7 +95,9 @@ TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
-            os.path.join(BASE_DIR, 'core/notificacion/template')
+            os.path.join(BASE_DIR, 'template'),
+            os.path.join(BASE_DIR, 'core/notificacion/template'),
+            os.path.join(BASE_DIR, 'core/formacion_complementaria/planificacion/template'),
         ],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -164,6 +167,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.0/howto/static-files/
 MEDIA_ROOT = BASE_DIR + '/media'
+MEDIA_URL = 'media/'
 STATIC_URL = 'static/'
 
 # Default primary key field type

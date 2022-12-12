@@ -8,7 +8,7 @@ from core.base.permissions import IsDirectorRecursosHumanos, IsJefeArea, IsSameA
 from core.formacion_complementaria.base.filters import GraduadoFilterSet
 from core.formacion_complementaria.base.serializers import ImportarGraduadoSerializer, GraduadoSerializer, \
     ImportarTutorSerializer
-from custom.authentication.LDAP.ldap_manager import LDAPManager
+from custom.authentication.LDAP.ldap_facade import LDAPFacade
 from custom.authentication.models import DirectoryUser
 
 
@@ -16,7 +16,7 @@ class ImportarGraduadosDirectorio(ListCreateAPIView):
     permission_classes = [IsDirectorRecursosHumanos]
 
     def list(self, request, **kwargs):
-        graduados = LDAPManager().all_graduates()
+        graduados = LDAPFacade().all_graduates()
         importados = Graduado.objects.filter(directorioID__in=[grad['areaId'] for grad in graduados])
 
         sin_importar = []
@@ -49,7 +49,7 @@ class ImportarTutoresDirectorio(ListCreateAPIView):
     # NO SE LE PUSO FILTRO PORQUE HARIA MAS COMPLEJA LA CONSULTA O TARDARIA MAS. EL FRONT QUE FILTRE
     def list(self, request, **kwargs):
         area = kwargs['area']
-        tutores = LDAPManager().all_tutors_from_area(area)
+        tutores = LDAPFacade().all_tutors_from_area(area)
         importados = DirectoryUser.objects.filter(directorioID__in=[tutor['areaId'] for tutor in tutores])
 
         sin_importar = []

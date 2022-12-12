@@ -25,7 +25,7 @@ class GraduateOfSameAreaPermissions(CustomBasePermission):
     def _has_permission(self, request, view):
         graduado = view.kwargs.get('graduadoID')
         graduado = get_object_or_404(Graduado, pk=graduado, area_id=request.user.area_id)
-        view.kwargs['graduado'] = graduado
+        view.kwargs.setdefault('graduado', graduado)
         has_permissions = graduado is not None
         return has_permissions
 

@@ -6,3 +6,4 @@ class ConfiguracionConfig(AppConfig):
     name = 'core.configuracion'
     label = 'system_configuration'
 
+

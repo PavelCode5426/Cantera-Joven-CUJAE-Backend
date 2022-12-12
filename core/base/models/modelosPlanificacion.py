@@ -2,7 +2,6 @@ from django.db import models
 
 from custom.authentication import models as authModels
 from . import modelosAbstractos as abstractModels
-from . import modelosSimple as simpleModels
 
 
 class Evaluacion(models.Model):
@@ -35,16 +34,18 @@ class Etapa(models.Model):
 
 
 class Actividad(abstractModels.AbstractNameEntity):
-    descripcion = models.CharField(max_length=255)
-    observaciones = models.CharField(max_length=255)
+    descripcion = models.TextField(null=True, blank=True, default=None)
+    observacion = models.TextField(null=True, blank=True, default=None)
     fechaInicio = models.DateTimeField()
 
-    dimesion = models.ForeignKey(simpleModels.Dimension, on_delete=models.RESTRICT)
-    responsable = models.ForeignKey(authModels.DirectoryUser, related_name='responsable', on_delete=models.RESTRICT)
+    # responsable = models.ForeignKey(authModels.DirectoryUser, related_name='responsable', default=None, blank=True,null=True,on_delete=models.RESTRICT)
     # participantes = models.ManyToManyField(authModels.DirectoryUser, related_name='participantes')
+    # dimesion = models.ForeignKey(simpleModels.Dimension, on_delete=models.RESTRICT)
+    responsable = models.TextField(null=True, blank=True, default=None)
+    participantes = models.TextField(null=True, blank=True, default=None)
 
-    etapa = models.ForeignKey(Etapa, on_delete=models.CASCADE, related_name='tareas')
-    actividadPadre = models.ForeignKey('Actividad', on_delete=models.RESTRICT)
+    etapa = models.ForeignKey(Etapa, on_delete=models.CASCADE, related_name='actividades')
+    actividadPadre = models.ForeignKey('Actividad', on_delete=models.CASCADE, null=True, blank=True, default=None)
 
 
 class Archivo(models.Model):
@@ -54,10 +55,11 @@ class Archivo(models.Model):
     POR LA FECHA SE SABRA CUAL ES EL MOMENTO DE CADA VERSION
     """
     fecha = models.DateTimeField(auto_now_add=True)
-    archivo = models.FilePathField()
-    plan = models.ForeignKey(Plan, on_delete=models.RESTRICT, related_name='versiones')
-    versionado = models.BooleanField(default=False)
-    actividad = models.ForeignKey(Actividad, on_delete=models.RESTRICT, related_name='documentos')
+    archivo = models.FileField(upload_to='media', max_length=1000)
+    plan = models.ForeignKey(Plan, on_delete=models.CASCADE, null=True, blank=True, default=None,
+                             related_name='versiones')
+    actividad = models.ForeignKey(Actividad, on_delete=models.CASCADE, null=True, blank=True, default=None,
+                                  related_name='documentos')
 
 
 class Comentario(abstractModels.AbtractUserForeignKey):
@@ -65,5 +67,6 @@ class Comentario(abstractModels.AbtractUserForeignKey):
     LOS COMENTARIOS PERTENECEN AL PLAN O LA ACTIVIDAD
     """
     texto = models.CharField(max_length=255)
+    fecha = models.DateTimeField(auto_now_add=True)
     plan = models.ForeignKey(Plan, null=True, blank=True, default=None, on_delete=models.RESTRICT)
     actividad = models.ForeignKey(Actividad, null=True, blank=True, default=None, on_delete=models.RESTRICT)

@@ -10,7 +10,7 @@ from core.formacion_complementaria.base.permissions import GraduateOfSameAreaPer
 from custom.authentication import serializer as authSerializers
 from custom.authentication.models import DirectoryUser
 from . import serializers
-from .exceptions import PreviouslyAnsweredRequestException
+from .exceptions import PreviouslyAnsweredRequestException, GraduateRequireAvalException
 from .filters import SolicitudTutorFilterSet, TutoriaFilterSet
 from .permissions import SendOrReciveSolicitudTutorExternoPermissions
 from ...base.permissions import IsJefeArea, IsSameAreaPermissions, IsDirectorRecursosHumanos
@@ -67,6 +67,10 @@ class AsignarSolicitarTutores(CreateAPIView):
     permission_classes = (GraduateOfSameAreaPermissions, IsJefeArea)
 
     def create(self, request, graduado, **kwargs):
+
+        if not hasattr(graduado, 'aval') and graduado.esNivelSuperior:
+            raise GraduateRequireAvalException
+
         data = request.data
         data.setdefault('graduado', graduado)
         serializer = serializers.AsignarSolicitarTutorSerializer(data=data)

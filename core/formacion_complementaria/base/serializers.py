@@ -6,7 +6,7 @@ from rest_framework import serializers
 from core.base.models.modelosSimple import Area
 from core.base.models.modelosUsuario import Graduado
 from core.familiarizacion.base.serializers import ImportarFromDirectorioSerializer
-from custom.authentication.LDAP.ldap_manager import LDAPManager, is_supergraduate
+from custom.authentication.LDAP.ldap_facade import LDAPFacade, is_supergraduate
 from custom.authentication.models import DirectoryUser
 
 
@@ -16,7 +16,7 @@ class ImportarGraduadoSerializer(ImportarFromDirectorioSerializer):
         if is_valid:
             try:
                 graduados_carnet = set(self.initial_data['importar'])
-                graduados = LDAPManager().all_graduates()
+                graduados = LDAPFacade().all_graduates()
                 graduados = list(filter(lambda x: x['identification'] in graduados_carnet, graduados))
 
                 if len(graduados) != len(graduados_carnet):
@@ -69,7 +69,7 @@ class ImportarTutorSerializer(ImportarFromDirectorioSerializer):
             try:
                 tutores_carnet = set(self.initial_data['importar'])
                 area = self.initial_data['area']
-                tutores = LDAPManager().all_tutors_from_area(area)
+                tutores = LDAPFacade().all_tutors_from_area(area)
                 tutores = list(filter(lambda x: x['identification'] in tutores_carnet, tutores))
 
                 if len(tutores) != len(tutores_carnet):
@@ -122,5 +122,6 @@ class GraduadoSerializer(serializers.ModelSerializer):
     class Meta:
         model = Graduado
         fields = (
-            'id', 'username', 'first_name', 'last_name', 'email', 'direccion', 'esExterno', 'esNivelSuperior', 'aval',
+            'id', 'username', 'first_name', 'last_name', 'email', 'direccion', 'cargo', 'telefono', 'carnet',
+            'directorioID', 'area', 'esExterno', 'esNivelSuperior', 'aval',
             'plan')
