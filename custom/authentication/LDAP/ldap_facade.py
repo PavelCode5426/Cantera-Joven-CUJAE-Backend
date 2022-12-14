@@ -41,7 +41,7 @@ def is_pgraduate(value):
     if 'personExternal' in value:
         _is = value['personExternal'] == 'TRUE'
 
-    return _is
+    return _is or is_student(value)
 
 
 def is_tutor(value):

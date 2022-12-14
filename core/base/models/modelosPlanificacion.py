@@ -9,18 +9,32 @@ class Evaluacion(models.Model):
     esSatisfactorio = models.BooleanField(default=True)
     aprobadoPor = models.ForeignKey(authModels.DirectoryUser, models.RESTRICT, null=True, blank=True)
 
+    @property
+    def is_evaluacion_final(self):
+        try:
+            return bool(self.evaluacionfinal)
+        except Exception:
+            return False
+
+    @property
+    def is_evaluacion_formacion(self):
+        try:
+            return bool(self.evaluacionformacion)
+        except Exception:
+            return False
+
 
 class Plan(models.Model):
     fechaCreado = models.DateTimeField(auto_now_add=True)
     aprobadoPor = models.ForeignKey(authModels.DirectoryUser, on_delete=models.RESTRICT, blank=True, null=True)
 
     class Estados(models.TextChoices):
-        ENDESARROLLO = ('DEV', 'En Desarrollo')
-        PENDIENTE = ('PEN', 'Pendiente de Revision')
-        RECHAZADO = ('REC', 'Rechazado')
-        APROBADO = ('APR', 'Aprobado')
+        ENDESARROLLO = 'En Desarrollo'
+        PENDIENTE = 'Pendiente de Revision'
+        RECHAZADO = 'Rechazado'
+        APROBADO = 'Aprobado'
 
-    estado = models.CharField(choices=Estados.choices, max_length=100, default=Estados.ENDESARROLLO)
+    estado = models.CharField(choices=Estados.choices, max_length=25, default=Estados.ENDESARROLLO)
 
     @property
     def is_approved(self):

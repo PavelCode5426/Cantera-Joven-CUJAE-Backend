@@ -1,8 +1,7 @@
-from annoying.functions import get_object_or_None
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
 
-from core.base.models.modelosPlanificacionFormacion import PlanFormacion, EtapaFormacion
+from core.base.models.modelosPlanificacionFormacion import PlanFormacion
 from core.base.permissions import CustomBasePermission, user_has_role
 from custom.authentication.models import DirectoryUser
 
@@ -17,7 +16,7 @@ class IsJovenTutorPermissions(CustomBasePermission):
         return has_permission
 
 
-class IsGraduateTutorOrJefeAreaPermissions(CustomBasePermission):
+class IsJovenTutorOrJefeAreaPermissions(CustomBasePermission):
     def _has_permission(self, request, view):
         user = request.user
         joven = get_object_or_404(DirectoryUser, pk=view.kwargs['jovenID'])
@@ -45,8 +44,10 @@ class PlanPermission:
         elif 'archivoID' in view_kwargs:
             plan = get_object_or_404(PlanFormacion, etapas__actividades__documentos=view_kwargs['archivoID'])
         elif 'evaluacionID' in view_kwargs:
-            etapa = get_object_or_None(EtapaFormacion, evaluacion_id=view_kwargs['evaluacionID'])
-            plan = get_object_or_404(PlanFormacion, Q(evaluacion=view_kwargs['evaluacionID']) | Q(etapas=etapa))
+            evaluacionID = view_kwargs['evaluacionID']
+            query = PlanFormacion.objects.filter(Q(etapas__etapaformacion__evaluacion_id=evaluacionID) |
+                                                 Q(evaluacion_id=evaluacionID)).distinct()
+            plan = get_object_or_404(query)
 
         self.add_plan_to_view(view_kwargs, plan)
         return plan

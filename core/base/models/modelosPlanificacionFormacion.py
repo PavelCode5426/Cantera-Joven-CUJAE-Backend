@@ -60,12 +60,12 @@ class ActividadFormacion(planModels.Actividad):
     fechaFin = models.DateTimeField()
 
     class Estado(models.TextChoices):
-        PENDIENTE = ('PEN', 'Pendiente')
-        ESPERA = ('ESP', 'Espera de Revision')
-        REVISADA = ('REV', 'Revisada')
+        PENDIENTE = 'Pendiente'
+        ESPERA = 'Espera de Revision'
+        REVISADA = 'Revisada'
         # CUANDO SE REPORTA PARA REVISAR Y NO SE CUMPLE SE DEJA COMO REVISADA SIEMPRE Q ESTE EN TIEMPO.
-        PARCIAL = ('PAR', 'Parcialmente Cumplida')
-        CUMPLIDA = ('CUM', 'Cumplida')
-        INCUMPLIDA = ('INCUM', 'Incumplida')
+        PARCIAL = 'Parcialmente Cumplida'
+        CUMPLIDA = 'Cumplida'
+        INCUMPLIDA = 'Incumplida'
 
-    estado = models.CharField(max_length=10, choices=Estado.choices, default=Estado.PENDIENTE)
+    estado = models.CharField(max_length=25, choices=Estado.choices, default=Estado.PENDIENTE)

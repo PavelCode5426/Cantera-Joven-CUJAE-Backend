@@ -39,7 +39,9 @@ class EtapaFormacionMixin(PlanFormacionMixin):
     def get_etapa(self, etapaID: int = None):
         if not etapaID:
             etapaID = self.get_etapaID()
-        return get_object_or_404(EtapaFormacion, pk=etapaID)
+        etapa = self.kwargs.get('etapa', get_object_or_404(EtapaFormacion, pk=etapaID))
+        self.kwargs.setdefault('etapa', etapa)
+        return etapa
 
     def etapa_is_evaluated(self, etapaID: int = None) -> bool:
         return self.get_etapa(etapaID).evaluacion_id is None
@@ -51,25 +53,26 @@ class EtapaFormacionMixin(PlanFormacionMixin):
         return True
 
 
-class EtapaFormacionMixinProxy(EtapaFormacionMixin):
-    def get_etapa(self, etapaID: int = None):
-        etapa = self.kwargs.get('etapa', super(EtapaFormacionMixinProxy, self).get_etapa(etapaID))
-        self.kwargs.setdefault('etapa', etapa)
-        return etapa
-
-
-class ActividadFormacionMixin(EtapaFormacionMixinProxy):
+class ActividadFormacionMixin(EtapaFormacionMixin):
     def get_actividadID(self):
         return self.kwargs.get('actividadID')
 
     def get_actividad(self, actividadID: int = None):
         if not actividadID:
             actividadID = self.get_actividadID()
-        return get_object_or_404(ActividadFormacion, pk=actividadID)
+        actividad = self.kwargs.get('actividad', get_object_or_404(ActividadFormacion, pk=actividadID))
+        self.kwargs.setdefault('actividad', actividad)
+        return actividad
 
     def can_manage_actividad(self, actividadID: int = None) -> bool:
         actividad = self.get_actividad(actividadID)
         return self.can_manage_etapa(actividad.etapa_id) or actividad.actividadPadre_id
+
+    def can_upload_file(self, actividadID: int = None) -> bool:
+        actividad = self.get_actividad(actividadID)
+        if actividad.etapa.etapaformacion.evaluacion is not None:
+            raise CantUpdateEtapaAfterEvalutation
+        return True
 
     def can_change_actividad_status(self, actividadID: int = None) -> bool:
         actividad = self.get_actividad(actividadID)
@@ -83,13 +86,6 @@ class ActividadFormacionMixin(EtapaFormacionMixinProxy):
         if self.plan_is_approved() and not self.etapa_is_evaluated(etapa_id):
             raise CantManageActividad
         return True
-
-
-class ActividadFormacionMixinProxy(ActividadFormacionMixin):
-    def get_actividad(self, actividadID: int = None):
-        actividad = self.kwargs.get('actividad', super(ActividadFormacionMixinProxy, self).get_actividad(actividadID))
-        self.kwargs.setdefault('actividad', actividad)
-        return actividad
 
 
 class PlanFormacionExportMixin(PlanFormacionMixin):

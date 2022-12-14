@@ -12,6 +12,7 @@ class PlanificacionFormacionComplementariaConfig(AppConfig):
 
         try:
             config('etapas_plan_formacion_complementaria')
+            config('etapas_plan_formacion_cantera')
             config('comenzar_formacion_complementaria')
 
             if not hasattr(settings, 'MEDIA_ROOT'):
@@ -22,6 +23,7 @@ class PlanificacionFormacionComplementariaConfig(AppConfig):
 
         except VariableNotFoundException:
             create_update_configuration('etapas_plan_formacion_complementaria', 4)
+            create_update_configuration('etapas_plan_formacion_cantera', 2)
             create_update_configuration('comenzar_formacion_complementaria', True)
         except Exception as e:
             print(e)

@@ -2,6 +2,12 @@ from rest_framework import status
 from rest_framework.exceptions import APIException
 
 
+class FormacionHasNotStarted(APIException):
+    status_code = status.HTTP_400_BAD_REQUEST
+    default_detail = 'La formacion individual no ha comenzado'
+    default_code = 'formation_has_not_started'
+
+
 class JovenHavePlan(APIException):
     status_code = status.HTTP_400_BAD_REQUEST
     default_detail = 'El joven ya tiene un plan de formacion individual'

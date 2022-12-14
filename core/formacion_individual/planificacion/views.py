@@ -1,10 +1,12 @@
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
+from django.utils.timezone import now
 from rest_framework.generics import RetrieveAPIView, CreateAPIView, RetrieveUpdateAPIView, ListAPIView, \
     ListCreateAPIView, RetrieveUpdateDestroyAPIView, RetrieveDestroyAPIView
 from rest_framework.parsers import MultiPartParser
 from rest_framework.response import Response
 from rest_framework.status import HTTP_201_CREATED, HTTP_200_OK
+from rest_framework.viewsets import ReadOnlyModelViewSet
 
 from core.base.generics import MultiplePermissionsView
 from core.base.models.modelosPlanificacion import Comentario, Evaluacion, Archivo
@@ -13,22 +15,24 @@ from core.base.models.modelosPlanificacionFormacion import EtapaFormacion, \
 from core.base.models.modelosSimple import Area
 from core.base.permissions import IsJefeArea, IsTutor
 from core.configuracion.helpers import config
+from core.formacion_individual.base.helpers import user_is_student
 from core.formacion_individual.base.permissions import IsSameJovenWhoRequestPermissions, \
     IsSameTutorWhoRequestPermissions
 from core.formacion_individual.planificacion import signals
 from core.formacion_individual.planificacion.exceptions import JovenHavePlan, CantEvaluateException, \
-    ResourceCantBeCommented, PlanAlreadyApproved, EvaluacionAlreadyApproved
+    ResourceCantBeCommented, PlanAlreadyApproved, EvaluacionAlreadyApproved, FormacionHasNotStarted
 from core.formacion_individual.planificacion.helpers import PlainPDFExporter, PlainCalendarExporter
-from core.formacion_individual.planificacion.mixin import PlanFormacionMixin, \
-    EtapaFormacionMixinProxy, ActividadFormacionMixinProxy, PlanFormacionExportMixin
-from core.formacion_individual.planificacion.permissions import IsGraduateTutorOrJefeAreaPermissions, \
+from core.formacion_individual.planificacion.mixin import PlanFormacionMixin, PlanFormacionExportMixin, \
+    ActividadFormacionMixin, EtapaFormacionMixin
+from core.formacion_individual.planificacion.permissions import IsJovenTutorOrJefeAreaPermissions, \
     IsJovenTutorPermissions, IsPlanJovenPermissions, IsPlanTutorOrJefeAreaPermissions, IsPlanTutorPermissions, \
     IsPlanJefeArea
 from core.formacion_individual.planificacion.serializers import PlanFormacionModelSerializer, \
     EtapaFormacionModelSerializer, UpdateEtapaFormacionSerializer, CrearEvaluacionFormacionModelSerializer, \
     CrearEvaluacionFinalModelSerializer, CommentsModelSerializer, UpdatePlanFormacionSerializer, \
     ArchivoModelSerializer, FirmarPlanFormacionSerializer, ActividadFormacionModelSerializer, \
-    CreateUpdateActividadFormacionSerializer, CambiarEstadoActividadFormacion, SubirArchivoActividad
+    CreateUpdateActividadFormacionSerializer, CambiarEstadoActividadFormacion, SubirArchivoActividad, \
+    EvaluacionModelSerializer
 from core.formacion_individual.planificacion.signals import actividad_revision_solicitada
 from custom.authentication.models import DirectoryUser
 
@@ -59,7 +63,7 @@ class ListPlanFormacionInTutor(ListAPIView):
             .order_by('-fechaCreado').all()
 
 
-class CreateRetrieveGraduadoPFC(CreateAPIView, RetrieveAPIView, MultiplePermissionsView):
+class CreateRetrieveJovenPlanFormacion(CreateAPIView, RetrieveAPIView, MultiplePermissionsView):
     """
     PERMITE OBTENER Y CREAR EL PLAN DE FORMACION DADO UN JOVEN
 
@@ -69,7 +73,7 @@ class CreateRetrieveGraduadoPFC(CreateAPIView, RetrieveAPIView, MultiplePermissi
     """
 
     post_permission_classes = (IsJovenTutorPermissions,)
-    get_permission_classes = (IsSameJovenWhoRequestPermissions | IsGraduateTutorOrJefeAreaPermissions,)
+    get_permission_classes = (IsSameJovenWhoRequestPermissions | IsJovenTutorOrJefeAreaPermissions,)
 
     serializer_class = PlanFormacionModelSerializer
 
@@ -77,13 +81,21 @@ class CreateRetrieveGraduadoPFC(CreateAPIView, RetrieveAPIView, MultiplePermissi
         return get_object_or_404(PlanFormacion, joven_id=self.kwargs['jovenID'], evaluacion=None)
 
     def create(self, request, *args, **kwargs):
-        jovenID = kwargs.get('jovenID')
-        if PlanFormacion.objects.filter(joven_id=jovenID, evaluacion=None).exists():
+        joven = kwargs.get('joven')
+
+        if not config('comenzar_formacion_complementaria'):
+            raise FormacionHasNotStarted
+
+        if PlanFormacion.objects.filter(joven=joven, evaluacion=None).exists():
             raise JovenHavePlan
 
-        # TODO CAMBIAR CONFIGURACION PARA CREAR DIFERENTES ETAPAS EN CASO DE TIPO DE PLAN
-        plan = PlanFormacion.objects.create(joven_id=jovenID)
-        for i in range(1, config('etapas_plan_formacion_complementaria') + 1):
+        plan = PlanFormacion.objects.create(joven=joven)
+        if user_is_student(joven):
+            config_key = 'etapas_plan_formacion_complementaria'
+        else:
+            config_key = 'etapas_plan_formacion_cantera'
+
+        for i in range(1, config(config_key) + 1):
             EtapaFormacion(numero=i, plan=plan).save()
 
         serializer = self.get_serializer(plan)
@@ -239,7 +251,7 @@ class ListEtapasPlanFormacion(ListAPIView, PlanFormacionMixin):
         return EtapaFormacion.objects.filter(plan_id=planID).order_by('numero').all()
 
 
-class RetrieveUpdateEtapaFormacion(RetrieveUpdateAPIView, EtapaFormacionMixinProxy, MultiplePermissionsView):
+class RetrieveUpdateEtapaFormacion(RetrieveUpdateAPIView, EtapaFormacionMixin, MultiplePermissionsView):
     """
     PERMITE ACTUALIZAR LOS DATOS DE LA ETAPA DE FORMACION COMPLEMENTARIA Y OBTENER LA MISMA
     """
@@ -266,7 +278,7 @@ class RetrieveUpdateEtapaFormacion(RetrieveUpdateAPIView, EtapaFormacionMixinPro
         return Response(serializer.data, HTTP_200_OK)
 
 
-class EvaluarEtapaFormacion(CreateAPIView, EtapaFormacionMixinProxy):
+class EvaluarEtapaFormacion(CreateAPIView, EtapaFormacionMixin):
     """
     PERMITE EVALUAR LA ETAPA DE FORMACION
     """
@@ -305,9 +317,19 @@ EVALUACIONES
 """
 
 
-# TODO MOSTRAR LAS EVALUACIONES PENDIENTES
+class ListRetrieveEvaluacionesArea(ReadOnlyModelViewSet):
+    permission_classes = (IsJefeArea,)
+    serializer_class = EvaluacionModelSerializer
 
-class AprobarEvaluacion(CreateAPIView, EtapaFormacionMixinProxy):
+    def get_queryset(self):
+        areaID = self.request.user.area_id
+        query = Evaluacion.objects.filter(
+            Q(evaluacionfinal__planformacion__aprobadoPor__area_id=areaID) |
+            Q(evaluacionformacion__etapaformacion__plan__aprobadoPor__area_id=areaID)).all()
+        return query
+
+
+class AprobarEvaluacion(CreateAPIView, EtapaFormacionMixin):
     """
     PERMITE ACEPTAR UNA EVALUACION, UNA VEZ ACEPTADA SE EJECUTA LA ACCION QUE ESTA CONTENGA
     """
@@ -337,7 +359,7 @@ TAREA DE FORMACION
 """
 
 
-class ListCreateActividadFormacion(ListCreateAPIView, MultiplePermissionsView, ActividadFormacionMixinProxy):
+class ListCreateActividadFormacion(ListCreateAPIView, MultiplePermissionsView, ActividadFormacionMixin):
     """
     PARA CREAR ADICIONAR TAREAS A LAS ETAPAS EL PLAN NO DEBE ESTAR APROBADO NI LA ETAPA DEBE ESTAR EVALUADA
     """
@@ -360,7 +382,7 @@ class ListCreateActividadFormacion(ListCreateAPIView, MultiplePermissionsView, A
 
 
 class RetrieveUpdateDeleteActividadFormacion(RetrieveUpdateDestroyAPIView, MultiplePermissionsView,
-                                             ActividadFormacionMixinProxy):
+                                             ActividadFormacionMixin):
     """
     PERMITE GESTIONAR LAS TAREAS DE FORMACION INDIVIDUAL
     """
@@ -405,7 +427,7 @@ class RetrieveUpdateDeleteActividadFormacion(RetrieveUpdateDestroyAPIView, Multi
         return Response({'detail': 'Actividad borrada correctamente'})
 
 
-class ListCreateSubActividadFormacion(ListCreateAPIView, MultiplePermissionsView, ActividadFormacionMixinProxy):
+class ListCreateSubActividadFormacion(ListCreateAPIView, MultiplePermissionsView, ActividadFormacionMixin):
     """
     PERMITE CREAR Y LISTAR LAS SUBTAREAS DADO UNA TAREA PADRE
     """
@@ -426,7 +448,7 @@ class ListCreateSubActividadFormacion(ListCreateAPIView, MultiplePermissionsView
         return Response({'detail': 'Actividad creada correctamente'})
 
 
-class SolicitarRevisionActividadFormacion(CreateAPIView, ActividadFormacionMixinProxy):
+class SolicitarRevisionActividadFormacion(CreateAPIView, ActividadFormacionMixin):
     """
     PERMITE SOLICITAR LA REVISION DE UNA TAREA AL TUTOR
     """
@@ -436,6 +458,7 @@ class SolicitarRevisionActividadFormacion(CreateAPIView, ActividadFormacionMixin
         self.can_change_actividad_status()
         actividad = self.get_actividad()
         actividad.estado = actividad.Estado.ESPERA
+        actividad.fechaCumplimiento = now()
         actividad.save()
 
         actividad_revision_solicitada.send(actividad, plan=self.get_plan())
@@ -443,7 +466,7 @@ class SolicitarRevisionActividadFormacion(CreateAPIView, ActividadFormacionMixin
         return Response({'detail': 'Solicitud de revision enviada para la actividad'})
 
 
-class ListCreateActividadFormacionCommets(ListCreateAPIView, ActividadFormacionMixinProxy):
+class ListCreateActividadFormacionCommets(ListCreateAPIView, ActividadFormacionMixin):
     """
     LOS COMENTARIOS A LAS ACTIVIDADES SE HACE UNA VEZ APROBADO EL PLAN
     """
@@ -469,7 +492,7 @@ class ListCreateActividadFormacionCommets(ListCreateAPIView, ActividadFormacionM
         return Response({'detail': 'Comentario creado correctamente'}, HTTP_201_CREATED)
 
 
-class ActividadFormacionUploadFile(CreateAPIView, ActividadFormacionMixinProxy):
+class ActividadFormacionUploadFile(CreateAPIView, ActividadFormacionMixin):
     """
     PERMITE SUBIR UN ARCHIVO A LA ACTIVIDAD, ESTO ES UTIL PORQUE PUEDES ENTREGAR TAREAS MEDIANTE ESTA OPCION
     """
@@ -477,6 +500,8 @@ class ActividadFormacionUploadFile(CreateAPIView, ActividadFormacionMixinProxy):
     serializer_class = SubirArchivoActividad
 
     def create(self, request, *args, **kwargs):
+        self.can_upload_file()
+
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(True)
         serializer.save(actividad_id=self.get_actividadID(), plan_id=self.get_planID())

@@ -26,7 +26,7 @@ class PlainPDFExporter(PlainExporter):
         plan_id = self.plan.pk
         plan = PlanFormacion.objects.select_related('evaluacion').get(pk=plan_id)
         etapa__actividad = []
-        etapas = EtapaFormacion.objects.filter(plan_id=plan_id).all()
+        etapas = EtapaFormacion.objects.filter(plan_id=plan_id).order_by('numero').all()
         for etapa in etapas:
             etapa__actividad.append((
                 etapa,

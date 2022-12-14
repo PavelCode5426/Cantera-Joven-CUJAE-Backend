@@ -1,18 +1,20 @@
 from django.urls import path
+from rest_framework.routers import DefaultRouter
 
-from core.formacion_individual.planificacion.views import CreateRetrieveGraduadoPFC, RetrieveUpdateEtapaFormacion, \
+from core.formacion_individual.planificacion.views import CreateRetrieveJovenPlanFormacion, \
+    RetrieveUpdateEtapaFormacion, \
     EvaluarEtapaFormacion, ListEtapasPlanFormacion, ListPlanFormacionInArea, \
     ListPlanFormacionInTutor, ListCreatePlanFormacionCommets, EvaluarPlanFormacion, AprobarEvaluacion, \
     RetriveUpdatePlanFormacion, VersionesPlanFormacion, FirmarPlanFormacion, \
     ListCreateActividadFormacion, RetrieveUpdateDeleteActividadFormacion, ListCreateActividadFormacionCommets, \
     ExportarPDFPlanFormacionComplemtaria, ExportarCalendarioPlanFormacionComplemtaria, \
     SolicitarRevisionActividadFormacion, ListCreateSubActividadFormacion, RetrieveDeleteArchive, \
-    ActividadFormacionUploadFile
+    ActividadFormacionUploadFile, ListRetrieveEvaluacionesArea
 
 app_name = 'PlanificacionFormacionIndividual'
 
 urlpatterns = [
-    path('joven/<int:jovenID>/plan', CreateRetrieveGraduadoPFC.as_view()),
+    path('joven/<int:jovenID>/plan', CreateRetrieveJovenPlanFormacion.as_view()),
     # ME TENDRA QUE DAR LOS PLANES DEL GRADUADO Y DEL ESTUDIANTE
     path('area/<int:areaID>/planes', ListPlanFormacionInArea.as_view()),
     # MUESTRA TAMBIEN LOS PLANES DEL GRADUADO Y EL ESTUDIANTE
@@ -42,8 +44,10 @@ urlpatterns = [
     path('actividad/<int:actividadID>/subir-archivo', ActividadFormacionUploadFile.as_view()),
     path('archivo/<int:archivoID>', RetrieveDeleteArchive.as_view()),
 
-    # TODO COMPLETAR LAS EVALUACIONES
     path('evaluacion/<int:evaluacionID>/aprobar', AprobarEvaluacion.as_view()),
 ]
 
-# TODO FALTA FORZAR CIERRE DEL PLAN DE FORMACION QUE SE HIZO MEDIANTE LAS EVALUACIONES
+router = DefaultRouter()
+router.register('evaluacion', ListRetrieveEvaluacionesArea, 'area-evaluaciones')
+
+urlpatterns += router.urls

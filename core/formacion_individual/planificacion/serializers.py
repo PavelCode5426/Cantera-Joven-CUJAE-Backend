@@ -4,7 +4,7 @@ from django.conf import settings
 from django.core.files.storage import FileSystemStorage
 from rest_framework import serializers
 
-from core.base.models.modelosPlanificacion import Comentario, Archivo
+from core.base.models.modelosPlanificacion import Comentario, Archivo, Evaluacion
 from core.base.models.modelosPlanificacionFormacion import EtapaFormacion, \
     EvaluacionFormacion, EvaluacionFinal, ActividadFormacion, PlanFormacion
 from core.base.validators import datetime_greater_now
@@ -39,6 +39,30 @@ class EvaluacionFormacionModelSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = EvaluacionFormacion
+        exclude = ()
+
+
+class EvaluacionFinalModelSerializer(serializers.ModelSerializer):
+    aprobadoPor = DirectoryUserSerializer(allow_null=True)
+
+    class Meta:
+        model = EvaluacionFinal
+        depth = 1
+        exclude = ()
+
+
+class EvaluacionModelSerializer(serializers.ModelSerializer):
+    def to_representation(self, instance: Evaluacion):
+        if instance.is_evaluacion_formacion:
+            representation = EvaluacionFormacionModelSerializer(instance=instance.evaluacionformacion).data
+        elif instance.is_evaluacion_final:
+            representation = EvaluacionFinalModelSerializer(instance=instance.evaluacionfinal).data
+        else:
+            representation = super(EvaluacionModelSerializer, self).to_representation(instance)
+        return representation
+
+    class Meta:
+        model = Evaluacion
         exclude = ()
 
 
@@ -215,11 +239,18 @@ class CreateUpdateActividadFormacionSerializer(serializers.ModelSerializer):
 
 class CambiarEstadoActividadFormacion(serializers.ModelSerializer):
     estado = serializers.ChoiceField(choices=(
-        ('REV', 'Revisada'),
-        ('PAR', 'Parcialmente Cumplida'),
-        ('CUM', 'Cumplida'),
-        ('INCUM', 'Incumplida'),
+        'Revisada',
+        'Parcialmente Cumplida',
+        'Cumplida',
+        'Incumplida',
     ))
+
+    def update(self, instance, validated_data):
+        instance = super(CambiarEstadoActividadFormacion, self).update(instance, validated_data)
+        if instance.estado is not ActividadFormacion.Estado.CUMPLIDA:
+            instance.fechaCumplimiento = None
+            instance.save()
+        return instance
 
     class Meta:
         model = ActividadFormacion
