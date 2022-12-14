@@ -1,3 +1,4 @@
+from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from rest_framework.generics import RetrieveAPIView, CreateAPIView, RetrieveUpdateAPIView, ListAPIView, \
     ListCreateAPIView, RetrieveUpdateDestroyAPIView, RetrieveDestroyAPIView
@@ -16,8 +17,7 @@ from core.formacion_individual.base.permissions import IsSameJovenWhoRequestPerm
     IsSameTutorWhoRequestPermissions
 from core.formacion_individual.planificacion import signals
 from core.formacion_individual.planificacion.exceptions import JovenHavePlan, CantEvaluateException, \
-    ResourceCantBeCommented, EvaluacionAlreadyApproved, \
-    PlanAlreadyApproved
+    ResourceCantBeCommented, PlanAlreadyApproved, EvaluacionAlreadyApproved
 from core.formacion_individual.planificacion.helpers import PlainPDFExporter, PlainCalendarExporter
 from core.formacion_individual.planificacion.mixin import PlanFormacionMixin, \
     EtapaFormacionMixinProxy, ActividadFormacionMixinProxy, PlanFormacionExportMixin
@@ -153,12 +153,16 @@ class EvaluarPlanFormacion(CreateAPIView, PlanFormacionMixin):
         if plan.evaluation_approved or not plan.is_approved:
             raise CantEvaluateException
 
-        serializer = self.get_serializer(instance=plan.evaluacion_id, data=request.data)
+        serializer = self.get_serializer(instance=plan.evaluacion, data=request.data)
         serializer.is_valid(raise_exception=True)
-        plan.evaluacion_id = serializer.save()
-        plan.save()
+        evaluacion = serializer.save()
 
-        signals.evaluacion_creada.send(plan)
+        if not plan.evaluacion:
+            signals.evaluacion_creada.send(evaluacion, plan=plan)
+            plan.evaluacion_id = evaluacion.pk
+            plan.save()
+        else:
+            signals.evaluacion_actualizada.send(evaluacion, plan=plan)
 
         return Response({'detail': 'Plan evaluado correctamente'}, HTTP_200_OK)
 
@@ -275,8 +279,9 @@ class EvaluarEtapaFormacion(CreateAPIView, EtapaFormacionMixinProxy):
     def create(self, request, *args, **kwargs):
         etapa = self.get_object()
         plan = self.get_plan()
-        etapas_sin_evaluar = plan.etapas.filter(etapaformacion__numero__lt=etapa.numero,
-                                                etapaformacion__evaluacion=None).count()
+        etapas_sin_evaluar = plan.etapas.filter(Q(etapaformacion__evaluacion=None) |
+                                                Q(etapaformacion__evaluacion__aprobadoPor=None),
+                                                etapaformacion__numero__lt=etapa.numero).count()
         if etapa.evaluation_approved or not plan.is_approved and etapas_sin_evaluar:
             raise CantEvaluateException
 
@@ -286,9 +291,9 @@ class EvaluarEtapaFormacion(CreateAPIView, EtapaFormacionMixinProxy):
         if not etapa.evaluacion:
             etapa.evaluacion_id = evaluacion.pk
             etapa.save()
-            signals.evaluacion_creada.send(etapa)
+            signals.evaluacion_creada.send(evaluacion, plan=plan, etapa=etapa)
         else:
-            signals.evaluacion_actualizada.send(etapa)
+            signals.evaluacion_actualizada.send(evaluacion, plan=plan, etapa=etapa)
 
         return Response({'detail': 'Etapa evaluada correctamente'}, HTTP_200_OK)
 
@@ -302,7 +307,7 @@ EVALUACIONES
 
 # TODO MOSTRAR LAS EVALUACIONES PENDIENTES
 
-class AprobarEvaluacion(CreateAPIView):
+class AprobarEvaluacion(CreateAPIView, EtapaFormacionMixinProxy):
     """
     PERMITE ACEPTAR UNA EVALUACION, UNA VEZ ACEPTADA SE EJECUTA LA ACCION QUE ESTA CONTENGA
     """
@@ -315,8 +320,14 @@ class AprobarEvaluacion(CreateAPIView):
             raise EvaluacionAlreadyApproved
 
         evaluacion.aprobadoPor = request.user
-        signals.evaluacion_aprobada.send(evaluacion)
-        return Response({'detail', 'Evaluacion aprobada correctamente'}, HTTP_200_OK)
+        evaluacion.save()
+        plan = self.get_plan()
+
+        evaluacion = evaluacion.evaluacionformacion if hasattr(evaluacion,
+                                                               'evaluacionformacion') else evaluacion.evaluacionfinal
+
+        signals.evaluacion_aprobada.send(evaluacion, plan=plan)
+        return Response({'detail': 'Evaluacion aprobada correctamente'}, HTTP_200_OK)
 
 
 """
@@ -385,7 +396,7 @@ class RetrieveUpdateDeleteActividadFormacion(RetrieveUpdateDestroyAPIView, Multi
         if getattr(actividad, '_prefetched_objects_cache', None):
             actividad._prefetched_objects_cache = {}
 
-        signals.actividad_revisada.send(actividad)
+        signals.actividad_revisada.send(actividad, plan=self.get_plan())
         return Response({'detail': 'Actividad actualizada correctamente'})
 
     def destroy(self, request, *args, **kwargs):
@@ -427,12 +438,12 @@ class SolicitarRevisionActividadFormacion(CreateAPIView, ActividadFormacionMixin
         actividad.estado = actividad.Estado.ESPERA
         actividad.save()
 
-        actividad_revision_solicitada.send(actividad)
+        actividad_revision_solicitada.send(actividad, plan=self.get_plan())
 
         return Response({'detail': 'Solicitud de revision enviada para la actividad'})
 
 
-class ListCreateActividadFormacionCommets(ListCreateAPIView):
+class ListCreateActividadFormacionCommets(ListCreateAPIView, ActividadFormacionMixinProxy):
     """
     LOS COMENTARIOS A LAS ACTIVIDADES SE HACE UNA VEZ APROBADO EL PLAN
     """
@@ -453,7 +464,7 @@ class ListCreateActividadFormacionCommets(ListCreateAPIView):
         serializer.is_valid(raise_exception=True)
         comentario = serializer.save()
 
-        signals.actividad_comentada.send(comentario)
+        signals.actividad_comentada.send(comentario, plan=self.get_plan(), actividad=self.get_actividad())
 
         return Response({'detail': 'Comentario creado correctamente'}, HTTP_201_CREATED)
 

@@ -8,6 +8,7 @@ from xhtml2pdf import pisa
 
 from core.base.models.modelosPlanificacionFormacion import PlanFormacion, EtapaFormacion, \
     ActividadFormacion
+from custom.authentication.models import DirectoryUser
 
 
 class PlainExporter:
@@ -65,3 +66,26 @@ class PlainCalendarExporter(PlainExporter):
         response = HttpResponse(calendar.serialize(), content_type='text/calendar')
         response['Content-Disposition'] = f'attachment; filename="calendario.ics"'
         return response
+
+
+class PlanFormacionIndividualHelpers:
+    def __init__(self, plan: PlanFormacion):
+        self.plan = plan
+
+    def obtener_tutores(self):
+        return self.plan.joven.tutores.filter(fechaRevocado=None).all()
+
+    def obtener_jefes_area(self):
+        area = self.plan.joven.area
+        return DirectoryUser.objects.filter(area=area, groups__name__in=['JEFE DE AREA']).all()
+
+    def obtener_supervisores(self):
+        tutores = self.obtener_tutores()
+        jefes = self.obtener_jefes_area()
+        supervisores = [tutor for tutor in tutores] + [jefe for jefe in jefes]
+        return supervisores
+
+    def obtener_involucrados(self):
+        involucrados = self.obtener_supervisores()
+        involucrados.append(self.plan.joven)
+        return involucrados

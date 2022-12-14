@@ -69,5 +69,3 @@ class ActividadFormacion(planModels.Actividad):
         INCUMPLIDA = ('INCUM', 'Incumplida')
 
     estado = models.CharField(max_length=10, choices=Estado.choices, default=Estado.PENDIENTE)
-
-
