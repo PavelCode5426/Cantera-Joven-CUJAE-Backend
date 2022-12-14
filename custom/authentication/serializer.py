@@ -4,7 +4,7 @@ from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
 from rest_framework.authtoken.serializers import AuthTokenSerializer
 
-from core.familiarizacion.gestionar_area.serializers import AreaSerializer
+from core.formacion_colectiva.gestionar_area.serializers import AreaSerializer
 from .models import DirectoryUser, DirectoryUserAPIKey
 
 

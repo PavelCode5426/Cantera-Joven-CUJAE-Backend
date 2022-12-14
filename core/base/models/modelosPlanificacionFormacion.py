@@ -1,8 +1,8 @@
 from django.db import models
 
+from custom.authentication.models import DirectoryUser
 from . import modelosPlanificacion as planModels
 from . import modelosSimple as simpleModels
-from . import modelosUsuario as userModels
 
 
 class EvaluacionFinal(planModels.Evaluacion):
@@ -23,11 +23,11 @@ class EtapaFormacion(planModels.Etapa):
 
     @property
     def graduado(self):
-        return PlanFormacionComplementaria.objects.get(pk=self.plan).graduado
+        return PlanFormacion.objects.get(pk=self.plan).usuario
 
     @property
     def estudiante(self):
-        return PlanFormacionCantera.objects.get(pk=self.plan).estudiante
+        return PlanFormacion.objects.get(pk=self.plan).usuario
 
     @property
     def evaluation_approved(self):
@@ -41,6 +41,7 @@ class EtapaFormacion(planModels.Etapa):
 
 
 class PlanFormacion(planModels.Plan):
+    joven = models.ForeignKey(DirectoryUser, related_name='planesformacion', on_delete=models.RESTRICT)
     evaluacion = models.OneToOneField(EvaluacionFinal, on_delete=models.RESTRICT, null=True, blank=True)
 
     @property
@@ -54,20 +55,12 @@ class PlanFormacion(planModels.Plan):
         return approved
 
 
-class PlanFormacionCantera(PlanFormacion):
-    estudiante = models.OneToOneField(userModels.Estudiante, on_delete=models.RESTRICT)
-
-
-class PlanFormacionComplementaria(PlanFormacion):
-    graduado = models.OneToOneField(userModels.Graduado, on_delete=models.RESTRICT)
-
-
 class ActividadFormacion(planModels.Actividad):
     fechaCumplimiento = models.DateTimeField(null=True, blank=True, default=None)
     fechaFin = models.DateTimeField()
 
     class Estado(models.TextChoices):
-        PENDIENTE = ('PEN', 'Pendiente de Revision')
+        PENDIENTE = ('PEN', 'Pendiente')
         ESPERA = ('ESP', 'Espera de Revision')
         REVISADA = ('REV', 'Revisada')
         # CUANDO SE REPORTA PARA REVISAR Y NO SE CUMPLE SE DEJA COMO REVISADA SIEMPRE Q ESTE EN TIEMPO.
@@ -76,3 +69,5 @@ class ActividadFormacion(planModels.Actividad):
         INCUMPLIDA = ('INCUM', 'Incumplida')
 
     estado = models.CharField(max_length=10, choices=Estado.choices, default=Estado.PENDIENTE)
+
+

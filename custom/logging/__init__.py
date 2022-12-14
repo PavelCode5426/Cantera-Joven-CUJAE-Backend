@@ -1,12 +1,27 @@
 import logging
+from logging import LogRecord
 
 from telegram import Bot
 
 logger = logging.getLogger(__name__)
 
 
+class TelegramLogFilter(logging.Filter):
+    exclude = ['']
+
+    def filter(self, record):
+        return False
+
+
 class TelegramFormater(logging.Formatter):
-    def format(self, record):
+    def format(self, record: LogRecord):
+        if hasattr(record, 'request'):
+            text = self._format_request(record)
+        else:
+            text = self._format_simple(record)
+        return text
+
+    def _format_request(self, record: LogRecord):
         text_format = "Nivel: {levelname} \n" \
                       "Fecha: {asctime} \n" \
                       "Usuario: {user} \n" \
@@ -26,6 +41,9 @@ class TelegramFormater(logging.Formatter):
 
         return text_format
 
+    def _format_simple(self, record: LogRecord):
+        return f'{record.levelname} {record.message}'
+
 
 class TelegramLogHandler(logging.Handler):
     channel = None
@@ -34,9 +52,9 @@ class TelegramLogHandler(logging.Handler):
     def __init__(self, channel, token, *args, **kwargs):
         self.channel = channel
         self.token = token
-        super().__init__(*args, **kwargs)
+        super(TelegramLogHandler, self).__init__(*args, **kwargs)
 
-    def emit(self, record):
+    def emit(self, record: LogRecord):
         try:
             if self.channel and self.token:
                 bot = Bot(token=self.token)

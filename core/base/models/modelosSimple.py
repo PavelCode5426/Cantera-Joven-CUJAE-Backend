@@ -3,10 +3,6 @@ from django.db import models
 from . import modelosAbstractos as abstractModels
 
 
-class Alertas(abstractModels.AbtractUserForeignKey):
-    texto = models.CharField(max_length=255)
-
-
 class Area(abstractModels.AbstractNameEntity):
     distinguishedName = models.CharField(max_length=255)
 

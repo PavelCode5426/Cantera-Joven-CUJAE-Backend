@@ -16,7 +16,7 @@ def registerModels():
     modelTracker.register(models.modelosSimple.Dimension)
 
     modelTracker.register(models.modelosTutoria.SolicitudTutorExterno)
-    modelTracker.register(models.modelosTutoria.GraduadoTutor)
+    modelTracker.register(models.modelosTutoria.TutoresAsignados)
 
     modelTracker.register(models.modelosPlanificacion.Plan)
     modelTracker.register(models.modelosPlanificacion.Etapa)

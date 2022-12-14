@@ -45,7 +45,8 @@ class Actividad(abstractModels.AbstractNameEntity):
     participantes = models.TextField(null=True, blank=True, default=None)
 
     etapa = models.ForeignKey(Etapa, on_delete=models.CASCADE, related_name='actividades')
-    actividadPadre = models.ForeignKey('Actividad', on_delete=models.CASCADE, null=True, blank=True, default=None)
+    actividadPadre = models.ForeignKey('Actividad', related_name='subactividades', on_delete=models.CASCADE, null=True,
+                                       blank=True, default=None)
 
 
 class Archivo(models.Model):

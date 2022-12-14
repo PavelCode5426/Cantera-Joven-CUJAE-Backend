@@ -97,7 +97,7 @@ TEMPLATES = [
         'DIRS': [
             os.path.join(BASE_DIR, 'template'),
             os.path.join(BASE_DIR, 'core/notificacion/template'),
-            os.path.join(BASE_DIR, 'core/formacion_complementaria/planificacion/template'),
+            os.path.join(BASE_DIR, 'core/formacion_individual/planificacion/template'),
         ],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -219,25 +219,27 @@ SWAGGER_SETTINGS = {
 LOGGING = {
     'version': 1,  # Version del Gestor de Registros
     'disable_existing_loggers': False,  # Deshabilitar los registros predeterminados
+    'filters': {
+        # 'telegram_filter': 'logging.TelegramLogFilter',
+    },
     'handlers': {  # Configurar los gestores
-        'file':
-            {
-                'class': 'logging.FileHandler',
-                'filename': env('LOG_FILE', default='app.log'),
-                'formatter': 'verbose'
-            },
-        'telegram':
-            {
-                'class': 'custom.logging.TelegramLogHandler',
-                'channel': env('TELEGRAM_CHANNEL', default=None),
-                'token': env('TELEGRAM_TOKEN', default=None),
-                'level': 'ERROR',
-                'formatter': 'telegram-format',
-            }
+        'file': {
+            'class': 'logging.FileHandler',
+            'filename': env('LOG_FILE', default='app.log'),
+            'formatter': 'verbose'
+        },
+        'telegram': {
+            'class': 'custom.logging.TelegramLogHandler',
+            'channel': env('TELEGRAM_CHANNEL', default=None),
+            'token': env('TELEGRAM_TOKEN', default=None),
+            'level': 'ERROR',
+            'formatter': 'telegram-format',
+            # 'filters': ['telegram_filter']
+        }
     },
     'loggers': {
         '': {
-            'level': 'DEBUG',
+            'level': 'INFO',
             'handlers': ['file', 'telegram'],
         },
     },
