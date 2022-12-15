@@ -86,7 +86,8 @@ class AsignarSolicitarTutorSerializer(serializers.Serializer):
                     SolicitudTutorExterno.objects.update_or_create(
                         defaults=data,
                         area=solicitud['area'],
-                        joven=joven
+                        joven=joven,
+                        respuesta=None
                     ))
             result['solicitudes'] = solicitudes
 
@@ -118,14 +119,14 @@ class ResponderSolicitudSerializer(serializers.Serializer):
     motivo_respuesta = serializers.CharField()
 
     def is_valid(self, raise_exception=False):
-        is_valid = super().is_valid()
+        super().is_valid(raise_exception)
 
         # COMPROBAR QUE TODOS LOS TUTORES SON DE LA MISMA AREA
         area = self.initial_data['area']
         solicitud = self.initial_data['solicitud']
-        graduado = solicitud.graduado
+        joven = solicitud.joven
 
-        tutores_asignados_del_area = DirectoryUser.objects.filter(tutorados__graduado=graduado,
+        tutores_asignados_del_area = DirectoryUser.objects.filter(tutorados__joven=joven,
                                                                   tutorados__fechaRevocado__isnull=True,
                                                                   area=area).all()
         for tutor in self._validated_data['tutores']:
@@ -136,13 +137,13 @@ class ResponderSolicitudSerializer(serializers.Serializer):
 
         self._validated_data['area'] = area
         self._validated_data['solicitud'] = solicitud
-        self._validated_data['graduado'] = graduado
+        self._validated_data['joven'] = joven
 
-        return not bool(self._errors)
+        return super(ResponderSolicitudSerializer, self).is_valid(raise_exception)
 
     def create(self, validated_data):
         solicitud = validated_data['solicitud']
-        graduado = validated_data['graduado']
+        joven = validated_data['joven']
         tutores = validated_data['tutores']
         motivo_respuesta = validated_data['motivo_respuesta']
 
@@ -153,7 +154,7 @@ class ResponderSolicitudSerializer(serializers.Serializer):
 
         asignar_tutores = list()
         for tutor in tutores:
-            asignar_tutores.append(TutoresAsignados(tutor=tutor, graduado=graduado))
+            asignar_tutores.append(TutoresAsignados(tutor=tutor, joven=joven))
         TutoresAsignados.objects.bulk_create(asignar_tutores)
 
         return solicitud

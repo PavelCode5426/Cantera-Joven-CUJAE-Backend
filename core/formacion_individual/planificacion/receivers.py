@@ -1,4 +1,5 @@
 from crum import get_current_user
+from django.db.models import Max
 from notifications.signals import notify
 
 from .helpers import PlanFormacionIndividualHelpers
@@ -8,6 +9,7 @@ from .signals import plan_creado, plan_aprobado, plan_rechazado, plan_comentado,
 from ...base.models.modelosPlanificacionFormacion import PlanFormacion, EvaluacionFormacion, EtapaFormacion, \
     EvaluacionFinal, ActividadFormacion
 from ...base.models.modelosSimple import PropuestaMovimiento
+from ...configuracion.helpers import config
 
 """
 *****************************
@@ -135,7 +137,17 @@ def gestionar_la_aprobacion_de_la_evaluacion(sender, plan: PlanFormacion = None,
     if isinstance(sender, EvaluacionFinal):
         propuesta = PropuestaMovimiento.objects.get(nombre='Prorroga')
         if propuesta == sender.propuestaMovimiento:
-            pass  # TODO HACER PRORROGA
+            config_key = 'etapas_de_prorroga_formacion_individual'
+            plan = sender.planformacion
+            numero_max = EtapaFormacion.objects.filter(plan_id=plan.pk).aggregate(Max('numero'))['numero__max']
+
+            for i in range(numero_max + 1, numero_max + config(config_key)):
+                EtapaFormacion.objects.create(plan_id=plan.pk, esProrroga=True, numero=i)
+
+            plan.estado = plan.Estados.ENDESARROLLO
+            plan.aprobadoPor = None
+            plan.save()
+
     elif isinstance(sender, EvaluacionFormacion):
         if sender.cerrarPlan:
             etapas = EtapaFormacion.objects.filter(plan_id=plan.pk, evaluacion=None).all()

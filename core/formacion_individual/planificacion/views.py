@@ -148,7 +148,7 @@ class ListCreatePlanFormacionCommets(ListCreateAPIView, PlanFormacionMixin):
         serializer.is_valid(raise_exception=True)
         comentario = serializer.save()
 
-        signals.plan_comentado.send(comentario)
+        signals.plan_comentado.send(self.get_plan())
 
         return Response({'detail': 'Comentario creado correctamente'}, HTTP_201_CREATED)
 
@@ -162,7 +162,9 @@ class EvaluarPlanFormacion(CreateAPIView, PlanFormacionMixin):
 
     def create(self, request, *args, **kwargs):
         plan = self.get_plan()
-        if plan.evaluation_approved or not plan.is_approved:
+        etapas_sin_evaluar = EtapaFormacion.objects. \
+            filter(Q(evaluacion=None) | Q(evaluacion__aprobadoPor=None), plan_id=plan.pk).exists()
+        if plan.evaluation_approved or not plan.is_approved or etapas_sin_evaluar:
             raise CantEvaluateException
 
         serializer = self.get_serializer(instance=plan.evaluacion, data=request.data)
@@ -325,7 +327,8 @@ class ListRetrieveEvaluacionesArea(ReadOnlyModelViewSet):
         areaID = self.request.user.area_id
         query = Evaluacion.objects.filter(
             Q(evaluacionfinal__planformacion__aprobadoPor__area_id=areaID) |
-            Q(evaluacionformacion__etapaformacion__plan__aprobadoPor__area_id=areaID)).all()
+            Q(evaluacionformacion__etapaformacion__plan__aprobadoPor__area_id=areaID)) \
+            .order_by('-id').all()
         return query
 
 
@@ -509,7 +512,7 @@ class ActividadFormacionUploadFile(CreateAPIView, ActividadFormacionMixin):
         return Response({'detail': 'Archivo subido correctamente'}, HTTP_201_CREATED)
 
 
-class RetrieveDeleteArchive(CreateAPIView, RetrieveDestroyAPIView):
+class RetrieveDeleteArchive(RetrieveDestroyAPIView, MultiplePermissionsView):
     """
     PERMITE GESTIONAR LOS ARCHIVOS SUBIDOS AL SISTEMA
     """

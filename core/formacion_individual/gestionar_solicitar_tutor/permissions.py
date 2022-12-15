@@ -1,4 +1,5 @@
 from django.db.models import Q
+from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import SAFE_METHODS
 
 from core.base.models.modelosTutoria import SolicitudTutorExterno
@@ -16,7 +17,7 @@ class SendOrReciveSolicitudTutorExternoPermissions(CustomBasePermission):
         area = request.user.area
 
         try:
-            solicitud = SolicitudTutorExterno.objects.get(Q(joven__area=area) | Q(area=area), pk=solicitud)
+            solicitud = get_object_or_404(SolicitudTutorExterno, Q(joven__area=area) | Q(area=area), pk=solicitud)
         except SolicitudTutorExterno.DoesNotExist:
             solicitud = None
 

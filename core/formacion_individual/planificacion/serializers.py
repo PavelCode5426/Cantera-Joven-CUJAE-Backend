@@ -137,7 +137,6 @@ class ArchivoModelSerializer(serializers.ModelSerializer):
 
 class PlanFormacionModelSerializer(serializers.ModelSerializer):
     joven = JovenSerializer(read_only=True)
-    # etapas = EtapaFormacionModelSerializer(many=True, read_only=True)
     aprobadoPor = DirectoryUserSerializer(allow_null=True, read_only=True)
     documento = serializers.SerializerMethodField(method_name='last_version', read_only=True, allow_null=True)
 
@@ -155,8 +154,8 @@ class PlanFormacionModelSerializer(serializers.ModelSerializer):
 
 class UpdatePlanFormacionSerializer(serializers.ModelSerializer):
     estado = serializers.ChoiceField(choices=(
-        ('DEV', 'En Desarrollo'),
-        ('PEN', 'Pendiente de Revision')
+        'En Desarrollo',
+        'Pendiente de Revision'
     ))
 
     class Meta:
@@ -258,7 +257,7 @@ class CambiarEstadoActividadFormacion(serializers.ModelSerializer):
 
 
 class SubirArchivoActividad(serializers.Serializer):
-    file = serializers.FileField(max_length=10_000)
+    file = serializers.FileField(max_length=10000)
 
     def create(self, validated_data):
         plan_id = validated_data.get('plan_id')

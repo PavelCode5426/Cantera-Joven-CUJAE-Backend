@@ -23,7 +23,6 @@ from custom.authentication.models import DirectoryUser
 class JovenOfSameAreaPermissions(CustomBasePermission):
     def _has_permission(self, request, view):
         joven = view.kwargs.get('jovenID')
-        # TODO MEJORAR LA CONSULTA PARA OBTENER LOS ESTUDIANTES O GRADUADOS
         joven = get_object_or_404(DirectoryUser, pk=joven, area_id=request.user.area_id)
         view.kwargs.setdefault('joven', joven)
         has_permissions = joven is not None

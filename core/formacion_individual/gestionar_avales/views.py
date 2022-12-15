@@ -18,7 +18,6 @@ class PlantillaAvalModelViewSet(ModelViewSet):
 
 
 class ObtenerCrearActualizarAval(CreateAPIView, RetrieveUpdateAPIView, MultiplePermissionsView):
-    # TODO REVISAR LOS PERMISOS DE LOS AVALES
     serializer_class = UserAvalSerializer
     lookup_url_kwarg = ['usuarioID']
     permission_classes = [IsAvalOwner | IsAvalOwnerTutorOrJefeArea | IsDirectorRecursosHumanos]

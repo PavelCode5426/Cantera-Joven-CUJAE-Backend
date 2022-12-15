@@ -4,7 +4,6 @@ from django_filters.rest_framework import FilterSet, filters
 from core.base.models.modelosTutoria import SolicitudTutorExterno, TutoresAsignados
 
 
-# TODO TERMINAR ESTO Y TRADUCIR AL INGLES
 class SolicitudTutorFilterSet(FilterSet):
     is_pendiente = filters.BooleanFilter(method='is_pendiente_filter')
     is_enviada = filters.BooleanFilter(method='is_enviada_filter')

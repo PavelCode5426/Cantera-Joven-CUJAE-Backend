@@ -36,3 +36,9 @@ class GraduateRequireAvalException(APIException):
     status_code = status.HTTP_400_BAD_REQUEST
     default_detail = 'Los graduados de nivel superior requieren aval antes de asignar tutor'
     default_code = 'graduate_require_aval'
+
+
+class SelectedUserIsNotJovenException(APIException):
+    status_code = status.HTTP_400_BAD_REQUEST
+    default_detail = 'Solamente se le puede asignar tutor a los jovenes'
+    default_code = 'selected_user_is_not_joven'

@@ -12,6 +12,7 @@ class PlanificacionFormacionComplementariaConfig(AppConfig):
 
         try:
             config('etapas_plan_formacion_complementaria')
+            config('etapas_de_prorroga_formacion_individual')
             config('etapas_plan_formacion_cantera')
             config('comenzar_formacion_complementaria')
 
@@ -25,5 +26,7 @@ class PlanificacionFormacionComplementariaConfig(AppConfig):
             create_update_configuration('etapas_plan_formacion_complementaria', 4)
             create_update_configuration('etapas_plan_formacion_cantera', 2)
             create_update_configuration('comenzar_formacion_complementaria', True)
+            create_update_configuration('etapas_de_prorroga_formacion_individual', 3)
+
         except Exception as e:
             print(e)

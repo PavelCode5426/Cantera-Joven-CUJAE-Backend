@@ -2,7 +2,7 @@ from django.db.models import Q
 from rest_framework.generics import ListAPIView, CreateAPIView
 from rest_framework.generics import get_object_or_404, RetrieveAPIView
 from rest_framework.response import Response
-from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST
+from rest_framework.status import HTTP_200_OK
 
 from core.base.models.modelosTutoria import SolicitudTutorExterno, TutoresAsignados
 from core.formacion_individual.base.permissions import JovenOfSameAreaPermissions, \
@@ -10,7 +10,8 @@ from core.formacion_individual.base.permissions import JovenOfSameAreaPermission
 from custom.authentication import serializer as authSerializers
 from custom.authentication.models import DirectoryUser
 from . import serializers
-from .exceptions import PreviouslyAnsweredRequestException, GraduateRequireAvalException
+from .exceptions import PreviouslyAnsweredRequestException, GraduateRequireAvalException, \
+    SelectedUserIsNotJovenException
 from .filters import SolicitudTutorFilterSet, TutoriaFilterSet
 from .permissions import SendOrReciveSolicitudTutorExternoPermissions
 from ..base.helpers import user_student_or_graduate
@@ -71,7 +72,9 @@ class AsignarSolicitarTutores(CreateAPIView):
     def create(self, request, *args, **kwargs):
         joven, es_estudiante = user_student_or_graduate(kwargs.get('joven'))
 
-        if isinstance(joven, Graduado) and not hasattr(joven, 'aval') and joven.esNivelSuperior:
+        if not joven:
+            raise SelectedUserIsNotJovenException
+        elif isinstance(joven, Graduado) and not hasattr(joven, 'aval') and joven.esNivelSuperior:
             raise GraduateRequireAvalException
 
         data = request.data
@@ -140,10 +143,7 @@ class ObtenerResponderSolicitudesTutor(RetrieveAPIView, CreateAPIView):
         data['solicitud'] = solicitud
 
         serializer = serializers.ResponderSolicitudSerializer(data=data)
-
-        if not serializer.is_valid():
-            return Response(serializer.errors, HTTP_400_BAD_REQUEST)
-
+        serializer.is_valid(True)
         solicitud = serializer.save()
 
         return Response({'detail': 'Solicitud {resp} correctamente'.format(
