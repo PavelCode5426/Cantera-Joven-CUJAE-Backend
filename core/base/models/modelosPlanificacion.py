@@ -51,9 +51,8 @@ class Actividad(abstractModels.AbstractNameEntity):
     descripcion = models.TextField(null=True, blank=True, default=None)
     observacion = models.TextField(null=True, blank=True, default=None)
     fechaInicio = models.DateTimeField()
+    fechaFin = models.DateTimeField()
 
-    # responsable = models.ForeignKey(authModels.DirectoryUser, related_name='responsable', default=None, blank=True,null=True,on_delete=models.RESTRICT)
-    # participantes = models.ManyToManyField(authModels.DirectoryUser, related_name='participantes')
     # dimesion = models.ForeignKey(simpleModels.Dimension, on_delete=models.RESTRICT)
     responsable = models.TextField(null=True, blank=True, default=None)
     participantes = models.TextField(null=True, blank=True, default=None)

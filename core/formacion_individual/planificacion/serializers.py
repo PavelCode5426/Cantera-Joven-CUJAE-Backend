@@ -3,13 +3,21 @@ import os
 from django.conf import settings
 from django.core.files.storage import FileSystemStorage
 from rest_framework import serializers
+from rest_framework.serializers import ModelSerializer
 
 from core.base.models.modelosPlanificacion import Comentario, Archivo, Evaluacion
 from core.base.models.modelosPlanificacionFormacion import EtapaFormacion, \
     EvaluacionFormacion, EvaluacionFinal, ActividadFormacion, PlanFormacion
+from core.base.models.modelosSimple import PropuestaMovimiento
 from core.base.validators import datetime_greater_now
 from core.formacion_individual.base.serializers import JovenSerializer
 from custom.authentication.serializer import DirectoryUserSerializer
+
+
+class PropuestaMovimientoModelSerializer(ModelSerializer):
+    class Meta:
+        model = PropuestaMovimiento
+        fields = '__all__'
 
 
 class CommentsModelSerializer(serializers.ModelSerializer):
@@ -44,10 +52,10 @@ class EvaluacionFormacionModelSerializer(serializers.ModelSerializer):
 
 class EvaluacionFinalModelSerializer(serializers.ModelSerializer):
     aprobadoPor = DirectoryUserSerializer(allow_null=True)
+    propuestaMovimiento = PropuestaMovimientoModelSerializer(allow_null=True)
 
     class Meta:
         model = EvaluacionFinal
-        depth = 1
         exclude = ()
 
 
@@ -188,7 +196,7 @@ class FirmarPlanFormacionSerializer(serializers.Serializer):
             extension = os.path.splitext(file.name)[1]
             version = plan.versiones.count() + 1
             file_system = FileSystemStorage()
-            file = file_system.save(f'{settings.PFC_UPLOAD_ROOT}/plan_{plan.pk}/v_{version}{extension}', file)
+            file = file_system.save(f'{settings.PFI_UPLOAD_ROOT}/plan_{plan.pk}/v_{version}{extension}', file)
 
             plan.versiones.create(plan_id=plan.pk, archivo=file)
 
@@ -265,6 +273,6 @@ class SubirArchivoActividad(serializers.Serializer):
         file = validated_data.get('file')
 
         file_system = FileSystemStorage()
-        file = file_system.save(f'{settings.PFC_UPLOAD_ROOT}/plan_{plan_id}/actividad_{actividad_id}/{file}', file)
+        file = file_system.save(f'{settings.PFI_UPLOAD_ROOT}/plan_{plan_id}/actividad_{actividad_id}/{file}', file)
 
         return Archivo.objects.create(actividad_id=actividad_id, archivo=file)

@@ -57,7 +57,6 @@ class PlanFormacion(planModels.Plan):
 
 class ActividadFormacion(planModels.Actividad):
     fechaCumplimiento = models.DateTimeField(null=True, blank=True, default=None)
-    fechaFin = models.DateTimeField()
 
     class Estado(models.TextChoices):
         PENDIENTE = 'Pendiente'

@@ -73,6 +73,25 @@ INSTALLED_APPS = [
     # Libs de Autenticacion
     'rest_framework.authtoken',
 
+    # Modulos Ajustados
+    'custom.authentication',
+    'custom.administrator',
+    'custom.logging',
+
+    # Modulos Instalados
+    'core.base',
+    'core.configuracion',
+    'core.notificacion',
+
+    'core.formacion_colectiva.base',
+    'core.formacion_colectiva.gestionar_area',
+    'core.formacion_colectiva.planificacion_',
+
+    'core.formacion_individual.base',
+    'core.formacion_individual.gestionar_avales',
+    'core.formacion_individual.gestionar_solicitar_tutor',
+    'core.formacion_individual.planificacion',
+
 ]
 
 MIDDLEWARE = [
@@ -282,6 +301,9 @@ SIGENU_URL = env('SIGENU_URL', default=None)
 SIGENU_USERNAME = env('SIGENU_USERNAME', default=None)
 SIGENU_PASSWORD = env('SIGENU_PASSWORD', default=None)
 
-apps_loader = AppsLoader()
-apps_loader.load()
-INSTALLED_APPS += apps_loader.get_apps()
+PFI_UPLOAD_ROOT = MEDIA_ROOT + '/plan-individual'
+PFC_UPLOAD_ROOT = MEDIA_ROOT + '/plan-colectivo'
+
+# apps_loader = AppsLoader()
+# apps_loader.load()
+# INSTALLED_APPS += apps_loader.get_apps()
