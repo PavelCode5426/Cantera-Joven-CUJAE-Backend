@@ -42,7 +42,7 @@ urlpatterns = [
     path('actividad-formacion/<int:actividadID>/comentarios', ListCreateActividadFormacionCommets.as_view()),
     path('actividad-formacion/<int:actividadID>/subactividades', ListCreateSubActividadFormacion.as_view()),
     path('actividad-formacion/<int:actividadID>/subir-archivo', ActividadFormacionUploadFile.as_view()),
-    path('archivo/<int:archivoID>', RetrieveDeleteArchive.as_view()),
+    # path('archivo/<int:archivoID>', RetrieveDeleteArchive.as_view()),
 
     path('evaluacion-formacion/<int:evaluacionID>/aprobar', AprobarEvaluacion.as_view()),
 ]
@@ -50,5 +50,6 @@ urlpatterns = [
 router = DefaultRouter()
 router.register('evaluacion', ListRetrieveEvaluacionesArea, 'area-evaluaciones')
 router.register('propuesta-moviemiento', PropuestaMovimientoModelViewset, 'propuesta-movimiento')
+router.register('archivo', RetrieveDeleteArchive, 'archivo')
 
 urlpatterns += router.urls

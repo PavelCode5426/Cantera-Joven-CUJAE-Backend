@@ -6,7 +6,9 @@ from rest_framework import serializers
 from config import settings
 from core.base.models.modelosPlanificacion import Plan, Archivo, Etapa, Comentario
 from core.base.models.modelosPlanificacionFamiliarizarcion import ActividadFamiliarizacion
+from core.base.models.modelosUsuario import PosibleGraduado
 from core.base.validators import datetime_greater_now
+from core.formacion_colectiva.gestionar_area.serializers import AreaSerializer
 from custom.authentication.serializer import DirectoryUserSerializer
 
 
@@ -105,9 +107,19 @@ class CommentsModelSerializer(serializers.ModelSerializer):
 
 
 class ActividadColectivaModelSerializer(serializers.ModelSerializer):
+    documentos = ArchivoModelSerializer(many=True)
+
     class Meta:
         model = ActividadFamiliarizacion
         exclude = ('actividadPadre', 'area', 'asistencias',)
+
+
+class ActividadColectivaAreaModelSerializer(ActividadColectivaModelSerializer):
+    area = AreaSerializer()
+
+    class Meta:
+        model = ActividadFamiliarizacion
+        exclude = ('actividadPadre', 'asistencias',)
 
 
 class CreateUpdateActividadColectivaSerializer(serializers.ModelSerializer):
@@ -123,6 +135,26 @@ class CreateUpdateActividadColectivaSerializer(serializers.ModelSerializer):
     class Meta:
         model = ActividadFamiliarizacion
         exclude = ('area', 'actividadPadre', 'asistencias', 'etapa',)
+
+
+class CreateUpdateActividadAreaSerializer(CreateUpdateActividadColectivaSerializer):
+    def create(self, validated_data: dict):
+        if 'etapa' not in validated_data and 'etapa_id' not in validated_data:
+            raise Exception('Falta la etapa en los datos validos')
+
+        if 'actividadPadre' not in validated_data and 'actividadPadre_id' not in validated_data:
+            raise Exception('Falta la actividadPadre en los datos validos')
+
+        if 'area' not in validated_data and 'area_id' not in validated_data:
+            raise Exception('Falta la actividadPadre en los datos validos')
+
+        validated_data['esGeneral'] = False
+        actividad = ActividadFamiliarizacion.objects.create(**validated_data)
+        return actividad
+
+    class Meta:
+        model = ActividadFamiliarizacion
+        exclude = ('asistencias', 'etapa', 'actividadPadre')
 
 
 class FirmarPlanColectivoSerializer(serializers.Serializer):
@@ -170,3 +202,42 @@ class SubirArchivoActividad(serializers.Serializer):
         file = file_system.save(f'{settings.PFC_UPLOAD_ROOT}/plan_{plan_id}/actividad_{actividad_id}/{file}', file)
 
         return Archivo.objects.create(actividad_id=actividad_id, archivo=file)
+
+
+class ActividadAsistenciaSerilizer(serializers.ModelSerializer):
+    asistencias = serializers.ListField(
+        child=serializers.PrimaryKeyRelatedField(queryset=PosibleGraduado.objects.filter(evaluacion=None).all()),
+        allow_empty=True
+    )
+
+    def is_valid(self, raise_exception=False):
+        super(ActividadAsistenciaSerilizer, self).is_valid(raise_exception)
+
+        area = self.context.get('request').user.area
+        jovenes = self._validated_data.get('asistencias')
+
+        found = False
+        it = iter(jovenes)
+        try:
+            while not found:
+                elem = next(it)
+                if elem.area_id is not area.pk:
+                    found = True
+        except StopIteration:
+            pass
+
+        if found:
+            self._errors.setdefault('jovenes', ['Ha seleccionado jovenes inexistentes en su area'])
+
+        return super(ActividadAsistenciaSerilizer, self).is_valid(raise_exception)
+
+    def update(self, instance, validated_data):
+        area = self.context.get('request').user.area
+        jovenes_area = PosibleGraduado.objects.filter(area=area, evaluacion=None).all()
+        for joven in jovenes_area:
+            instance.asistencias.remove(joven)
+        return super(ActividadAsistenciaSerilizer, self).update(instance, validated_data)
+
+    class Meta:
+        model = ActividadFamiliarizacion
+        fields = ('asistencias',)

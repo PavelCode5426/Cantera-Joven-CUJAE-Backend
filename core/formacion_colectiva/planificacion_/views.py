@@ -1,5 +1,5 @@
 from arrow import now
-from django.db.models import Max
+from django.db.models import Max, Count
 from django.http import Http404
 from requests import Response
 from rest_framework.generics import ListAPIView, ListCreateAPIView, RetrieveAPIView, get_object_or_404, CreateAPIView
@@ -9,14 +9,16 @@ from rest_framework.status import HTTP_201_CREATED, HTTP_200_OK
 from rest_framework.viewsets import ModelViewSet, GenericViewSet
 
 from core.base.generics import MultiplePermissionsView
-from core.base.models.modelosPlanificacion import Plan, Etapa, Comentario
+from core.base.models.modelosPlanificacion import Plan, Etapa, Comentario, Archivo
 from core.base.models.modelosPlanificacionFamiliarizarcion import ActividadFamiliarizacion
 from core.base.models.modelosUsuario import PosibleGraduado
 from core.base.permissions import IsDirectorRecursosHumanos, IsPosibleGraduado, IsJefeArea, IsVicerrector
 from core.configuracion.helpers import config
+from core.formacion_colectiva.gestionar_area.serializers import PosibleGraduadoSerializer
 from core.formacion_colectiva.planificacion_ import exceptions
 from core.formacion_colectiva.planificacion_ import signals
 from core.formacion_colectiva.planificacion_.exceptions import ResourceCantBeCommented
+from core.formacion_colectiva.planificacion_.filters import ActividadColectivaFilterSet
 from core.formacion_colectiva.planificacion_.helpers import can_manage_etapa, can_upload_file
 from core.formacion_colectiva.planificacion_.mixin import PlanColectivoMixin, EtapaColectivaMixin, \
     ActividadColectivaMixin
@@ -24,7 +26,8 @@ from core.formacion_colectiva.planificacion_.permisions import IsSamePosibleGrad
 from core.formacion_colectiva.planificacion_.serializers import PlanFormacionColectivaModelSerializer, \
     UpdateEstadoPlanFormacionColectivoSerializer, EtapaModelSerializer, UpdateEtapaColectivaSerializer, \
     CommentsModelSerializer, ActividadColectivaModelSerializer, CreateUpdateActividadColectivaSerializer, \
-    FirmarPlanColectivoSerializer, SubirArchivoActividad
+    FirmarPlanColectivoSerializer, SubirArchivoActividad, ActividadColectivaAreaModelSerializer, \
+    CreateUpdateActividadAreaSerializer, ArchivoModelSerializer, ActividadAsistenciaSerilizer
 
 
 class RetrieveJovenPlanColectivo(RetrieveAPIView):
@@ -58,9 +61,11 @@ class ListCreateRetrieveUpdatePlanFormacionColectivo(ModelViewSet, MultiplePermi
         if not config('comenzar_formacion_colectiva'):
             raise exceptions.FormacionHasNotStarted
 
-        ultimaFechaFin = Etapa.objects.filter(etapaformacion=None).aggregate(Max('fechaFin'))['fechaFin__max']
+        query = Etapa.objects.filter(etapaformacion=None).aggregate(Max('fechaFin'), Count('id', fechaFin=None))
+        ultimaFechaFin = query.get('fechaFin__max')
+        etapas_sinFecha = query.get('id__count')
 
-        if ultimaFechaFin and ultimaFechaFin > now():
+        if ultimaFechaFin and ultimaFechaFin > now() or etapas_sinFecha:
             raise exceptions.OnlyOnePlanColectivo
 
         plan = Plan.objects.create()
@@ -139,7 +144,8 @@ class ListCreatePlanColectivoCommets(ListCreateAPIView, PlanColectivoMixin):
 class ListCreateActividadColectiva(ListCreateAPIView, EtapaColectivaMixin, MultiplePermissionsView):
     get_permission_classes = [IsPosibleGraduado | IsDirectorRecursosHumanos | IsJefeArea | IsVicerrector]
     post_permission_classes = [IsDirectorRecursosHumanos]
-    serializer_class = ActividadColectivaModelSerializer
+    serializer_class = ActividadColectivaAreaModelSerializer
+    filterset_class = ActividadColectivaFilterSet
 
     def get_queryset(self):
         etapa = self.get_etapa()
@@ -176,6 +182,16 @@ class RetrieveDeleteUpdateActividadColectiva(RetrieveModelMixin, UpdateModelMixi
         self.serializer_class = CreateUpdateActividadColectivaSerializer
         super(RetrieveDeleteUpdateActividadColectiva, self).update(request, *args, **kwargs)
         return Response({'detail': "Actividad actualizada correctamente"})
+
+
+class RetrieveDeleteUpdateActividadArea(RetrieveDeleteUpdateActividadColectiva):
+    delete_permission_classes = [IsJefeArea]
+    put_permission_classes = [IsJefeArea]
+    serializer_class = ActividadColectivaAreaModelSerializer
+
+    def get_queryset(self):
+        area = self.request.user.area
+        return ActividadFamiliarizacion.objects.filter(etapa__etapaformacion=None, area=area).all()
 
 
 class FirmarPlanColectivo(CreateAPIView, PlanColectivoMixin):
@@ -215,3 +231,58 @@ class ActividadColectivaUploadFile(CreateAPIView, ActividadColectivaMixin):
         serializer.save(actividad_id=actividad.pk, plan_id=actividad.etapa.plan_id)
 
         return Response({'detail': 'Archivo subido correctamente'}, HTTP_201_CREATED)
+
+
+class ListCreateActividadArea(ListCreateAPIView, MultiplePermissionsView, ActividadColectivaMixin):
+    """
+    SOLAMENTE MUESTRA LAS ACTIVIDADES DEL AREA Y CREA EN EL AREA
+    """
+    get_permission_classes = [IsPosibleGraduado | IsDirectorRecursosHumanos | IsVicerrector | IsJefeArea]
+    post_permission_classes = [IsJefeArea]
+    serializer_class = ActividadColectivaAreaModelSerializer
+
+    def get_queryset(self):
+        actividad = self.get_actividad()
+        area = self.request.user.area
+        return ActividadFamiliarizacion.objects.filter(actividadPadre=actividad, esGeneral=False, area=area).all()
+
+    def create(self, request, *args, **kwargs):
+        if config('planificar_formacion_colectiva'):
+            raise exceptions.FormacionHasNotStarted
+
+        actividad = self.get_actividad()
+        area = request.user.area
+        serializer = CreateUpdateActividadAreaSerializer(data=request.data)
+        serializer.is_valid(True)
+        serializer.save(etapa_id=actividad.etapa_id, actividadPadre_id=actividad.pk, area_id=area.pk)
+        return Response({'detail': 'Actividad creada correctamente'})
+
+
+class RetrieveDeleteArchive(RetrieveModelMixin, DestroyModelMixin, GenericViewSet):
+    """
+    PERMITE GESTIONAR LOS ARCHIVOS SUBIDOS AL SISTEMA
+    """
+    serializer_class = ArchivoModelSerializer
+    queryset = Archivo.objects.all()
+
+    def destroy(self, request, *args, **kwargs):
+        super(RetrieveDeleteArchive, self).destroy(request, *args, **kwargs)
+        return Response({'detail': 'Archivo borrado correctamente'})
+
+
+class ListAsistenciaActividad(ListCreateAPIView, ActividadColectivaMixin, MultiplePermissionsView):
+    get_permission_classes = [IsVicerrector | IsJefeArea | IsDirectorRecursosHumanos]
+    post_permission_classes = [IsJefeArea]
+    serializer_class = PosibleGraduadoSerializer
+    filterset_class = None  # TODO PONER UN FILTRO AQUI PARA LA ASISTENCIA
+
+    def get_queryset(self):
+        actividad = self.get_actividad()
+        return actividad.asistencias.all()
+
+    def create(self, request, *args, **kwargs):
+        self.serializer_class = ActividadAsistenciaSerilizer
+        serializer = self.get_serializer(instance=self.get_actividad(), data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response({'detail': 'Asistecia pasada correctamente'}, HTTP_201_CREATED)

@@ -73,7 +73,7 @@ class AceptarRechazarUbicacionLaboralAdelantadaAPIView(APIView):
                 preubicacion.esPreubicacion = False
             modelosPlanificacionFamiliarizarcion.UbicacionLaboralAdelantada.objects.bulk_update(preubicaciones,
                                                                                                 ['esPreubicacion'])
-
+            # TODO PONER EVENTO PARA ASIGNAR EL AREA A TODOS LOS POSIBLES GRADUADOS
             response = Response({'detail': 'Ubicacion Laboral Adelantada Aceptada'}, HTTP_200_OK)
         else:
             response = Response({'detail': 'Ubicacion Laboral Adelantada Rechazada'}, HTTP_200_OK)

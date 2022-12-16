@@ -2,11 +2,12 @@ from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django.utils.timezone import now
 from rest_framework.generics import RetrieveAPIView, CreateAPIView, RetrieveUpdateAPIView, ListAPIView, \
-    ListCreateAPIView, RetrieveUpdateDestroyAPIView, RetrieveDestroyAPIView
+    ListCreateAPIView, RetrieveUpdateDestroyAPIView
+from rest_framework.mixins import RetrieveModelMixin, DestroyModelMixin
 from rest_framework.parsers import MultiPartParser
 from rest_framework.response import Response
 from rest_framework.status import HTTP_201_CREATED, HTTP_200_OK
-from rest_framework.viewsets import ReadOnlyModelViewSet, ModelViewSet
+from rest_framework.viewsets import ReadOnlyModelViewSet, ModelViewSet, GenericViewSet
 
 from core.base.generics import MultiplePermissionsView
 from core.base.models.modelosPlanificacion import Comentario, Evaluacion, Archivo
@@ -91,9 +92,9 @@ class CreateRetrieveJovenPlanFormacion(CreateAPIView, RetrieveAPIView, MultipleP
 
         plan = PlanFormacion.objects.create(joven=joven)
         if user_is_student(joven):
-            config_key = 'etapas_plan_formacion_individual_graduado'
-        else:
             config_key = 'etapas_plan_formacion_individual_estudiante'
+        else:
+            config_key = 'etapas_plan_formacion_individual_graduado'
 
         for i in range(1, config(config_key) + 1):
             EtapaFormacion(numero=i, plan=plan).save()
@@ -512,18 +513,15 @@ class ActividadFormacionUploadFile(CreateAPIView, ActividadFormacionMixin):
         return Response({'detail': 'Archivo subido correctamente'}, HTTP_201_CREATED)
 
 
-class RetrieveDeleteArchive(RetrieveDestroyAPIView, MultiplePermissionsView):
+class RetrieveDeleteArchive(RetrieveModelMixin, DestroyModelMixin, GenericViewSet):
     """
     PERMITE GESTIONAR LOS ARCHIVOS SUBIDOS AL SISTEMA
     """
-    permission_classes = [IsPlanJovenPermissions | IsPlanTutorPermissions]
     serializer_class = ArchivoModelSerializer
-    lookup_url_kwarg = 'archivoID'
     queryset = Archivo.objects.all()
 
-    def delete(self, request, *args, **kwargs):
-        archivo = self.get_object()
-        archivo.delete()
+    def destroy(self, request, *args, **kwargs):
+        super(RetrieveDeleteArchive, self).destroy(request, *args, **kwargs)
         return Response({'detail': 'Archivo borrado correctamente'})
 
 
