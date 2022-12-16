@@ -276,6 +276,11 @@ class ListAsistenciaActividad(ListCreateAPIView, ActividadColectivaMixin, Multip
     serializer_class = PosibleGraduadoSerializer
     filterset_class = None  # TODO PONER UN FILTRO AQUI PARA LA ASISTENCIA
 
+    def get_actividad(self, actividadID: int = None):
+        actividad_query = ActividadFamiliarizacion.objects.exclude(area=None, esGeneral=False)
+        actividad = get_object_or_404(actividad_query, pk=self.get_actividadID())
+        return actividad
+
     def get_queryset(self):
         actividad = self.get_actividad()
         return actividad.asistencias.all()
@@ -286,3 +291,12 @@ class ListAsistenciaActividad(ListCreateAPIView, ActividadColectivaMixin, Multip
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response({'detail': 'Asistecia pasada correctamente'}, HTTP_201_CREATED)
+
+
+class ListJovenAsistencias(ListAPIView):
+    permission_classes = [IsSamePosibleGraduado | IsSameAreaJefeArea | IsDirectorRecursosHumanos | IsVicerrector]
+    serializer_class = ActividadColectivaModelSerializer
+
+    def get_queryset(self):
+        joven = self.kwargs.get('joven', get_object_or_404(PosibleGraduado, pk=self.kwargs.get('jovenID')))
+        return joven.asistencias.all()

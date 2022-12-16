@@ -5,12 +5,13 @@ from core.formacion_colectiva.planificacion_.views import ListCreateRetrieveUpda
     ListEtapasPlanFormacionColectivo, RetrieveUpdateEtapaPlanFormacionColectivo, ListCreatePlanColectivoCommets, \
     ListCreateActividadColectiva, RetrieveDeleteUpdateActividadColectiva, RetrieveJovenPlanColectivo, \
     FirmarPlanColectivo, ActividadColectivaUploadFile, ListCreateActividadArea, RetrieveDeleteArchive, \
-    RetrieveDeleteUpdateActividadArea, ListAsistenciaActividad
+    RetrieveDeleteUpdateActividadArea, ListAsistenciaActividad, ListJovenAsistencias
 
 app_name = 'PlanificacionFormacionColectiva'
 
 urlpatterns = [
     path('joven/<int:jovenID>/plan-colectivo', RetrieveJovenPlanColectivo.as_view()),
+    path('joven/<int:jovenID>/asistencias', ListJovenAsistencias.as_view()),
 
     path('plan-colectivo/<int:planID>/etapas', ListEtapasPlanFormacionColectivo.as_view()),
     path('plan-colectivo/<int:planID>/comentarios', ListCreatePlanColectivoCommets.as_view()),
