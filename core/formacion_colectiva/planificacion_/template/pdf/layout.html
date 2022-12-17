@@ -1,0 +1,33 @@
+{% load static %}
+<!doctype html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Plan de Formacion Individual - Pavel Perez Gonzalez</title>
+    <link style="{% static 'css/bootstrap_pdf.css' %}">
+    <style>
+        @page {
+            size: "A4";
+            margin: 1.0cm 1.5cm 3.5cm 1.5cm;
+        }
+
+        body {
+        {#width: 100% !important;#}{#height: 100%;#} background: #fff;
+            color: black;
+            font-size: 100%;
+            font-family: 'Roboto', sans-serif;
+            line-height: 1.65;
+            -webkit-font-smoothing: antialiased;
+            -webkit-text-size-adjust: none;
+        }
+
+    </style>
+</head>
+<body>
+<main class="container">
+    {% block content %}
+    {% endblock %}
+</main>
+</body>
+</html>

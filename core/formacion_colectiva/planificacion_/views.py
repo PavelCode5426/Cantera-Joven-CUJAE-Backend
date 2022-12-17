@@ -17,17 +17,17 @@ from core.configuracion.helpers import config
 from core.formacion_colectiva.gestionar_area.serializers import PosibleGraduadoSerializer
 from core.formacion_colectiva.planificacion_ import exceptions
 from core.formacion_colectiva.planificacion_ import signals
-from core.formacion_colectiva.planificacion_.exceptions import ResourceCantBeCommented
+from core.formacion_colectiva.planificacion_.exceptions import ResourceCantBeCommented, JovenAlreadyEvaluated
 from core.formacion_colectiva.planificacion_.filters import ActividadColectivaFilterSet
-from core.formacion_colectiva.planificacion_.helpers import can_manage_etapa, can_upload_file
+from core.formacion_colectiva.planificacion_.helpers import can_manage_etapa, can_upload_file, PlainPDFExporter
 from core.formacion_colectiva.planificacion_.mixin import PlanColectivoMixin, EtapaColectivaMixin, \
-    ActividadColectivaMixin
+    ActividadColectivaMixin, PlanColectivoExportMixin
 from core.formacion_colectiva.planificacion_.permisions import IsSamePosibleGraduado, IsSameAreaJefeArea
 from core.formacion_colectiva.planificacion_.serializers import PlanFormacionColectivaModelSerializer, \
     UpdateEstadoPlanFormacionColectivoSerializer, EtapaModelSerializer, UpdateEtapaColectivaSerializer, \
     CommentsModelSerializer, ActividadColectivaModelSerializer, CreateUpdateActividadColectivaSerializer, \
     FirmarPlanColectivoSerializer, SubirArchivoActividad, ActividadColectivaAreaModelSerializer, \
-    CreateUpdateActividadAreaSerializer, ArchivoModelSerializer, ActividadAsistenciaSerilizer
+    CreateUpdateActividadAreaSerializer, ArchivoModelSerializer, ActividadAsistenciaSerilizer, EvaluacionModelSerializer
 
 
 class RetrieveJovenPlanColectivo(RetrieveAPIView):
@@ -300,3 +300,34 @@ class ListJovenAsistencias(ListAPIView):
     def get_queryset(self):
         joven = self.kwargs.get('joven', get_object_or_404(PosibleGraduado, pk=self.kwargs.get('jovenID')))
         return joven.asistencias.all()
+
+
+class RetrieveCreateJovenEvaluacion(RetrieveAPIView, CreateAPIView, MultiplePermissionsView):
+    get_permission_classes = [IsSamePosibleGraduado | IsSameAreaJefeArea | IsDirectorRecursosHumanos | IsVicerrector]
+    post_permission_classes = [IsSameAreaJefeArea]
+    serializer_class = EvaluacionModelSerializer
+
+    def get_object(self):
+        joven = get_object_or_404(PosibleGraduado, pk=self.kwargs.get('jovenID'))
+        return joven.evaluacionFamiliarizacion
+
+    def create(self, request, *args, **kwargs):
+        joven = get_object_or_404(PosibleGraduado, pk=kwargs.get('jovenID'))
+
+        # TODO HACER QUE SOLAMENTE SE PUEDA EVALUAR AL JOVEN QUE ESTA EN ESTE PLAN ACTUAL
+        if joven.evaluacionFamiliarizacion:
+            raise JovenAlreadyEvaluated
+
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(True)
+        joven.evaluacionFamiliarizacion = serializer.save()
+        joven.save()
+        return Response({'detail': 'Joven evaluado correctamente'}, HTTP_201_CREATED)
+
+
+class ExportarPlanColectivoPDF(PlanColectivoExportMixin):
+    """
+    PERMITE EXPORTAR UN PLAN DE FORMACION A PDF
+    """
+    permission_classes = [IsJefeArea | IsVicerrector | IsDirectorRecursosHumanos]
+    plain_exporter_class = PlainPDFExporter

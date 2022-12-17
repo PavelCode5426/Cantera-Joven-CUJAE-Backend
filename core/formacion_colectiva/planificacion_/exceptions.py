@@ -60,3 +60,9 @@ class ResourceCantBeCommented(APIException):
     status_code = status.HTTP_400_BAD_REQUEST
     default_detail = 'El recurso no puede ser comentado'
     default_code = 'resource_cant_be_commented'
+
+
+class JovenAlreadyEvaluated(APIException):
+    status_code = status.HTTP_400_BAD_REQUEST
+    default_detail = 'El joven ha sido evaluado anteriormente'
+    default_code = 'jove_already_evaluated'

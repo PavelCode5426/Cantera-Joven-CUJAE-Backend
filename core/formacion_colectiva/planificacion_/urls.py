@@ -5,13 +5,15 @@ from core.formacion_colectiva.planificacion_.views import ListCreateRetrieveUpda
     ListEtapasPlanFormacionColectivo, RetrieveUpdateEtapaPlanFormacionColectivo, ListCreatePlanColectivoCommets, \
     ListCreateActividadColectiva, RetrieveDeleteUpdateActividadColectiva, RetrieveJovenPlanColectivo, \
     FirmarPlanColectivo, ActividadColectivaUploadFile, ListCreateActividadArea, RetrieveDeleteArchive, \
-    RetrieveDeleteUpdateActividadArea, ListAsistenciaActividad, ListJovenAsistencias
+    RetrieveDeleteUpdateActividadArea, ListAsistenciaActividad, ListJovenAsistencias, ExportarPlanColectivoPDF, \
+    RetrieveCreateJovenEvaluacion
 
 app_name = 'PlanificacionFormacionColectiva'
 
 urlpatterns = [
     path('joven/<int:jovenID>/plan-colectivo', RetrieveJovenPlanColectivo.as_view()),
     path('joven/<int:jovenID>/asistencias', ListJovenAsistencias.as_view()),
+    path('joven/<int:jovenID>/evaluacion', RetrieveCreateJovenEvaluacion.as_view()),
 
     path('plan-colectivo/<int:planID>/etapas', ListEtapasPlanFormacionColectivo.as_view()),
     path('plan-colectivo/<int:planID>/comentarios', ListCreatePlanColectivoCommets.as_view()),
@@ -20,7 +22,7 @@ urlpatterns = [
     path('actividad-colectiva/<int:actividadID>/subir-archivo', ActividadColectivaUploadFile.as_view()),
     path('actividad-colectiva/<int:actividadID>/actividades-area', ListCreateActividadArea.as_view()),
     path('actividad/<int:actividadID>/asistencia', ListAsistenciaActividad.as_view()),
-    # path('plan-colectivo/ID/exportar-pdf', APIView.as_view()),
+    path('plan-colectivo/<int:planID>/exportar-pdf', ExportarPlanColectivoPDF.as_view()),
     # path('plan-colectivo/ID/exportar-calendario', APIView.as_view()),
 ]
 

@@ -117,6 +117,7 @@ TEMPLATES = [
             os.path.join(BASE_DIR, 'template'),
             os.path.join(BASE_DIR, 'core/notificacion/template'),
             os.path.join(BASE_DIR, 'core/formacion_individual/planificacion/template'),
+            os.path.join(BASE_DIR, 'core/formacion_colectiva/planificacion_/template'),
         ],
         'APP_DIRS': True,
         'OPTIONS': {

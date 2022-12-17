@@ -4,7 +4,7 @@ from django.core.files.storage import FileSystemStorage
 from rest_framework import serializers
 
 from config import settings
-from core.base.models.modelosPlanificacion import Plan, Archivo, Etapa, Comentario
+from core.base.models.modelosPlanificacion import Plan, Archivo, Etapa, Comentario, Evaluacion
 from core.base.models.modelosPlanificacionFamiliarizarcion import ActividadFamiliarizacion
 from core.base.models.modelosUsuario import PosibleGraduado
 from core.base.validators import datetime_greater_now
@@ -241,3 +241,9 @@ class ActividadAsistenciaSerilizer(serializers.ModelSerializer):
     class Meta:
         model = ActividadFamiliarizacion
         fields = ('asistencias',)
+
+
+class EvaluacionModelSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Evaluacion
+        exclude = ()

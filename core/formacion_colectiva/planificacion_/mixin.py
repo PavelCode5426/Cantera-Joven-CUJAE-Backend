@@ -4,9 +4,8 @@ from rest_framework.views import APIView
 from core.base.models.modelosPlanificacion import Plan, Etapa
 # TODO OPTIMIZAR LOS GET DE FORMA TAL QUE GUARDE LOS DATOS EN EL KWARG ANTES DE RETORNARLO
 from core.base.models.modelosPlanificacionFamiliarizarcion import ActividadFamiliarizacion
-
-
 # from core.formacion_individual.planificacion.helpers import PlainExporter
+from core.formacion_colectiva.planificacion_.helpers import PlainExporter
 
 
 class PlanColectivoMixin(APIView):
@@ -57,13 +56,14 @@ class ActividadColectivaMixin(APIView):
         self.kwargs.setdefault('actividad', actividad)
         return actividad
 
-# class PlanFormacionExportMixin(PlanFormacionColectivoMixin):
-#     plain_exporter_class: PlainExporter
-#
-#     def get_exporter(self):
-#         plan = self.get_plan()
-#         return self.plain_exporter_class(plan)
-#
-#     def get(self, request, *args, **kwargs):
-#         exporter = self.get_exporter()
-#         return exporter.export()
+
+class PlanColectivoExportMixin(PlanColectivoMixin):
+    plain_exporter_class: PlainExporter
+
+    def get_exporter(self):
+        plan = self.get_plan()
+        return self.plain_exporter_class(plan)
+
+    def get(self, request, *args, **kwargs):
+        exporter = self.get_exporter()
+        return exporter.export()

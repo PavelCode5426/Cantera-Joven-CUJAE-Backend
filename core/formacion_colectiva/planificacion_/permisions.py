@@ -12,5 +12,5 @@ class IsSameAreaJefeArea(IsSameAreaPermissions):
     def _has_permission(self, request, view):
         kwargs = view.kwargs
         joven = get_object_or_404(PosibleGraduado, pk=kwargs.get('jovenID'))
-        kwargs.set('joven', joven)
+        kwargs.setdefault('joven', joven)
         return joven.area_id == request.user.area_id
