@@ -22,5 +22,7 @@ class BaseConfig(AppConfig):
         prefix = '**/receivers.py'
         files = glob.iglob(prefix, recursive=True)
         for file in files:
-            file = file.replace('\\', '.').replace('.py', '')
+            file = file.replace('\\', '.') \
+                .replace('.py', '') \
+                .replace('/', '.')
             importlib.import_module(file)

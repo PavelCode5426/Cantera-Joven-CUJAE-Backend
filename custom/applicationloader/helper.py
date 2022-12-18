@@ -29,8 +29,9 @@ class AbstractApplicationLoader:
         return found
 
     def cleanPath(self, file):
-        file = file.replace('\\', '.')
-        file = file.replace('.py', '')
+        file = file.replace('\\', '.') \
+            .replace('/', '.') \
+            .replace('.py', '')
         return file
 
     def load(self):

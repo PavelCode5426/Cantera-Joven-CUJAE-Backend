@@ -35,8 +35,11 @@ fake_data_aval = {
 
 # CREAR USUARIO DE FIJO EN EL SISTEMA
 
-authModels.DirectoryUser.objects.create_superuser("Administrador", "Administrador", "admin@ceis.cujae.edu.cu", "admin")
+user = authModels.DirectoryUser.objects.create_superuser("Administrador", "Administrador", "admin@ceis.cujae.edu.cu",
+                                                         "admin")
 
+user.area = modelosSimple.Area.objects.get(nombre='Facultad de Ingenieria Informatica')
+user.save()
 # seeder.add_entity(authModels.DirectoryUser, 100, fake_data_func_user())
 
 # seeder.add_entity(modelosUsuario.Graduado, 100, fake_data_func_user())
