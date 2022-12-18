@@ -6,5 +6,5 @@ class Command(BaseCommand):
     help = 'Iniciarliza la base de datos con filas de prueba'
 
     def handle(self, *args, **options):
-        call_command('runseed')
         call_command('migrate')
+        call_command('runseed')
