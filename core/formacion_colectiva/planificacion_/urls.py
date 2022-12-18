@@ -23,7 +23,6 @@ urlpatterns = [
     path('actividad-colectiva/<int:actividadID>/actividades-area', ListCreateActividadArea.as_view()),
     path('actividad/<int:actividadID>/asistencia', ListAsistenciaActividad.as_view()),
     path('plan-colectivo/<int:planID>/exportar-pdf', ExportarPlanColectivoPDF.as_view()),
-    # path('plan-colectivo/ID/exportar-calendario', APIView.as_view()),
 ]
 
 router = DefaultRouter()
