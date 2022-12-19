@@ -34,10 +34,9 @@ environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 
 # SECURITY WARNING: don't run with debug turned on in production!
 # False if not in os.environ because of casting above
-DEBUG = env('DEBUG', default=False)
+DEBUG = env('DEBUG')
 
 # SECURITY WARNING: keep the secret key used in production secret!
-# SECRET_KEY = 'django-insecure-pbfwo%(a1b4uu+1+4mhwm)$m7d64)^v9lx6$mg5qz0!k9pr5y8'
 SECRET_KEY = env('SECRET_KEY')
 
 # Quick-start development settings - unsuitable for production
@@ -263,7 +262,7 @@ LOGGING = {
             'handlers': ['file', 'telegram'],
         },
     },
-    'formatters': {  # Formatos del Log
+    'formatters': {
         'verbose': {
             'format': '{name} {levelname} {asctime} {module} {process:d} {thread:d} {message}',
             'style': '{',

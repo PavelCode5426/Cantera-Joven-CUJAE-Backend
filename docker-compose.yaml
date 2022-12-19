@@ -45,6 +45,7 @@ services:
 
       #CONFIGURACION PARA TRAZAS Y ERRORES
       LOG_FILE: app.log
+
       #NO CONFIGURAR EN CASO DE NO QUERER UTILIZAR TELEGRAM
       TELEGRAM_CHANNEL: 1001550325467
       TELEGRAM_TOKEN: 5250171383:AAGcKpubG_xVjAjg4XVZNWlWP8pCvZib5vw
@@ -57,7 +58,17 @@ services:
     ports:
       - 8050:8000
 
+  portainer:
+    image: portainer/portainer
+    restart: always
+    ports:
+      - "9000:9000"
+    command: -H unix:///var/run/docker.sock
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer_data:/data
 volumes:
   api_data:
   db_data:
+  portainer_data:
 

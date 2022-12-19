@@ -8,4 +8,3 @@ plan_comentado = Signal()
 
 evaluacion_creada = Signal()
 evaluacion_actualizada = Signal()
-evaluacion_aprobada = Signal()

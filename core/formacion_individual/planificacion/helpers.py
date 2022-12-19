@@ -8,7 +8,7 @@ from xhtml2pdf import pisa
 
 from core.base.models.modelosPlanificacionFormacion import PlanFormacion, EtapaFormacion, \
     ActividadFormacion
-from custom.authentication.models import DirectoryUser
+from custom.authentication.helpers import all_user_with_roles
 
 
 class PlainExporter:
@@ -77,7 +77,7 @@ class PlanFormacionIndividualHelpers:
 
     def obtener_jefes_area(self):
         area = self.plan.joven.area
-        return DirectoryUser.objects.filter(area=area, groups__name__in=['JEFE DE AREA']).all()
+        return all_user_with_roles(['JEFE DE AREA']).filter(area=area).all()
 
     def obtener_supervisores(self):
         tutores = self.obtener_tutores()

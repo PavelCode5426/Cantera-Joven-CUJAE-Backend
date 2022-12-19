@@ -18,7 +18,7 @@ class TutoresDelGraduadoSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = TutoresAsignados
-        exclude = ['graduado']
+        exclude = ['joven']
         deph = 1
 
 
