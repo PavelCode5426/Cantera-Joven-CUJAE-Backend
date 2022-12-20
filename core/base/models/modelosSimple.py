@@ -19,7 +19,7 @@ class Dimension(abstractModels.AbstractNameEntity):
 
 
 class Configuracion(models.Model):
-    etiqueta = models.CharField(max_length=50, unique=True)
+    etiqueta = models.CharField(max_length=250, unique=True)
     valor = models.JSONField()
     validacion = models.JSONField(blank=True, null=True)
     created_at = models.DateTimeField(auto_created=True, auto_now=True)

@@ -2,14 +2,17 @@ from crum import get_current_user
 from django.db.models import Max
 from notifications.signals import notify
 
+from custom.authentication.helpers import all_user_with_roles
 from .helpers import PlanFormacionIndividualHelpers
 from .signals import plan_creado, plan_aprobado, plan_rechazado, plan_comentado, plan_revision_solicitada, \
     evaluacion_creada, evaluacion_aprobada, evaluacion_actualizada, actividad_comentada, actividad_revisada, \
     actividad_revision_solicitada
-from ...base.models.modelosPlanificacionFormacion import PlanFormacion, EvaluacionFormacion, EtapaFormacion, \
+from ...base.models.modelosPlanificacionIndividual import PlanFormacion, EvaluacionFormacion, EtapaFormacion, \
     EvaluacionFinal, ActividadFormacion
 from ...base.models.modelosSimple import PropuestaMovimiento
 from ...configuracion.helpers import config
+from ...configuracion.signals import configuracion_actualizada
+from ...notificacion.helpers import mass_notify
 
 """
 *****************************
@@ -216,3 +219,33 @@ actividad_revision_solicitada.connect(notificar_solicitud_de_revison_de_la_activ
                                       dispatch_uid='notificar_cumplimiento_de_la_actividad')
 actividad_revisada.connect(notificar_revision_de_la_actividad, dispatch_uid='notificar_revison_de_la_actividad')
 actividad_comentada.connect(notificar_comentario_de_la_actividad, dispatch_uid='notificar_comentario_de_la_actividad')
+
+"""
+*****************************************
+EVENTOS DE ACTUALIZACION DE CONFIGURACION
+*****************************************
+"""
+
+
+def notificar_configuracion_formacion_individual_actualizada(sender, *args, **kwargs):
+    if sender.etiqueta in ['etapas_plan_formacion_individual_graduado', 'etapas_plan_formacion_individual_estudiante',
+                           'etapas_de_prorroga_formacion_individual', 'comenzar_formacion_individual']:
+        label = sender.etiqueta
+        text = None
+        if label == 'etapas_plan_formacion_individual_graduado':
+            text = f"Las cantidad de etapas de la formacion individual del recien graduado ha cambiado a {sender.valor} por plan"
+        elif label == 'etapas_plan_formacion_individual_estudiante':
+            text = f"Las cantidad de etapas de la formacion individual del estudiante ha cambiado a {sender.valor} por plan"
+        elif label == 'etapas_de_prorroga_formacion_individual':
+            text = f"Las cantidad de etapas de la formacion individual a cambiado a {sender.valor} por prorroga"
+            text = f"La planificacion de la formacion colectiva en su area ha {'comenzado' if sender.valor else 'terminado'}"
+        elif label == 'comenzar_formacion_individual':
+            text = f"La planificacion de la formacion individual en su area ha {'comenzado' if sender.valor else 'terminado'}"
+
+        if text:
+            users = all_user_with_roles(['VICERRECTOR', 'JEFE DE AREA', 'DIRECTOR DE RECURSOS HUMANOS', 'TUTOR'])
+            mass_notify(users, get_current_user(), text, {})
+
+
+configuracion_actualizada.connect(notificar_configuracion_formacion_individual_actualizada,
+                                  dispatch_uid='notificar_configuracion_formacion_individual_actualizada')

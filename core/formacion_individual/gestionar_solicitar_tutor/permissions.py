@@ -2,7 +2,7 @@ from django.db.models import Q
 from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import SAFE_METHODS
 
-from core.base.models.modelosTutoria import SolicitudTutorExterno
+from core.base.models.modelosPlanificacionIndividual import SolicitudTutorExterno
 from core.base.permissions import CustomBasePermission
 
 

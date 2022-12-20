@@ -6,7 +6,7 @@ from rest_framework import serializers
 from rest_framework.serializers import ModelSerializer
 
 from core.base.models.modelosPlanificacion import Comentario, Archivo, Evaluacion
-from core.base.models.modelosPlanificacionFormacion import EtapaFormacion, \
+from core.base.models.modelosPlanificacionIndividual import EtapaFormacion, \
     EvaluacionFormacion, EvaluacionFinal, ActividadFormacion, PlanFormacion
 from core.base.models.modelosSimple import PropuestaMovimiento
 from core.base.validators import datetime_greater_now

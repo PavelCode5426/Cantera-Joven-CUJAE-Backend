@@ -11,7 +11,7 @@ from rest_framework.viewsets import ReadOnlyModelViewSet, ModelViewSet, GenericV
 
 from core.base.generics import MultiplePermissionsView
 from core.base.models.modelosPlanificacion import Comentario, Evaluacion, Archivo
-from core.base.models.modelosPlanificacionFormacion import EtapaFormacion, \
+from core.base.models.modelosPlanificacionIndividual import EtapaFormacion, \
     ActividadFormacion, PlanFormacion
 from core.base.models.modelosSimple import Area, PropuestaMovimiento
 from core.base.permissions import IsJefeArea, IsTutor
@@ -84,7 +84,7 @@ class CreateRetrieveJovenPlanFormacion(CreateAPIView, RetrieveAPIView, MultipleP
     def create(self, request, *args, **kwargs):
         joven = kwargs.get('joven')
 
-        if not config('comenzar_formacion_complementaria'):
+        if not config('comenzar_formacion_individual'):
             raise FormacionHasNotStarted
 
         if PlanFormacion.objects.filter(joven=joven, evaluacion=None).exists():

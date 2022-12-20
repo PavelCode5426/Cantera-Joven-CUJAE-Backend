@@ -1,3 +1,4 @@
+from django.db.models import Q
 from rest_framework.generics import ListCreateAPIView, ListAPIView, get_object_or_404
 from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST
@@ -5,9 +6,9 @@ from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST
 from core.base.models.modelosSimple import Area
 from core.base.models.modelosUsuario import Graduado, Estudiante
 from core.base.permissions import IsDirectorRecursosHumanos, IsJefeArea, IsSameAreaPermissions
-from core.formacion_individual.base.filters import JovenFilterSet
+from core.formacion_individual.base.filters import JovenFilterSet, JovenAdvanceFilterSet
 from core.formacion_individual.base.serializers import ImportarGraduadoSerializer, GraduadoSerializer, \
-    ImportarTutorSerializer, ImportarEstudianteSerializer, EstudianteSerializer
+    ImportarTutorSerializer, ImportarEstudianteSerializer, EstudianteSerializer, JovenSerializer
 from custom.authentication.LDAP.ldap_facade import LDAPFacade
 from custom.authentication.models import DirectoryUser
 
@@ -87,6 +88,7 @@ class ListGraduadosDelArea(ListAPIView):
 
     def get_queryset(self):
         area = get_object_or_404(Area, pk=self.kwargs['areaID'])
+        # TODO HAZ QUE SOLAMENTE SALGAN LOS QUE NO SEAN TUTORES, PARA ESTO USA LA TABLA DE TUTORES ASIGNADOS
         return Graduado.objects.filter(area=area).distinct()
 
 
@@ -135,4 +137,21 @@ class ListEstudiantesDelArea(ListAPIView):
 
     def get_queryset(self):
         area = get_object_or_404(Area, pk=self.kwargs['areaID'])
+        # TODO LAURA HAZ QUE EN LA CONSULTA SOLAMENTE SALGAN LOS QUE NO ESTEN COMO GRADUADOS NI POSIBLES GRADUADOS
         return Estudiante.objects.filter(area=area).distinct()
+
+
+class ListJovenesDelArea(ListAPIView):
+    """
+    Lista los Jovenes del Area, solamente tendran acceso los jefes de area, podiendo ver solamente en su area.
+    """
+    serializer_class = JovenSerializer
+    permission_classes = (IsSameAreaPermissions, IsJefeArea)
+    filterset_class = JovenAdvanceFilterSet
+    search_fields = ('first_name', 'last_name', 'email', 'username')
+    ordering_fields = '__all__'
+
+    def get_queryset(self):
+        areaID = self.kwargs['areaID']
+        return DirectoryUser.objects.filter(Q(graduado__isnull=False) | Q(estudiante__isnull=False),
+                                            area=areaID).distinct().all()

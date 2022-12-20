@@ -5,10 +5,10 @@ from requests import Response
 from xhtml2pdf import pisa
 
 from core.base.models.modelosPlanificacion import Etapa, Plan
-from core.base.models.modelosPlanificacionFamiliarizarcion import ActividadFamiliarizacion
+from core.base.models.modelosPlanificacionColectiva import ActividadColectiva
 from core.base.models.modelosSimple import Area
 from core.configuracion.helpers import config
-from core.formacion_colectiva.planificacion_.exceptions import CantUpdatePlanAfterApproved
+from core.formacion_colectiva.planificacion.exceptions import CantUpdatePlanAfterApproved
 
 
 def can_manage_plan(plan: Plan) -> bool:
@@ -21,7 +21,7 @@ def can_manage_etapa(etapa: Etapa) -> bool:
     return can_manage_plan(etapa.plan)
 
 
-def can_upload_file(actividad: ActividadFamiliarizacion) -> bool:
+def can_upload_file(actividad: ActividadColectiva) -> bool:
     if actividad.esGeneral or not config('planificar_formacion_colectiva'):
         can_manage_etapa(actividad.etapa)
 
@@ -48,7 +48,7 @@ class PlainPDFExporter(PlainExporter):
         for area in areas:
             etapa_actividades = []
             for etapa in etapas:
-                actividades = ActividadFamiliarizacion.objects \
+                actividades = ActividadColectiva.objects \
                     .filter(Q(area=area, esGeneral=False) | Q(esGeneral=True), etapa=etapa) \
                     .order_by('-fechaInicio').all()
 

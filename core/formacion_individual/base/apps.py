@@ -1,25 +1,46 @@
 from django.apps import AppConfig
 
+from core.base.apps import AppConfigToolkit
 
-class BaseFormacionComplementariaConfig(AppConfig):
+
+class BaseFormacionIndividualConfig(AppConfigToolkit, AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
     name = 'core.formacion_individual.base'
-    label = 'base_formacion_complementaria'
+    label = 'formacion_individual_base'
 
-    def ready(self):
+    def create_configuration_variables(self):
+        from core.configuracion.helpers import create_update_configuration, config
+        from core.configuracion.proxy import VariableNotFoundException
+        from django.db import ProgrammingError
+
+        try:
+            config('mantener_actualizada_informacion_de_estudiantes')
+            config('mantener_actualizada_informacion_de_graduados')
+        except VariableNotFoundException:
+            create_update_configuration('mantener_actualizada_informacion_de_estudiantes', True)
+            create_update_configuration('mantener_actualizada_informacion_de_graduados', True)
+        except ProgrammingError:
+            pass
+        except Exception as e:
+            print(e)
+
+    def schedule_async_task(self):
         from django_q.tasks import Schedule, schedule
         try:
-            Schedule.objects.filter(name='autoimportarGraduados').delete()
-            schedule(self.name + '.tasks.importar_graduados_automaticamente',
+            job_name = 'actualizarInformacionGraduadosJob'
+            Schedule.objects.filter(name=job_name).delete()
+            schedule(self.name + '.tasks.actualizar_informacion_graduados',
                      schedule_type=Schedule.CRON,
-                     name='autoimportarGraduados',
+                     name=job_name,
                      # cron='0 0 4 * * *' #4:00 am
                      cron=' * * * * *'
                      )
-            Schedule.objects.filter(name='autoimportarEstudiantes').delete()
-            schedule(self.name + '.tasks.importar_estudiantes_automaticamente',
+
+            job_name = 'actualizarInformacionEstudiantesJob'
+            Schedule.objects.filter(name=job_name).delete()
+            schedule(self.name + '.tasks.actualizar_informacion_estudiantes',
                      schedule_type=Schedule.CRON,
-                     name='autoimportarEstudiantes',
+                     name=job_name,
                      # cron='0 0 4 * * *' #4:00 am
                      cron=' * * * * *'
                      )

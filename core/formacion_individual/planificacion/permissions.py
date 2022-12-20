@@ -1,7 +1,7 @@
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
 
-from core.base.models.modelosPlanificacionFormacion import PlanFormacion
+from core.base.models.modelosPlanificacionIndividual import PlanFormacion
 from core.base.permissions import CustomBasePermission, user_has_role
 from custom.authentication.models import DirectoryUser
 

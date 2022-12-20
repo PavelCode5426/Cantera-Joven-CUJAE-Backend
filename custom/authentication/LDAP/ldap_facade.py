@@ -5,6 +5,7 @@ import openpyxl
 from django.conf import settings
 
 from core.base.models.modelosSimple import Area
+from core.base.models.modelosUsuario import Estudiante, Graduado
 from custom.authentication.LDAP.sigenu_ldap_services import SIGENU_LDAP_Services, SearchOption
 from custom.authentication.models import DirectoryUser
 
@@ -234,36 +235,13 @@ class LDAPFacade:
         return roles
 
     def update_or_insert_area(self, areaData: dict):
-        area = None
-        if areaData.get('area', None):
-            area_str = areaData['area']
-            area = Area.objects.filter(nombre=area_str).first()
-
-            department_str = areaData.get('department', None)
-            department = Area.objects.filter(nombre=department_str).first()
-
-            not_area = not area
-            not_department = (bool(department_str) and not department)
-
-            if not_area or not_department:
-                areas_with_departments = self.all_areas_with_departments()
-                areas = []
-
-                for item in areas_with_departments:
-                    _area = Area.objects.update_or_create(nombre=item['name'], defaults={**item})[0]
-                    areas.append(_area)
-                    for depart in item['subareas']:
-                        _area = Area.objects.update_or_create(nombre=depart, defaults={"nombre": depart})[0]
-                        areas.append(_area)
-
-                if not_department:
-                    area = next(filter(lambda x: x.nombre == department_str, areas))
-                else:
-                    area = next(filter(lambda x: x.nombre == area_str, areas))
-
-        return area
+        return Area.objects.update_or_create(defaults=areaData, nombre=areaData.get('nombre'))
 
     def update_or_insert_user(self, user_data: dict):
+        # TODO LAURA MEJORA ESTE CODIGO A LA HORA DE INSERTAR EL USUARIO SEGUN SI ES ETUDIANTE,GRADUADO O
+        # POSIBLE GRADUADO, HAZ QUE EL ESTUDIANTE TAMBIEN CONSULTE OTROS SERVICIOS Y TOME MAS DATOS
+        user = DirectoryUser.objects.get(directorioID=user_data['areaId'])
+
         data = dict(
             first_name=user_data['name'],
             last_name=user_data['lastname'],
@@ -274,23 +252,27 @@ class LDAPFacade:
             telefono=user_data['phone'],
             email=user_data['email'],
             username=user_data['user'],
-            area=self.update_or_insert_area({
-                'area': user_data.get('area', None),
-                'department': user_data.get('department', None)
-            })
+
         )
 
-        user, created = DirectoryUser.objects.update_or_create(directorioID=data['directorioID'], defaults=data)
+        add_area = True
+        if is_student(user_data):
+            data['anno_academico'] = user_data['studentYear']
+            model = Estudiante
+        elif is_pgraduate(user_data):
+            add_area = False
+            model = PosibleGraduado
+        elif is_graduate(user_data):
+            data['esNivelSuperior'] = '(NS)' in data['cargo']
+            data['esExterno'] = user_data['personExternal']
+            model = Graduado
+        else:
+            model = DirectoryUser
 
-        # if is_student(userData):
-        #     data['anno_academico'] = userData['studentYear']
-        #     Estudiante(user)
-        # elif is_graduate(userData):
-        #     data['esNivelSuperior'] = '(NS)' in data['cargo']
-        #     data['esExterno'] = userData['personExternal']
+        if add_area:
+            data.setdefault('area', self.update_or_insert_area({'nombre': user_data.get('area')})[0])
 
-        # elif is_pgraduate(userData):#NO LO ACTUALIZO PORQUE NO TIENE NADA
-        #     model = PosibleGraduado
+        user, created = model.objects.update_or_create(directorioID=data['directorioID'], defaults=data)
 
         return user
 

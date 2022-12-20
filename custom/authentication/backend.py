@@ -46,9 +46,9 @@ class DirectorioOnlineAuthBackend(ModelBackend):
 
                 if len(roles_strs):
                     roles = Group.objects.filter(name__in=roles_strs).all()
-
                     if user:
-                        user.groups.filter(name__in=roles_cuadros).delete()
+                        for rol in roles:
+                            user.groups.remove(rol)
 
                     user = ldap_facade.update_or_insert_user(user_data)
                     for rol in roles:

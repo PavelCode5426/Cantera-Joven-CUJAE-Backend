@@ -1,7 +1,7 @@
 from crum import get_current_user
 from django_filters.rest_framework import FilterSet, filters
 
-from core.base.models.modelosTutoria import SolicitudTutorExterno, TutoresAsignados
+from core.base.models.modelosPlanificacionIndividual import SolicitudTutorExterno, TutoresAsignados
 
 
 class SolicitudTutorFilterSet(FilterSet):

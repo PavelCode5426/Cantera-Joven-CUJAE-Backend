@@ -1,6 +1,6 @@
 from django_filters.rest_framework import FilterSet
 
-from core.base.models.modelosPlanificacionFormacion import PlanFormacionComplementaria
+from core.base.models.modelosPlanificacionIndividual import PlanFormacionComplementaria
 
 
 # from django_filters.rest_framework import filters

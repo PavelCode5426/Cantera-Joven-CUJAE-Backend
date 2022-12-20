@@ -11,13 +11,13 @@ class FormacionHasNotStarted(APIException):
 class JovenHavePlan(APIException):
     status_code = status.HTTP_400_BAD_REQUEST
     default_detail = 'El joven ya tiene un plan de formacion individual'
-    default_code = 'graduate_have_plan'
+    default_code = 'joven_have_plan'
 
 
 class JovenHaveNotPlan(APIException):
     status_code = status.HTTP_400_BAD_REQUEST
     default_detail = 'El joven no tiene plan de formacion individual'
-    default_code = 'graduate_have_not_plan'
+    default_code = 'joven_have_not_plan'
 
 
 class CantUpdatePlanAfterApproved(APIException):

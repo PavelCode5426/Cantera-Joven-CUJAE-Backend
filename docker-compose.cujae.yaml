@@ -18,7 +18,7 @@ services:
     container_name: sistema-formacion-jovenes-backend
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile_CUJAE
     environment:
       #CONFIGURAR DJANGO
       DEBUG: True
@@ -57,7 +57,19 @@ services:
       - database
     ports:
       - 8050:8000
+
+#  portainer:
+#    image: portainer/portainer
+#    restart: always
+#    ports:
+#      - "9000:9000"
+#    command: -H unix:///var/run/docker.sock
+#    volumes:
+#      - /var/run/docker.sock:/var/run/docker.sock
+#      - portainer_data:/data
+
 volumes:
   api_data:
   db_data:
+#  portainer_data:
 

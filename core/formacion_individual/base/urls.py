@@ -2,7 +2,8 @@ from django.urls import path
 
 # Create your views here.
 from core.formacion_individual.base.views import ImportarGraduadosDirectorio, \
-    ListGraduadosDelArea, ImportarTutoresDirectorio, ImportarEstudiantesDirectorio, ListEstudiantesDelArea
+    ListGraduadosDelArea, ImportarTutoresDirectorio, ImportarEstudiantesDirectorio, ListEstudiantesDelArea, \
+    ListJovenesDelArea
 
 app_name = 'BaseFormacionComplementaria'
 
@@ -13,4 +14,6 @@ urlpatterns = [
 
     path('area/<int:areaID>/estudiante', ListEstudiantesDelArea.as_view()),
     path('area/<int:areaID>/graduados', ListGraduadosDelArea.as_view()),
+    path('area/<int:areaID>/jovenes', ListJovenesDelArea.as_view()),
+
 ]

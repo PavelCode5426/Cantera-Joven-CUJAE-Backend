@@ -10,20 +10,20 @@ from rest_framework.viewsets import ModelViewSet, GenericViewSet
 
 from core.base.generics import MultiplePermissionsView
 from core.base.models.modelosPlanificacion import Plan, Etapa, Comentario, Archivo
-from core.base.models.modelosPlanificacionFamiliarizarcion import ActividadFamiliarizacion
+from core.base.models.modelosPlanificacionColectiva import ActividadColectiva
 from core.base.models.modelosUsuario import PosibleGraduado
 from core.base.permissions import IsDirectorRecursosHumanos, IsPosibleGraduado, IsJefeArea, IsVicerrector
 from core.configuracion.helpers import config
 from core.formacion_colectiva.gestionar_area.serializers import PosibleGraduadoSerializer
-from core.formacion_colectiva.planificacion_ import exceptions
-from core.formacion_colectiva.planificacion_ import signals
-from core.formacion_colectiva.planificacion_.exceptions import ResourceCantBeCommented, JovenAlreadyEvaluated
-from core.formacion_colectiva.planificacion_.filters import ActividadColectivaFilterSet
-from core.formacion_colectiva.planificacion_.helpers import can_manage_etapa, can_upload_file, PlainPDFExporter
-from core.formacion_colectiva.planificacion_.mixin import PlanColectivoMixin, EtapaColectivaMixin, \
+from core.formacion_colectiva.planificacion import exceptions
+from core.formacion_colectiva.planificacion import signals
+from core.formacion_colectiva.planificacion.exceptions import ResourceCantBeCommented, JovenAlreadyEvaluated
+from core.formacion_colectiva.planificacion.filters import ActividadColectivaFilterSet
+from core.formacion_colectiva.planificacion.helpers import can_manage_etapa, can_upload_file, PlainPDFExporter
+from core.formacion_colectiva.planificacion.mixin import PlanColectivoMixin, EtapaColectivaMixin, \
     ActividadColectivaMixin, PlanColectivoExportMixin
-from core.formacion_colectiva.planificacion_.permisions import IsSamePosibleGraduado, IsSameAreaJefeArea
-from core.formacion_colectiva.planificacion_.serializers import PlanFormacionColectivaModelSerializer, \
+from core.formacion_colectiva.planificacion.permisions import IsSamePosibleGraduado, IsSameAreaJefeArea
+from core.formacion_colectiva.planificacion.serializers import PlanFormacionColectivaModelSerializer, \
     UpdateEstadoPlanFormacionColectivoSerializer, EtapaModelSerializer, UpdateEtapaColectivaSerializer, \
     CommentsModelSerializer, ActividadColectivaModelSerializer, CreateUpdateActividadColectivaSerializer, \
     FirmarPlanColectivoSerializer, SubirArchivoActividad, ActividadColectivaAreaModelSerializer, \
@@ -36,7 +36,7 @@ class RetrieveJovenPlanColectivo(RetrieveAPIView):
 
     def get_object(self):
         joven = self.kwargs.get('joven', get_object_or_404(PosibleGraduado, pk=self.kwargs.get('jovenID')))
-        actividad = ActividadFamiliarizacion.objects.filter(asistencias=joven).first()
+        actividad = ActividadColectiva.objects.filter(asistencias=joven).first()
 
         if not actividad:
             plan = Plan.objects.filter(planformacion=None).order_by('-fechaCreado').first()
@@ -149,7 +149,7 @@ class ListCreateActividadColectiva(ListCreateAPIView, EtapaColectivaMixin, Multi
 
     def get_queryset(self):
         etapa = self.get_etapa()
-        return ActividadFamiliarizacion.objects.filter(etapa=etapa).order_by('fechaInicio').all()
+        return ActividadColectiva.objects.filter(etapa=etapa).order_by('fechaInicio').all()
 
     def create(self, request, *args, **kwargs):
         etapa = self.get_etapa()
@@ -172,7 +172,7 @@ class RetrieveDeleteUpdateActividadColectiva(RetrieveModelMixin, UpdateModelMixi
     http_method_names = ('get', 'put', 'delete')
 
     def get_queryset(self):
-        return ActividadFamiliarizacion.objects.filter(etapa__etapaformacion=None).all()
+        return ActividadColectiva.objects.filter(etapa__etapaformacion=None).all()
 
     def destroy(self, request, *args, **kwargs):
         super(RetrieveDeleteUpdateActividadColectiva, self).destroy(request, *args, **kwargs)
@@ -191,7 +191,7 @@ class RetrieveDeleteUpdateActividadArea(RetrieveDeleteUpdateActividadColectiva):
 
     def get_queryset(self):
         area = self.request.user.area
-        return ActividadFamiliarizacion.objects.filter(etapa__etapaformacion=None, area=area).all()
+        return ActividadColectiva.objects.filter(etapa__etapaformacion=None, area=area).all()
 
 
 class FirmarPlanColectivo(CreateAPIView, PlanColectivoMixin):
@@ -244,7 +244,7 @@ class ListCreateActividadArea(ListCreateAPIView, MultiplePermissionsView, Activi
     def get_queryset(self):
         actividad = self.get_actividad()
         area = self.request.user.area
-        return ActividadFamiliarizacion.objects.filter(actividadPadre=actividad, esGeneral=False, area=area).all()
+        return ActividadColectiva.objects.filter(actividadPadre=actividad, esGeneral=False, area=area).all()
 
     def create(self, request, *args, **kwargs):
         if config('planificar_formacion_colectiva'):
@@ -277,7 +277,7 @@ class ListAsistenciaActividad(ListCreateAPIView, ActividadColectivaMixin, Multip
     filterset_class = None  # TODO PONER UN FILTRO AQUI PARA LA ASISTENCIA
 
     def get_actividad(self, actividadID: int = None):
-        actividad_query = ActividadFamiliarizacion.objects.exclude(area=None, esGeneral=False)
+        actividad_query = ActividadColectiva.objects.exclude(area=None, esGeneral=False)
         actividad = get_object_or_404(actividad_query, pk=self.get_actividadID())
         return actividad
 

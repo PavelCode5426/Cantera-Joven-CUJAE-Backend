@@ -7,9 +7,9 @@ from core.base.models.modelosSimple import Area
 from core.base.models.modelosUsuario import Graduado, Estudiante
 from core.formacion_colectiva.base.serializers import ImportarFromDirectorioSerializer
 from core.formacion_colectiva.gestionar_area.serializers import AreaSerializer
-from core.formacion_individual.base.helpers import user_is_gradute, user_is_student
 from custom.authentication.LDAP.ldap_facade import LDAPFacade, is_supergraduate
 from custom.authentication.models import DirectoryUser
+from custom.authentication.serializer import DirectoryUserSerializer
 
 
 class ImportarGraduadoSerializer(ImportarFromDirectorioSerializer):
@@ -159,12 +159,10 @@ class ImportarEstudianteSerializer(ImportarFromDirectorioSerializer):
         return lis
 
 
-class JovenSerializer(serializers.ModelSerializer):
+class JovenCommonAttrs(DirectoryUserSerializer):
     area = AreaSerializer()
     aval = serializers.SerializerMethodField()
     plan = serializers.SerializerMethodField()
-    esGraduado = serializers.SerializerMethodField()
-    esEstudiante = serializers.SerializerMethodField()
 
     def get_aval(self, object):
         return hasattr(object, 'aval')
@@ -172,28 +170,23 @@ class JovenSerializer(serializers.ModelSerializer):
     def get_plan(self, object):
         return object.planesformacion.filter(evaluacion=None).exists()
 
-    def get_esGraduado(self, object):
-        return bool(user_is_gradute(object))
 
-    def get_esEstudiante(self, object):
-        return not self.get_esGraduado(object) and bool(user_is_student(object))
-
-    class Meta:
-        model = DirectoryUser
-        fields = ('id', 'username', 'first_name', 'last_name', 'email', 'direccion', 'cargo', 'telefono', 'carnet',
-                  'directorioID', 'area', 'aval', 'plan', 'esGraduado', 'esEstudiante')
-
-
-class GraduadoSerializer(JovenSerializer):
+class GraduadoSerializer(JovenCommonAttrs):
     class Meta:
         model = Graduado
-        fields = (
-            'id', 'username', 'first_name', 'last_name', 'email', 'direccion', 'cargo', 'telefono', 'carnet',
-            'directorioID', 'area', 'esExterno', 'esNivelSuperior', 'aval',
-            'plan')
+        fields = DirectoryUserSerializer.Meta.fields + ('esExterno', 'esNivelSuperior', 'aval', 'plan')
 
 
-class EstudianteSerializer(JovenSerializer):
+class EstudianteSerializer(JovenCommonAttrs):
     class Meta:
         model = Estudiante
-        fields = ('id', 'username', 'first_name', 'last_name', 'email', 'anno_academico', 'aval', 'plan')
+        fields = DirectoryUserSerializer.Meta.fields + ('anno_academico', 'aval', 'plan')
+
+
+class JovenSerializer(serializers.ModelSerializer):
+    def to_representation(self, instance):
+        if hasattr(instance, 'graduado'):
+            return GraduadoSerializer(instance=instance).data
+        elif hasattr(instance, 'estudiante'):
+            return EstudianteSerializer(instance=instance).data
+        return DirectoryUserSerializer(instance=instance).data

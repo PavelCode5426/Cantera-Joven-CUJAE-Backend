@@ -1,21 +1,43 @@
 from django.apps import AppConfig
 
 
-class BaseConfig(AppConfig):
+class AppConfigToolkit:
+
+    def ready(self):
+        from django.apps import apps
+        self.connect_signals()
+
+        if apps.is_installed('django_q'):
+            self.schedule_async_task()
+
+        if apps.is_installed('core.configuracion'):
+            self.create_configuration_variables()
+
+    def connect_signals(self):
+        pass
+
+    def schedule_async_task(self):
+        pass
+
+    def create_configuration_variables(self):
+        pass
+
+
+class BaseConfig(AppConfigToolkit, AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
     name = 'core.base'
 
-    # Cargar los modelos
     def __init__(self, app_name, app_module):
-        super().__init__(app_name, app_module)
+        super(BaseConfig, self).__init__(app_name, app_module)
         self.models_module = '/models'
 
     def ready(self):
-        self.instanceObservers()
         from .trackers import registerModels
         registerModels()
 
-    def instanceObservers(self):
+        super(BaseConfig, self).ready()
+
+    def connect_signals(self):
         import glob
         import importlib
 

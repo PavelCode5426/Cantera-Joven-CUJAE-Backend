@@ -6,7 +6,7 @@ from ics import Calendar, Event
 from rest_framework.response import Response
 from xhtml2pdf import pisa
 
-from core.base.models.modelosPlanificacionFormacion import PlanFormacion, EtapaFormacion, \
+from core.base.models.modelosPlanificacionIndividual import PlanFormacion, EtapaFormacion, \
     ActividadFormacion
 from custom.authentication.helpers import all_user_with_roles
 

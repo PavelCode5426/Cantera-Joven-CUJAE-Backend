@@ -84,7 +84,7 @@ INSTALLED_APPS = [
 
     'core.formacion_colectiva.base',
     'core.formacion_colectiva.gestionar_area',
-    'core.formacion_colectiva.planificacion_',
+    'core.formacion_colectiva.planificacion',
 
     'core.formacion_individual.base',
     'core.formacion_individual.gestionar_avales',
@@ -116,7 +116,7 @@ TEMPLATES = [
             os.path.join(BASE_DIR, 'template'),
             os.path.join(BASE_DIR, 'core/notificacion/template'),
             os.path.join(BASE_DIR, 'core/formacion_individual/planificacion/template'),
-            os.path.join(BASE_DIR, 'core/formacion_colectiva/planificacion_/template'),
+            os.path.join(BASE_DIR, 'core/formacion_colectiva/planificacion/template'),
         ],
         'APP_DIRS': True,
         'OPTIONS': {

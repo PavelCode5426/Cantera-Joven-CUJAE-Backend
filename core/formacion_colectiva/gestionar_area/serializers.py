@@ -1,7 +1,8 @@
 from django.utils.timezone import now
 from rest_framework import serializers
 
-from core.base.models import modelosSimple, modelosPlanificacionFamiliarizarcion, modelosUsuario
+from core.base.models import modelosSimple, modelosPlanificacionColectiva, modelosUsuario
+from custom.authentication.serializer import DirectoryUserSerializer
 
 
 class AreaSerializer(serializers.ModelSerializer):
@@ -16,7 +17,7 @@ class PreubicacionLaboralAdelantadaSerializer(serializers.Serializer):
     area = serializers.PrimaryKeyRelatedField(required=True, queryset=modelosSimple.Area.objects.all())
 
     def validate(self, data):
-        ultima_area = modelosPlanificacionFamiliarizarcion.UbicacionLaboralAdelantada. \
+        ultima_area = modelosPlanificacionColectiva.UbicacionLaboralAdelantada. \
                           objects.filter(posiblegraduado_id=data.get('posiblegraduado'), esPreubicacion=False).order_by(
             '-fechaAsignado')[:1]
 
@@ -30,13 +31,13 @@ class PreubicacionLaboralAdelantadaSerializer(serializers.Serializer):
         posible_graduado = validated_data.get('posiblegraduado')
         preubicacion = None
         try:
-            preubicacion = modelosPlanificacionFamiliarizarcion.UbicacionLaboralAdelantada.objects.get(
+            preubicacion = modelosPlanificacionColectiva.UbicacionLaboralAdelantada.objects.get(
                 posiblegraduado=posible_graduado, esPreubicacion=True)
             preubicacion.area = validated_data.get('area')
             preubicacion.fecha = now()
 
-        except modelosPlanificacionFamiliarizarcion.UbicacionLaboralAdelantada.DoesNotExist:
-            preubicacion = modelosPlanificacionFamiliarizarcion.UbicacionLaboralAdelantada(**validated_data)
+        except modelosPlanificacionColectiva.UbicacionLaboralAdelantada.DoesNotExist:
+            preubicacion = modelosPlanificacionColectiva.UbicacionLaboralAdelantada(**validated_data)
 
         finally:
             preubicacion.save()
@@ -49,16 +50,14 @@ class SendNotificationSerializer(serializers.Serializer):
     aceptada = serializers.BooleanField(required=True)
 
 
-class PosibleGraduadoSerializer(serializers.ModelSerializer):
+class PosibleGraduadoSerializer(DirectoryUserSerializer):
     class Meta:
         model = modelosUsuario.PosibleGraduado
-        fields = (
-        'id', 'username', 'first_name', 'last_name', 'email', 'direccion', 'telefono', 'carnet', 'directorioID')
-        depth = 1
+        fields = DirectoryUserSerializer.Meta.fields + ()
 
 
 class PreubicacionLaboralAdelantadaModelSerializer(serializers.ModelSerializer):
     class Meta:
-        model = modelosPlanificacionFamiliarizarcion.UbicacionLaboralAdelantada
+        model = modelosPlanificacionColectiva.UbicacionLaboralAdelantada
         exclude = ['posiblegraduado']
         depth = 1

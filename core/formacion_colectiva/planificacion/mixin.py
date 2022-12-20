@@ -1,11 +1,11 @@
+# TODO OPTIMIZAR LOS GET DE FORMA TAL QUE GUARDE LOS DATOS EN EL KWARG ANTES DE RETORNARLO
 from django.shortcuts import get_object_or_404
 from rest_framework.views import APIView
 
 from core.base.models.modelosPlanificacion import Plan, Etapa
-# TODO OPTIMIZAR LOS GET DE FORMA TAL QUE GUARDE LOS DATOS EN EL KWARG ANTES DE RETORNARLO
-from core.base.models.modelosPlanificacionFamiliarizarcion import ActividadFamiliarizacion
+from core.base.models.modelosPlanificacionColectiva import ActividadColectiva
 # from core.formacion_individual.planificacion.helpers import PlainExporter
-from core.formacion_colectiva.planificacion_.helpers import PlainExporter
+from core.formacion_colectiva.planificacion.helpers import PlainExporter
 
 
 class PlanColectivoMixin(APIView):
@@ -52,7 +52,7 @@ class ActividadColectivaMixin(APIView):
     def get_actividad(self, actividadID: int = None):
         if not actividadID:
             actividadID = self.get_actividadID()
-        actividad = self.kwargs.get('actividad', get_object_or_404(ActividadFamiliarizacion, pk=actividadID))
+        actividad = self.kwargs.get('actividad', get_object_or_404(ActividadColectiva, pk=actividadID))
         self.kwargs.setdefault('actividad', actividad)
         return actividad
 

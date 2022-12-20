@@ -19,7 +19,7 @@ COPY requirements.txt /code/
 #Corremos el comando de instalacion de dependencias.
 RUN pip install --upgrade pip
 
-RUN pip install -r requirements.txt
+RUN pip --proxy http://10.8.6.50:3128 install -r requirements.txt
 
 COPY . .
 

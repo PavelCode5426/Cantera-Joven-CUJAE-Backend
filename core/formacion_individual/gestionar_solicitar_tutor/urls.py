@@ -9,7 +9,6 @@ app_name = 'GestionarSolicitarTutor'
 router = routers.SimpleRouter()
 
 urlpatterns = [
-
                   path('area/<int:areaID>/tutores', views.TutoresPorAreaListAPIView.as_view()),
                   path('joven/<int:jovenID>/tutores', views.TutoresPorGraduadoListAPIView.as_view()),
                   path('tutor/<int:tutorID>/tutorados', views.TutoradosPorTutorListAPIView.as_view()),

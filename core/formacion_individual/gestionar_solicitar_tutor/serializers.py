@@ -1,8 +1,10 @@
 from crum import get_current_user
+from django.contrib.auth.models import Group
+from django.db.models import Count, F
 from django.utils.timezone import now
 from rest_framework import serializers
 
-from core.base.models.modelosTutoria import TutoresAsignados, SolicitudTutorExterno
+from core.base.models.modelosPlanificacionIndividual import TutoresAsignados, SolicitudTutorExterno
 from core.formacion_individual.gestionar_solicitar_tutor.helpers import get_all_tutors
 from custom.authentication.models import DirectoryUser
 from custom.authentication.serializer import DirectoryUserSerializer
@@ -73,9 +75,25 @@ class AsignarSolicitarTutorSerializer(serializers.Serializer):
             tutores = validated_data['tutores']
             joven.tutores.exclude(tutor__in=tutores, fechaRevocado__isnull=True).update(fechaRevocado=now())
 
+            tutores_sin_tutorados = DirectoryUser.objects \
+                .filter(tutorados__fechaRevocado__isnull=False, groups__name__in=['TUTOR']) \
+                .annotate(revocados=Count('tutorados__fechaRevocado'), asignados=Count('tutorados')) \
+                .filter(revocados=F('asignados')).all()
+
+            role = Group.objects.get_or_create(name='TUTOR', defaults={'name': 'TUTOR'})[0]
+            for tutor in tutores_sin_tutorados:
+                role.user_set.remove(tutor)
+
+            # TODO LAURA QUITAR ROLE DE TUTOR A LOS TUTORES SIN TUTORADOS
+            # SELECT * FROM TUTORASIGNADO WHERE ALL(TUTOR.REVOCADO = TRUE) #LA CONSULTA PARA OBTENER LOS TUTORES
+            # SINO PONLO EN UN TRIGGER DE POSTGRESQL
+            # TODO ESTO LO HICE, REVISA QUE FUNCIONE BIEN
+
             for tutor in tutores:
                 data = dict(tutor=tutor)
                 joven.tutores.get_or_create(defaults=data, tutor=tutor, fechaRevocado=None)
+                tutor.groups.add(role)
+
             result['tutores'] = tutores
 
         if 'solicitudes' in validated_data:

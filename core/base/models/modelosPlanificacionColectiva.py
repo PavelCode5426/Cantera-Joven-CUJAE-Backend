@@ -1,8 +1,8 @@
 from django.db import models
 
-from . import modelosPlanificacion as planModels
 from . import modelosSimple as simpleModels
 from . import modelosUsuario as userModels
+from .modelosPlanificacion import Actividad
 
 
 class UbicacionLaboralAdelantada(models.Model):
@@ -12,7 +12,7 @@ class UbicacionLaboralAdelantada(models.Model):
     fechaAsignado = models.DateTimeField(auto_now=True)
 
 
-class ActividadFamiliarizacion(planModels.Actividad):
+class ActividadColectiva(Actividad):
     """
     LAS ACTIVIDADES QUE INTEGRARAN LA ETAPA DEL PLAN DE FAMILIARIZACION, CADA ACTIVIDAD PUEDE SER
     GENERAL (SIN AREA y esGeneral TRUE)

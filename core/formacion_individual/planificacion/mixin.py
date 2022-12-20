@@ -1,7 +1,7 @@
 from django.shortcuts import get_object_or_404
 from rest_framework.views import APIView
 
-from core.base.models.modelosPlanificacionFormacion import EtapaFormacion, \
+from core.base.models.modelosPlanificacionIndividual import EtapaFormacion, \
     ActividadFormacion, PlanFormacion
 from core.formacion_individual.planificacion.exceptions import CantUpdatePlanAfterApproved, \
     CantUpdateEtapaAfterEvalutation, CantManageActividad

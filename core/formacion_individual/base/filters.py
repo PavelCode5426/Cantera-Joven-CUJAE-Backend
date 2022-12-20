@@ -25,12 +25,28 @@ class JovenFilterSet(FilterSet):
     def has_plan_filter(self, queryset, name, value):
         plan = bool(value)
         if plan:
-            queryset = queryset.filter(planformacioncomplementaria__isnull=False)
+            queryset = queryset.filter(planesformacion__isnull=False)
         else:
-            queryset = queryset.filter(planformacioncomplementaria=None)
+            queryset = queryset.filter(planesformacion=None)
         return queryset
 
     class Meta:
         model = DirectoryUser
-        # fields = ('esExterno', 'esNivelSuperior')
         fields = []
+
+
+class JovenAdvanceFilterSet(JovenFilterSet):
+    is_student = filters.BooleanFilter(method='is_student_filter')
+    is_graduate = filters.BooleanFilter(method='is_graduate_filter')
+
+    def is_student_filter(self, query, name, value):
+        student = bool(value)
+        if student:
+            query = query.filter(graduado=None)
+        return query
+
+    def is_graduate_filter(self, query, name, value):
+        graduate = bool(value)
+        if graduate:
+            query = query.filter(graduado__isnull=False)
+        return query

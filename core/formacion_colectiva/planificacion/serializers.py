@@ -5,7 +5,7 @@ from rest_framework import serializers
 
 from config import settings
 from core.base.models.modelosPlanificacion import Plan, Archivo, Etapa, Comentario, Evaluacion
-from core.base.models.modelosPlanificacionFamiliarizarcion import ActividadFamiliarizacion
+from core.base.models.modelosPlanificacionColectiva import ActividadColectiva
 from core.base.models.modelosUsuario import PosibleGraduado
 from core.base.validators import datetime_greater_now
 from core.formacion_colectiva.gestionar_area.serializers import AreaSerializer
@@ -110,7 +110,7 @@ class ActividadColectivaModelSerializer(serializers.ModelSerializer):
     documentos = ArchivoModelSerializer(many=True)
 
     class Meta:
-        model = ActividadFamiliarizacion
+        model = ActividadColectiva
         exclude = ('actividadPadre', 'area', 'asistencias',)
 
 
@@ -118,7 +118,7 @@ class ActividadColectivaAreaModelSerializer(ActividadColectivaModelSerializer):
     area = AreaSerializer()
 
     class Meta:
-        model = ActividadFamiliarizacion
+        model = ActividadColectiva
         exclude = ('actividadPadre', 'asistencias',)
 
 
@@ -129,11 +129,11 @@ class CreateUpdateActividadColectivaSerializer(serializers.ModelSerializer):
         if 'etapa' not in validated_data and 'etapa_id' not in validated_data:
             raise Exception('Falta la etapa en los datos validos')
 
-        actividad = ActividadFamiliarizacion.objects.create(**validated_data)
+        actividad = ActividadColectiva.objects.create(**validated_data)
         return actividad
 
     class Meta:
-        model = ActividadFamiliarizacion
+        model = ActividadColectiva
         exclude = ('area', 'actividadPadre', 'asistencias', 'etapa',)
 
 
@@ -149,11 +149,11 @@ class CreateUpdateActividadAreaSerializer(CreateUpdateActividadColectivaSerializ
             raise Exception('Falta la actividadPadre en los datos validos')
 
         validated_data['esGeneral'] = False
-        actividad = ActividadFamiliarizacion.objects.create(**validated_data)
+        actividad = ActividadColectiva.objects.create(**validated_data)
         return actividad
 
     class Meta:
-        model = ActividadFamiliarizacion
+        model = ActividadColectiva
         exclude = ('asistencias', 'etapa', 'actividadPadre')
 
 
@@ -239,7 +239,7 @@ class ActividadAsistenciaSerilizer(serializers.ModelSerializer):
         return super(ActividadAsistenciaSerilizer, self).update(instance, validated_data)
 
     class Meta:
-        model = ActividadFamiliarizacion
+        model = ActividadColectiva
         fields = ('asistencias',)
 
 

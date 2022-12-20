@@ -5,7 +5,7 @@ from rest_framework.views import APIView
 from rest_framework.viewsets import mixins, GenericViewSet
 
 from core.base.helpers import notificar_al_DRH
-from core.base.models import modelosSimple, modelosPlanificacionFamiliarizarcion, modelosUsuario
+from core.base.models import modelosSimple, modelosPlanificacionColectiva, modelosUsuario
 from . import serializers
 from .filters import PosibleGraduadoPreubicadoFilterSet
 from ...base.models.modelosUsuario import PosibleGraduado
@@ -23,7 +23,7 @@ class ListarCrearPreubicacionLaboralAdelantadaAPIView(ListCreateAPIView):
     serializer_class = serializers.PreubicacionLaboralAdelantadaSerializer
 
     def get_queryset(self):
-        return modelosPlanificacionFamiliarizarcion.UbicacionLaboralAdelantada.objects.filter(esPreubicacion=True).all()
+        return modelosPlanificacionColectiva.UbicacionLaboralAdelantada.objects.filter(esPreubicacion=True).all()
 
     def create(self, request):
         serializer = self.get_serializer(data=request.data, many=True)
@@ -63,17 +63,25 @@ class AceptarRechazarUbicacionLaboralAdelantadaAPIView(APIView):
         aceptada = serializador.validated_data.get('aceptada')
         notificacion = serializador.validated_data.get('mensaje')
 
+        # TODO PONER EVENTO AQUI PARA NOTIFICAR AL DIRECTOR DE RECURSOS HUMANOS
         if notificacion:
             notificar_al_DRH(notificacion)
 
         if aceptada:
-            preubicaciones = modelosPlanificacionFamiliarizarcion.UbicacionLaboralAdelantada.objects.filter(
+            preubicaciones = modelosPlanificacionColectiva.UbicacionLaboralAdelantada.objects.filter(
                 esPreubicacion=True)
+
+            pgraduados = list()
             for preubicacion in preubicaciones:
                 preubicacion.esPreubicacion = False
-            modelosPlanificacionFamiliarizarcion.UbicacionLaboralAdelantada.objects.bulk_update(preubicaciones,
-                                                                                                ['esPreubicacion'])
-            # TODO PONER EVENTO PARA ASIGNAR EL AREA A TODOS LOS POSIBLES GRADUADOS
+                pgraduado = preubicacion.posiblegraduado
+                pgraduado.area = preubicacion.area
+                pgraduados.append(pgraduado)
+
+            PosibleGraduado.objects.bulk_update(pgraduados, ['area'])
+            modelosPlanificacionColectiva.UbicacionLaboralAdelantada.objects.bulk_update(preubicaciones,
+                                                                                         ['esPreubicacion'])
+
             response = Response({'detail': 'Ubicacion Laboral Adelantada Aceptada'}, HTTP_200_OK)
         else:
             response = Response({'detail': 'Ubicacion Laboral Adelantada Rechazada'}, HTTP_200_OK)
@@ -103,7 +111,7 @@ class ListarUbicacionesPosibleGraduado(ListAPIView):
 
     def get_queryset(self):
         posibleGraduado = get_object_or_404(modelosUsuario.PosibleGraduado, pk=self.kwargs['posibleGraduado'])
-        ubicaciones = posibleGraduado.ubicacionlaboraladelantada_set.all()
+        ubicaciones = posibleGraduado.ubicacionlaboraladelantada_set.order_by('-fechaAsignado').all()
         return ubicaciones
 
     # def list(self, request):

@@ -1,10 +1,11 @@
 from django.db.models import Q
+from lxml.html.builder import Q
 from rest_framework.generics import ListAPIView, CreateAPIView
 from rest_framework.generics import get_object_or_404, RetrieveAPIView
 from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK
 
-from core.base.models.modelosTutoria import SolicitudTutorExterno, TutoresAsignados
+from core.base.models.modelosPlanificacionIndividual import SolicitudTutorExterno, TutoresAsignados
 from core.formacion_individual.base.permissions import JovenOfSameAreaPermissions, \
     TutorOfSameAreaPermissions, IsSameTutorWhoRequestPermissions, IsSameJovenWhoRequestPermissions
 from custom.authentication import serializer as authSerializers

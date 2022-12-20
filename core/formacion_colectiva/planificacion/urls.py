@@ -1,7 +1,7 @@
 from django.urls import path
 from rest_framework.routers import DefaultRouter
 
-from core.formacion_colectiva.planificacion_.views import ListCreateRetrieveUpdatePlanFormacionColectivo, \
+from core.formacion_colectiva.planificacion.views import ListCreateRetrieveUpdatePlanFormacionColectivo, \
     ListEtapasPlanFormacionColectivo, RetrieveUpdateEtapaPlanFormacionColectivo, ListCreatePlanColectivoCommets, \
     ListCreateActividadColectiva, RetrieveDeleteUpdateActividadColectiva, RetrieveJovenPlanColectivo, \
     FirmarPlanColectivo, ActividadColectivaUploadFile, ListCreateActividadArea, RetrieveDeleteArchive, \
