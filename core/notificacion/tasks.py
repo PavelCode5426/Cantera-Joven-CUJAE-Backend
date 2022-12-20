@@ -36,4 +36,4 @@ def enviar_notificaciones_por_correo():
 
     connection.send_messages(mails)
     connection.close()
-    logger.info('Correos con estado de notificaciones enviados correctamente')
+    logger.critical('Correos con estado de notificaciones enviados correctamente')

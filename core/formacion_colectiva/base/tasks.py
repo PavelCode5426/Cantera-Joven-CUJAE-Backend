@@ -4,4 +4,4 @@ from custom.logging import logger
 
 @isConfigAvailable('mantener_actualizada_informacion_de_posibles_graduados')
 def actualizar_informacion_posibles_graduados():
-    logger.info('Posibles Graduados Importados Correctamente')
+    logger.critical('Posibles Graduados actualizados correctamente')

@@ -6,5 +6,4 @@ from custom.logging import logger
 def actualizar_informacion_usuarios():
     # TODO LAURA AQUI HAZ EL CODIGO DE ACTUALIZAR LA INFORMACION DE LOS USUARIOS CON ROLES DE LA APP
     # EXCEPTO LOS ESTUDIANTES, POSIBLES GRADUADOS Y GRADUADOS POR UN TEMA DE RENDIMIENTO
-    logger.info("Usuarios actualizados correctamente")
-    pass
+    logger.critical("Usuarios actualizados correctamente")

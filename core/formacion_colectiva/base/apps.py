@@ -30,7 +30,7 @@ class FormacionColectivaConfig(AppConfigToolkit, AppConfig):
         try:
             config('mantener_actualizada_informacion_de_posibles_graduados')
         except VariableNotFoundException:
-            create_update_configuration('mantener_actualizada_informacion_de_posibles_graduados', False)
+            create_update_configuration('mantener_actualizada_informacion_de_posibles_graduados', True)
         except ProgrammingError:
             pass
         except Exception as e:
