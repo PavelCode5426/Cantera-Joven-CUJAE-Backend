@@ -1,5 +1,3 @@
-from django.db.models import Q
-from lxml.html.builder import Q
 from rest_framework.generics import ListAPIView, CreateAPIView
 from rest_framework.generics import get_object_or_404, RetrieveAPIView
 from rest_framework.response import Response
@@ -104,9 +102,9 @@ class SolicitudesTutorListAPIView(ListAPIView):
     permission_classes = (IsSameAreaPermissions, IsJefeArea | IsDirectorRecursosHumanos,)
 
     def get_queryset(self):
-        area = self.kwargs['areaID'] if 'areaID' in self.kwargs else self.request.user.area_id
-        query = SolicitudTutorExterno.objects.filter(Q(joven__area_id=area) | Q(area_id=area)) \
-            .order_by('-fechaCreado').all()
+        area = self.kwargs.get('areaID', self.request.user.area_id)
+        query = SolicitudTutorExterno.objects.all()
+        # query = SolicitudTutorExterno.objects.filter(Q(joven__area_id=area) | Q(area_id=area)).order_by('-fechaCreado').all()
         return query
 
 
