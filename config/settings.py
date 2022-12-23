@@ -14,6 +14,7 @@ import os
 
 # INSTALANDO VARIABLES DE ENTORNO
 import environ
+from django.conf.global_settings import MEDIA_ROOT
 
 from custom.applicationloader.helper import AppsLoader
 
@@ -33,10 +34,9 @@ environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 
 # SECURITY WARNING: don't run with debug turned on in production!
 # False if not in os.environ because of casting above
-DEBUG = env('DEBUG', default=False)
+DEBUG = env('DEBUG')
 
 # SECURITY WARNING: keep the secret key used in production secret!
-# SECRET_KEY = 'django-insecure-pbfwo%(a1b4uu+1+4mhwm)$m7d64)^v9lx6$mg5qz0!k9pr5y8'
 SECRET_KEY = env('SECRET_KEY')
 
 # Quick-start development settings - unsuitable for production
@@ -72,6 +72,25 @@ INSTALLED_APPS = [
     # Libs de Autenticacion
     'rest_framework.authtoken',
 
+    # Modulos Ajustados
+    'custom.authentication',
+    'custom.administrator',
+    'custom.logging',
+
+    # Modulos Instalados
+    'core.base',
+    'core.configuracion',
+    'core.notificacion',
+
+    'core.formacion_colectiva.base',
+    'core.formacion_colectiva.gestionar_area',
+    'core.formacion_colectiva.planificacion',
+
+    'core.formacion_individual.base',
+    'core.formacion_individual.gestionar_avales',
+    'core.formacion_individual.gestionar_solicitar_tutor',
+    'core.formacion_individual.planificacion',
+
 ]
 
 MIDDLEWARE = [
@@ -94,7 +113,10 @@ TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
-            os.path.join(BASE_DIR, 'core/notificacion/template')
+            os.path.join(BASE_DIR, 'template'),
+            os.path.join(BASE_DIR, 'core/notificacion/template'),
+            os.path.join(BASE_DIR, 'core/formacion_individual/planificacion/template'),
+            os.path.join(BASE_DIR, 'core/formacion_colectiva/planificacion/template'),
         ],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -164,6 +186,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.0/howto/static-files/
 MEDIA_ROOT = BASE_DIR + '/media'
+MEDIA_URL = 'media/'
 STATIC_URL = 'static/'
 
 # Default primary key field type
@@ -215,29 +238,31 @@ SWAGGER_SETTINGS = {
 LOGGING = {
     'version': 1,  # Version del Gestor de Registros
     'disable_existing_loggers': False,  # Deshabilitar los registros predeterminados
+    'filters': {
+        # 'telegram_filter': 'logging.TelegramLogFilter',
+    },
     'handlers': {  # Configurar los gestores
-        'file':
-            {
-                'class': 'logging.FileHandler',
-                'filename': env('LOG_FILE', default='app.log'),
-                'formatter': 'verbose'
-            },
-        'telegram':
-            {
-                'class': 'custom.logging.TelegramLogHandler',
-                'channel': env('TELEGRAM_CHANNEL', default=None),
-                'token': env('TELEGRAM_TOKEN', default=None),
-                'level': 'ERROR',
-                'formatter': 'telegram-format',
-            }
+        'file': {
+            'class': 'logging.FileHandler',
+            'filename': env('LOG_FILE', default='app.log'),
+            'formatter': 'verbose'
+        },
+        'telegram': {
+            'class': 'custom.logging.TelegramLogHandler',
+            'channel': env('TELEGRAM_CHANNEL', default=None),
+            'token': env('TELEGRAM_TOKEN', default=None),
+            'level': 'ERROR',
+            'formatter': 'telegram-format',
+            # 'filters': ['telegram_filter']
+        }
     },
     'loggers': {
         '': {
-            'level': 'DEBUG',
+            'level': 'INFO',
             'handlers': ['file', 'telegram'],
         },
     },
-    'formatters': {  # Formatos del Log
+    'formatters': {
         'verbose': {
             'format': '{name} {levelname} {asctime} {module} {process:d} {thread:d} {message}',
             'style': '{',
@@ -276,6 +301,9 @@ SIGENU_URL = env('SIGENU_URL', default=None)
 SIGENU_USERNAME = env('SIGENU_USERNAME', default=None)
 SIGENU_PASSWORD = env('SIGENU_PASSWORD', default=None)
 
-apps_loader = AppsLoader()
-apps_loader.load()
-INSTALLED_APPS += apps_loader.get_apps()
+PFI_UPLOAD_ROOT = MEDIA_ROOT + '/plan-individual'
+PFC_UPLOAD_ROOT = MEDIA_ROOT + '/plan-colectivo'
+
+# apps_loader = AppsLoader()
+# apps_loader.load()
+# INSTALLED_APPS += apps_loader.get_apps()

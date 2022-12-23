@@ -10,3 +10,6 @@ __pycache__
 /registro.log
 /.env
 00*.py
+media/pf-comp
+media/plan-colectivo
+media/plan-individual

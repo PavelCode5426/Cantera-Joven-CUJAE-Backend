@@ -12,20 +12,19 @@ MANAGER PARA USUARIOS, SON FUNCIONES QUE SIRVEN PARA MANIPULAR OBJETOS DE AUTH.M
 
 
 class CustomUserManager(BaseUserManager):
-    def create_user(self, first_name, last_name, email, username, directorioID):
+    def create_user(self, first_name, last_name, email, username):
         user = None
-        if self.__validate_fields(first_name, last_name, email, directorioID):
+        if self.__validate_fields(first_name, last_name, email, username):
             user = DirectoryUser()
             user.first_name = first_name
             user.last_name = last_name
             user.email = self.normalize_email(email)
             user.username = username
-            user.directorioID = directorioID
             user.save()
         return user
 
-    def create_superuser(self, first_name, last_name, email, username, directorioID):
-        superUser = self.create_user(first_name, last_name, email, username, directorioID)
+    def create_superuser(self, first_name, last_name, email, username):
+        superUser = self.create_user(first_name, last_name, email, username)
         superUser.is_superuser = True
         superUser.is_staff = True
         superUser.save()
@@ -53,7 +52,7 @@ class DirectoryUser(AbstractUser):  # Abstract User Implementa AbstractBaseUser,
     cargo = models.CharField(max_length=255, blank=True, null=True)
     telefono = models.CharField(max_length=255, blank=True, null=True)
     carnet = models.CharField(max_length=11)
-    directorioID = models.CharField(max_length=255)
+    directorioID = models.CharField(max_length=255, blank=True, null=True)
 
     password = None  # Eliminados por cuestion del directorio de la CUJAE
 

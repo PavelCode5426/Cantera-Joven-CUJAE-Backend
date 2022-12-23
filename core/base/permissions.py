@@ -2,9 +2,10 @@ from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
 
 from core.base.models.modelosSimple import Area
+from custom.authentication.models import DirectoryUser
 
 
-def _user_has_role(user, roles: list):
+def user_has_role(user: DirectoryUser, roles: list) -> bool:
     have_role = user.groups.filter(name__in=roles).exists()
     return have_role
 
@@ -12,7 +13,7 @@ def _user_has_role(user, roles: list):
 class CustomBasePermission(IsAuthenticated):
 
     def _has_permission(self, request, view):
-        pass
+        return True
 
     def has_permission(self, request, view):
         has_permission = super(IsAuthenticated, self).has_permission(request, view) \
@@ -26,7 +27,7 @@ class IsRole(CustomBasePermission):
     role_name: list = []
 
     def _has_permission(self, request, view):
-        has_permission = _user_has_role(request.user, self.role_name)
+        has_permission = user_has_role(request.user, self.role_name)
         return has_permission
 
 
@@ -62,7 +63,7 @@ class IsSameUserWhoRequestPermissions(CustomBasePermission):
     URL_KWARGS_KEY = 'ID'
 
     def _has_permission(self, request, view):
-        has_permissions = view.kargs[self.URL_KWARGS_KEY] == request.user.pk
+        has_permissions = view.kwargs[self.URL_KWARGS_KEY] == request.user.pk
         return has_permissions
 
 

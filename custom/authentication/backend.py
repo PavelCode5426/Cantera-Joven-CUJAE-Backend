@@ -3,7 +3,7 @@ from django.contrib.auth.models import Group
 from rest_framework.authentication import TokenAuthentication
 
 from custom.authentication.models import DirectoryUser, DirectoryUserAPIKey
-from .LDAP.ldap_manager import LDAPManager
+from .LDAP.ldap_facade import LDAPFacade
 
 
 class DirectorioLocalAuthBackend(ModelBackend):
@@ -28,11 +28,11 @@ class DirectorioOnlineAuthBackend(ModelBackend):
     def authenticate(self, request, username, password, **kwargs):
         user = None
         try:
-            manager = LDAPManager()
-            user_data = manager.authentication(username, password)
+            ldap_facade = LDAPFacade()
+            user_data = ldap_facade.authentication(username, password)
 
             if user_data:
-                posibles_roles = manager.get_person_roles(user_data)
+                posibles_roles = ldap_facade.get_person_roles(user_data)
                 user = self.get_user_by_identification(user_data['identification'])
                 # NO COMPRUEBO LOS OTROS ROLES PORQUE SE SUPONE Q SI ESTAS EN LA
                 # BASE DE DATOS ES PORQUE TE IMPORTARON CON ALGUN ROL DE TUTOR, ESTUDIANTE,POSIBLE GRADUADO O GRADUADO
@@ -46,23 +46,21 @@ class DirectorioOnlineAuthBackend(ModelBackend):
 
                 if len(roles_strs):
                     roles = Group.objects.filter(name__in=roles_strs).all()
-
                     if user:
-                        user.groups.filter(name__in=roles_cuadros).delete()
+                        for rol in roles:
+                            user.groups.remove(rol)
 
-                    user = manager.update_or_insert_user(user_data)
+                    user = ldap_facade.update_or_insert_user(user_data)
                     for rol in roles:
                         user.groups.add(rol)
 
                 elif user and user.groups.count():
-                    user = manager.update_or_insert_user(user_data)
+                    user = ldap_facade.update_or_insert_user(user_data)
                 else:
                     user = None
 
-
-
         except Exception as e:
-            print(e)
+            pass
 
         return user
 

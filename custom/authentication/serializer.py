@@ -4,8 +4,14 @@ from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
 from rest_framework.authtoken.serializers import AuthTokenSerializer
 
-from core.familiarizacion.gestionar_area.serializers import AreaSerializer
+from core.base.models import modelosSimple
 from .models import DirectoryUser, DirectoryUserAPIKey
+
+
+class AreaSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = modelosSimple.Area
+        exclude = ('distinguishedName',)
 
 
 class CustomAuthTokenSerializer(AuthTokenSerializer):

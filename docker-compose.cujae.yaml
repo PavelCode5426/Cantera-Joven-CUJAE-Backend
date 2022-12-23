@@ -1,0 +1,75 @@
+version: '3.8'
+
+services:
+  database:
+    container_name: sistema-formacion-jovenes-database
+    image: postgres:14-alpine
+    volumes:
+      - db_data:/var/lib/postgresql
+    environment:
+      POSTGRES_DB: db_formacion_jovenes
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root
+    ports:
+      - 5432:5423
+
+
+  api:
+    container_name: sistema-formacion-jovenes-backend
+    build:
+      context: .
+      dockerfile: Dockerfile_CUJAE
+    environment:
+      #CONFIGURAR DJANGO
+      DEBUG: True
+      #SECRET_KEY:
+
+      #CONFIGURACION DE LA  BASE DE DATOS
+      DATABASE_HOST: database
+      DATABASE_PORT: 5432
+      DATABASE_NAME: db_formacion_jovenes
+      DATABASE_USER: root
+      DATABASE_PASSWORD: root
+
+      #CONFIGURACION DEL CORREO
+      DEFAULT_FROM_EMAIL: tesis@ceis.cujae.edu.cu
+      EMAIL_HOST: 10.8.176.4
+      EMAIL_PORT: 25
+      EMAIL_HOST_USER: tesis
+      EMAIL_HOST_PASSWORD: tesis
+
+      #CONFIGURAR SIGUENU
+      SIGENU_URL: https://sigenu.cujae.edu.cu/sigenu-ldap-cujae/ldap/
+      SIGENU_USERNAME: pperez
+      SIGENU_PASSWORD: pperez
+
+      #CONFIGURACION PARA TRAZAS Y ERRORES
+      LOG_FILE: app.log
+
+      #NO CONFIGURAR EN CASO DE NO QUERER UTILIZAR TELEGRAM
+      TELEGRAM_CHANNEL: 1001550325467
+      TELEGRAM_TOKEN: 5250171383:AAGcKpubG_xVjAjg4XVZNWlWP8pCvZib5vw
+    volumes:
+      - api_data:/media
+    links:
+      - database
+    depends_on:
+      - database
+    ports:
+      - 8050:8000
+
+#  portainer:
+#    image: portainer/portainer
+#    restart: always
+#    ports:
+#      - "9000:9000"
+#    command: -H unix:///var/run/docker.sock
+#    volumes:
+#      - /var/run/docker.sock:/var/run/docker.sock
+#      - portainer_data:/data
+
+volumes:
+  api_data:
+  db_data:
+#  portainer_data:
+

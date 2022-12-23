@@ -8,7 +8,7 @@ Para desplegar de forma local necesita cumplir con los siguientes requisitos.
 
 #### Requisitos de depliegue:
 
-* Python 3.7
+* Python 3.9
 * Postgresql 14
 
 #### Guia de despliegue:

@@ -13,9 +13,11 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+from django.conf.urls.static import static
 from django.urls import path, include
 from rest_framework.schemas import get_schema_view
 
+from config import settings
 from custom.applicationloader.helper import UrlsLoader
 
 excludeURLs = [
@@ -39,4 +41,4 @@ urlpatterns = api_routers + [
 
     # Configurando Swagger Open API
     path('', swaggerSchema, name='doc_swagger'),
-]
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

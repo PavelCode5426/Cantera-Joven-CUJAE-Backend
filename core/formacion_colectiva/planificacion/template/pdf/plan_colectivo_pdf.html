@@ -1,0 +1,93 @@
+{% extends 'pdf/layout.html' %}
+
+{% block content %}
+    <h1 class="text-center">Plan de Formacion Colectivo</h1>
+
+    {% for item in area_etapa_actividades %}
+        <h1>Plan de Formacion Colectivo: {{ item.area.nombre }}</h1>
+
+        {% for etapa in item.etapas %}
+            <h4>Etapa desde {{ etapa.fechaInicio }} hasta {{ etapa.fechaFin }}</h4>
+
+            <h5>Actividades</h5>
+            <table>
+                <tr>
+                    <td>Nombre</td>
+                    <td>Responsable</td>
+                    <td>Fecha de Inicio</td>
+                    <td>Fecha de Fin</td>
+                    <td>Participantes</td>
+                </tr>
+                {% for actividad in etapa.actividades %}
+                    <tr>
+                        <td>{{ actividad.nombre }}</td>
+                        <td>{{ actividad.responsable }}</td>
+                        <td>{{ actividad.fechaInicio|date:'Y-m-d H:i' }}</td>
+                        <td>{{ actividad.fechaFin|date:'Y-m-d H:i' }}</td>
+                        <td>{{ actividad.participantes }}</td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td>Sin actividades definidas</td>
+                    </tr>
+                {% endfor %}
+            </table>
+            <hr>
+        {% endfor %}
+
+    {% endfor %}
+
+
+
+
+
+
+
+
+    {% for etapa,actividades in etapa__actividad %}
+        <h5>Etapa #{{ etapa.numero }}</h5>
+        <table>
+            <tr>
+                <td>
+                    <p>Objetivo: {{ etapa.objetivo }}</p>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <p>Fecha de Inicio: {{ etapa.fechaInicio|date:'Y-m-d H:i' }}</p>
+                </td>
+                <td>
+                    <p>Fecha de Fin: {{ etapa.fechaFin|date:'Y-m-d H:i' }}</p>
+                </td>
+            </tr>
+        </table>
+
+        <h3>Actividades de Formacion</h3>
+
+        <table>
+            <tr>
+                <td>Nombre</td>
+                <td>Responsable</td>
+                <td>Fecha de Inicio</td>
+                <td>Fecha de Fin</td>
+                <td>Participantes</td>
+            </tr>
+            {% for actividad in actividades %}
+                <tr>
+                    <td>{{ actividad.nombre }}</td>
+                    <td>{{ actividad.responsable }}</td>
+                    <td>{{ actividad.fechaInicio|date:'Y-m-d H:i' }}</td>
+                    <td>{{ actividad.fechaFin|date:'Y-m-d H:i' }}</td>
+                    <td>{{ actividad.participantes }}</td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td>Sin actividades definidas</td>
+                </tr>
+            {% endfor %}
+        </table>
+        <hr>
+    {% endfor %}
+
+{% endblock %}
+

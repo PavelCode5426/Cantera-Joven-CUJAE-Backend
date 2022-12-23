@@ -1,16 +1,9 @@
-from custom.authentication.models import DirectoryUser
-from custom.authentication.directorio import obtenerUsuariosPorIDs,update_user
-from custom.logging import logger
 from core.configuracion.helpers import isConfigAvailable
+from custom.logging import logger
 
-@isConfigAvailable('auto_actualizar_usuario')
+
+@isConfigAvailable('mantener_actualizada_informacion_de_usuarios')
 def actualizar_informacion_usuarios():
-    usuarios = DirectoryUser.objects.all()
-    ids = [usuario.pk for usuario in usuarios]
-    usuarios_directorio = obtenerUsuariosPorIDs(ids)
-
-    for usuario_dir in usuarios_directorio:
-        if 'password' in usuario_dir:
-            usuario_dir.pop('password')
-        update_user(usuario_dir)
-    logger.info("Usuarios actualizados correctamente")
+    # TODO LAURA AQUI HAZ EL CODIGO DE ACTUALIZAR LA INFORMACION DE LOS USUARIOS CON ROLES DE LA APP
+    # EXCEPTO LOS ESTUDIANTES, POSIBLES GRADUADOS Y GRADUADOS POR UN TEMA DE RENDIMIENTO
+    logger.critical("Usuarios actualizados correctamente")

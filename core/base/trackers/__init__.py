@@ -15,8 +15,8 @@ def registerModels():
     modelTracker.register(models.modelosSimple.PropuestaMovimiento)
     modelTracker.register(models.modelosSimple.Dimension)
 
-    modelTracker.register(models.modelosTutoria.SolicitudTutorExterno)
-    modelTracker.register(models.modelosTutoria.GraduadoTutor)
+    modelTracker.register(models.modelosPlanificacionIndividual.SolicitudTutorExterno)
+    modelTracker.register(models.modelosPlanificacionIndividual.TutoresAsignados)
 
     modelTracker.register(models.modelosPlanificacion.Plan)
     modelTracker.register(models.modelosPlanificacion.Etapa)
@@ -24,4 +24,4 @@ def registerModels():
     modelTracker.register(models.modelosPlanificacion.Evaluacion)
     modelTracker.register(models.modelosPlanificacion.Actividad)
 
-    modelTracker.register(models.modelosPlanificacionFamiliarizarcion.UbicacionLaboralAdelantada)
+    modelTracker.register(models.modelosPlanificacionColectiva.UbicacionLaboralAdelantada)
