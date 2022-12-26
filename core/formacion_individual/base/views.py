@@ -83,7 +83,7 @@ class ListGraduadosDelArea(ListAPIView):
     permission_classes = (IsSameAreaPermissions, IsJefeArea | IsDirectorRecursosHumanos)
     # FILTRADO
     filterset_class = JovenFilterSet
-    search_fields = ('first_name', 'last_name', 'email', 'username')
+    search_fields = ('first_name', 'last_name', 'email', 'username', 'carnet')
     ordering_fields = '__all__'
 
     def get_queryset(self):
@@ -132,12 +132,11 @@ class ListEstudiantesDelArea(ListAPIView):
     permission_classes = (IsSameAreaPermissions, IsJefeArea | IsDirectorRecursosHumanos)
     serializer_class = EstudianteSerializer
     filterset_class = JovenFilterSet
-    search_fields = ('first_name', 'last_name', 'email', 'username')
+    search_fields = ('first_name', 'last_name', 'email', 'username', 'carnet')
     ordering_fields = '__all__'
 
     def get_queryset(self):
         area = get_object_or_404(Area, pk=self.kwargs['areaID'])
-        # TODO LAURA HAZ QUE EN LA CONSULTA SOLAMENTE SALGAN LOS QUE NO ESTEN COMO GRADUADOS NI POSIBLES GRADUADOS
         return Estudiante.objects.filter(area=area).distinct()
 
 
@@ -148,10 +147,10 @@ class ListJovenesDelArea(ListAPIView):
     serializer_class = JovenSerializer
     permission_classes = (IsSameAreaPermissions, IsJefeArea)
     filterset_class = JovenAdvanceFilterSet
-    search_fields = ('first_name', 'last_name', 'email', 'username')
+    search_fields = ('first_name', 'last_name', 'email', 'username', 'carnet')
     ordering_fields = '__all__'
-
+    #TODO Pavel revisar esto, el serializador cunado es un graduado no da todo pero para el estudiante si da las cosas
     def get_queryset(self):
         areaID = self.kwargs['areaID']
-        return DirectoryUser.objects.filter(Q(graduado__isnull=False) | Q(estudiante__isnull=False),
+        return DirectoryUser.objects.select_related('grduado','estudiante').filter(Q(graduado__isnull=False) | Q(estudiante__isnull=False),
                                             area=areaID).distinct().all()

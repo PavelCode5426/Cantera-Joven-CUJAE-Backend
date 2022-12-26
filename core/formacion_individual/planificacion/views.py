@@ -47,6 +47,8 @@ FORMACION POR PLAN
 class ListPlanFormacionInArea(ListAPIView):
     permission_classes = (IsJefeArea,)
     serializer_class = PlanFormacionModelSerializer
+    search_fields = ('joven__first_name', 'joven__last_name', 'joven__carnet')
+    ordering_fields = '__all__'
 
     def get_queryset(self):
         area = get_object_or_404(Area, pk=self.kwargs['areaID'])

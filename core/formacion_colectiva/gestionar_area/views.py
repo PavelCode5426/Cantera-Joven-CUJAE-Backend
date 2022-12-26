@@ -6,11 +6,12 @@ from rest_framework.viewsets import mixins, GenericViewSet
 
 from core.base.helpers import notificar_al_DRH
 from core.base.models import modelosSimple, modelosPlanificacionColectiva, modelosUsuario
-from . import serializers
+from . import serializers, signals
 from .filters import PosibleGraduadoPreubicadoFilterSet
 from ...base.models.modelosUsuario import PosibleGraduado
 from ...base.permissions import IsDirectorRecursosHumanos, IsJefeArea, IsVicerrector, IsSameAreaPermissions, \
     IsSameUserWhoRequestPermissions, IsPosibleGraduado
+
 
 
 class ListarObtenerArea(mixins.ListModelMixin, mixins.RetrieveModelMixin, GenericViewSet):
@@ -63,9 +64,8 @@ class AceptarRechazarUbicacionLaboralAdelantadaAPIView(APIView):
         aceptada = serializador.validated_data.get('aceptada')
         notificacion = serializador.validated_data.get('mensaje')
 
-        # TODO PONER EVENTO AQUI PARA NOTIFICAR AL DIRECTOR DE RECURSOS HUMANOS
         if notificacion:
-            notificar_al_DRH(notificacion)
+            signals.preubicacion_creada.send(notificacion)
 
         if aceptada:
             preubicaciones = modelosPlanificacionColectiva.UbicacionLaboralAdelantada.objects.filter(
@@ -82,6 +82,7 @@ class AceptarRechazarUbicacionLaboralAdelantadaAPIView(APIView):
             modelosPlanificacionColectiva.UbicacionLaboralAdelantada.objects.bulk_update(preubicaciones,
                                                                                          ['esPreubicacion'])
 
+
             response = Response({'detail': 'Ubicacion Laboral Adelantada Aceptada'}, HTTP_200_OK)
         else:
             response = Response({'detail': 'Ubicacion Laboral Adelantada Rechazada'}, HTTP_200_OK)
@@ -96,6 +97,8 @@ class ListarObtenerPosibleGraduadoListAPIView(ListAPIView):
     permission_classes = [IsDirectorRecursosHumanos]
     serializer_class = serializers.PosibleGraduadoSerializer
     filterset_class = PosibleGraduadoPreubicadoFilterSet
+    search_fields = ('first_name', 'last_name', 'email', 'username', 'carnet')
+    ordering_fields = '__all__'
 
     def get_queryset(self):
         return PosibleGraduado.objects.filter(evaluacion=None).all()

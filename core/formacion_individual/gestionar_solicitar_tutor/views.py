@@ -7,6 +7,7 @@ from core.base.models.modelosPlanificacionIndividual import SolicitudTutorExtern
 from core.formacion_individual.base.permissions import JovenOfSameAreaPermissions, \
     TutorOfSameAreaPermissions, IsSameTutorWhoRequestPermissions, IsSameJovenWhoRequestPermissions
 from custom.authentication import serializer as authSerializers
+from custom.authentication.LDAP.sigenu_ldap_services import SearchOption
 from custom.authentication.models import DirectoryUser
 from . import serializers
 from .exceptions import PreviouslyAnsweredRequestException, GraduateRequireAvalException, \
@@ -24,6 +25,8 @@ class TutoresPorAreaListAPIView(ListAPIView):
     """
     serializer_class = authSerializers.DirectoryUserSerializer
     permission_classes = (IsSameAreaPermissions, IsJefeArea)
+    search_fields = ('first_name', 'last_name', 'email', 'username', 'carnet')
+    ordering_fields = '__all__'
 
     def get_queryset(self):
         areaID = self.kwargs['areaID']
@@ -37,6 +40,8 @@ class TutoresPorGraduadoListAPIView(ListAPIView):
     serializer_class = serializers.TutoresDelGraduadoSerializer
     permission_classes = (JovenOfSameAreaPermissions, (IsJefeArea | IsSameJovenWhoRequestPermissions),)
     filterset_class = TutoriaFilterSet
+    search_fields = ('tutor__first_name', 'tutor__last_name', 'tutor__email', 'tutor__username', 'tutor__carnet')
+    ordering_fields = '__all__'
 
     def get_queryset(self):
         joven_id = self.kwargs['jovenID']
@@ -50,6 +55,8 @@ class TutoradosPorTutorListAPIView(ListAPIView):
     serializer_class = serializers.TutoradosDelTutorSerializer
     permission_classes = (TutorOfSameAreaPermissions | IsJefeArea | IsSameTutorWhoRequestPermissions,)
     filterset_class = TutoriaFilterSet
+    search_fields = ('joven__first_name', 'joven__last_name', 'joven__email', 'joven__username', 'joven__carnet')
+    ordering_fields = '__all__'
 
     def get_queryset(self):
         tutor = self.kwargs['tutor']

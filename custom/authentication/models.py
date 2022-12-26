@@ -55,7 +55,6 @@ class DirectoryUser(AbstractUser):  # Abstract User Implementa AbstractBaseUser,
     directorioID = models.CharField(max_length=255, blank=True, null=True)
 
     password = None  # Eliminados por cuestion del directorio de la CUJAE
-
     objects = CustomUserManager()
 
 

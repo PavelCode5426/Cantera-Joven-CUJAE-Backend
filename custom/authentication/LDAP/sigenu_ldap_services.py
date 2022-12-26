@@ -67,3 +67,28 @@ class SIGENU_LDAP_Services(object):
             count += 1
             persons += people
         return persons
+
+class SIGENU_Services(object):
+    def __init__(self):
+        self.base_url = settings.SIGENU2_URL
+        self.username = settings.SIGENU2_USERNAME
+        self.password = settings.SIGENU2_PASSWORD
+
+    def __request(self, url, method, query_params=None, data=None):
+        auth = HTTPBasicAuth(self.username, self.password)
+        return requests.request(
+            method=method,
+            url=f'{self.base_url}/{url}',
+            auth=auth,
+            params=query_params,
+            json=data,
+            verify=False
+        )
+
+    def students_data(self, carnet: str):
+        return self.__request('students', 'GET', data=dict(identification=carnet)).json()
+
+
+    def carreras(self):
+        return self.__request('carreras', 'GET').json()
+
