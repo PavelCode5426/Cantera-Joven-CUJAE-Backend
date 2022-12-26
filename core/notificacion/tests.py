@@ -12,3 +12,4 @@ class TestNotifications(TestCase):
 
     def test_send_email(self):
         enviar_estado_notificaciones_por_correo()
+

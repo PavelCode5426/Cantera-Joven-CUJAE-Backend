@@ -23,3 +23,7 @@ class Configuracion(models.Model):
     valor = models.JSONField()
     validacion = models.JSONField(blank=True, null=True)
     created_at = models.DateTimeField(auto_created=True, auto_now=True)
+
+class Carrera(abstractModels.AbstractNameEntity):
+    codigo = models.CharField(max_length=100)
+

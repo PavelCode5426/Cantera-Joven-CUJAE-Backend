@@ -136,6 +136,7 @@ class ImportarEstudianteSerializer(ImportarFromDirectorioSerializer):
     def create(self, validated_data):
         lis = list()
         area = validated_data['area']
+        #carrera = validated_data['carrera']
         role = Group.objects.get(name='ESTUDIANTE')
         with transaction.atomic():
             for estudiante_dic in validated_data['estudiantes']:
@@ -151,6 +152,7 @@ class ImportarEstudianteSerializer(ImportarFromDirectorioSerializer):
                     cargo=estudiante_dic.get('teachingCategory', None),
                     telefono=estudiante_dic.get('phone', None),
                     area=area,
+                    #carrera=carrera,
                 )
                 estudiante = Estudiante.objects.update_or_create(directorioID=data['directorioID'], defaults=data)[0]
                 estudiante.groups.add(role)
@@ -180,7 +182,7 @@ class GraduadoSerializer(JovenCommonAttrs):
 class EstudianteSerializer(JovenCommonAttrs):
     class Meta:
         model = Estudiante
-        fields = DirectoryUserSerializer.Meta.fields + ('anno_academico', 'aval', 'plan')
+        fields = DirectoryUserSerializer.Meta.fields + ('anno_academico', 'aval', 'plan','carrera')
 
 
 class JovenSerializer(serializers.ModelSerializer):

@@ -301,6 +301,10 @@ SIGENU_URL = env('SIGENU_URL', default=None)
 SIGENU_USERNAME = env('SIGENU_USERNAME', default=None)
 SIGENU_PASSWORD = env('SIGENU_PASSWORD', default=None)
 
+SIGENU2_URL = env('SIGENU2_URL', default=None)
+SIGENU2_USERNAME = env('SIGENU2_USERNAME', default=None)
+SIGENU2_PASSWORD = env('SIGENU2_PASSWORD', default=None)
+
 PFI_UPLOAD_ROOT = MEDIA_ROOT + '/plan-individual'
 PFC_UPLOAD_ROOT = MEDIA_ROOT + '/plan-colectivo'
 

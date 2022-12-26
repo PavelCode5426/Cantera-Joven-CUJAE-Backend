@@ -276,6 +276,7 @@ class ListAsistenciaActividad(ListCreateAPIView, ActividadColectivaMixin, Multip
     serializer_class = PosibleGraduadoSerializer
     filterset_class = None  # TODO PONER UN FILTRO AQUI PARA LA ASISTENCIA
 
+
     def get_actividad(self, actividadID: int = None):
         actividad_query = ActividadColectiva.objects.exclude(area=None, esGeneral=False)
         actividad = get_object_or_404(actividad_query, pk=self.get_actividadID())

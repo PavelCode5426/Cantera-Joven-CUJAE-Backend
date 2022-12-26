@@ -6,6 +6,7 @@ from . import modelosAbstractos as abstractModel
 
 class Estudiante(authModels.DirectoryUser):
     anno_academico = models.PositiveSmallIntegerField(null=True, blank=True)
+    carrera = models.ForeignKey('Carrera', on_delete=models.RESTRICT, null=True, blank=True)
 
     class Meta:
         verbose_name = 'Estudiante'
