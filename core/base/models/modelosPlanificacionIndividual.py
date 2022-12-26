@@ -62,12 +62,23 @@ class EtapaFormacion(Etapa):
 class PlanFormacion(Plan):
     joven = models.ForeignKey(DirectoryUser, related_name='planesformacion', on_delete=models.RESTRICT)
     evaluacion = models.OneToOneField(EvaluacionFinal, on_delete=models.RESTRICT, null=True, blank=True)
+    evaluacion_prorroga = models.OneToOneField(EvaluacionFinal, on_delete=models.RESTRICT, null=True, blank=True)
 
     @property
     def evaluation_approved(self):
         approved = False
         try:
             approved = self.evaluacion_id and self.evaluacion.aprobadoPor_id
+        except Exception:
+            pass
+
+        return approved
+
+    @property
+    def evaluation_prorroga_approved(self):
+        approved = False
+        try:
+            approved = self.evaluacion_prorroga_id and self.evaluacion_prorroga.aprobadoPor_id
         except Exception:
             pass
 

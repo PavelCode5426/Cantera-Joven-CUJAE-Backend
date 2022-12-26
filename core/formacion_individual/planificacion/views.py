@@ -168,7 +168,11 @@ class EvaluarPlanFormacion(CreateAPIView, PlanFormacionMixin):
         if plan.evaluation_approved or not plan.is_approved or etapas_sin_evaluar:
             raise CantEvaluateException
 
-        serializer = self.get_serializer(instance=plan.evaluacion, data=request.data)
+        if plan.evaluacion.aprobadoPor_id:
+            serializer = self.get_serializer(instance=plan.evaluacion, data=request.data)
+        else:
+            serializer = self.get_serializer(instance=plan.evaluacion_prorroga, data=request.data)
+
         serializer.is_valid(raise_exception=True)
         evaluacion = serializer.save()
 
