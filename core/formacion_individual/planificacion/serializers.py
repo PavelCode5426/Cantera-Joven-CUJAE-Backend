@@ -8,7 +8,7 @@ from rest_framework.serializers import ModelSerializer
 from core.base.models.modelosPlanificacion import Comentario, Archivo, Evaluacion
 from core.base.models.modelosPlanificacionIndividual import EtapaFormacion, \
     EvaluacionFormacion, EvaluacionFinal, ActividadFormacion, PlanFormacion
-from core.base.models.modelosSimple import PropuestaMovimiento
+from core.base.models.modelosSimple import PropuestaMovimiento, Dimension
 from core.base.validators import datetime_greater_now
 from core.formacion_individual.base.serializers import JovenSerializer
 from custom.authentication.serializer import DirectoryUserSerializer
@@ -17,6 +17,12 @@ from custom.authentication.serializer import DirectoryUserSerializer
 class PropuestaMovimientoModelSerializer(ModelSerializer):
     class Meta:
         model = PropuestaMovimiento
+        fields = '__all__'
+
+
+class DimensionModelSerializer(ModelSerializer):
+    class Meta:
+        model = Dimension
         fields = '__all__'
 
 
@@ -83,6 +89,15 @@ class CrearEvaluacionFormacionModelSerializer(serializers.ModelSerializer):
 
 
 class CrearEvaluacionFinalModelSerializer(serializers.ModelSerializer):
+
+    def is_valid(self, raise_exception=False):
+        super(CrearEvaluacionFinalModelSerializer, self).is_valid(raise_exception)
+
+        validated_data = self._validated_data
+        if self.context.get('esProrroga', False):
+            propuestaMovimiento = validated_data.get('propuestaMovimiento')
+        return super(CrearEvaluacionFinalModelSerializer, self).is_valid(raise_exception)
+
     class Meta:
         model = EvaluacionFinal
         exclude = ()
@@ -91,6 +106,7 @@ class CrearEvaluacionFinalModelSerializer(serializers.ModelSerializer):
 class EtapaFormacionModelSerializer(serializers.ModelSerializer):
     numero = serializers.IntegerField(read_only=True)
     esProrroga = serializers.BooleanField(read_only=True)
+    dimension = DimensionModelSerializer(allow_null=True, read_only=True)
     evaluacion = EvaluacionFormacionModelSerializer(allow_null=True, read_only=True)
 
     class Meta:
@@ -117,7 +133,7 @@ class UpdateEtapaFormacionSerializer(EtapaFormacionModelSerializer):
 
     class Meta:
         model = EtapaFormacion
-        exclude = ('plan',)
+        exclude = ('plan', 'evaluacion')
 
 
 class ArchivoModelSerializer(serializers.ModelSerializer):

@@ -4,6 +4,7 @@ from custom.authentication import models as authModels
 from custom.authentication.models import DirectoryUser
 from . import modelosSimple as simpleModels
 from .modelosPlanificacion import Plan, Etapa, Evaluacion, Actividad
+from .modelosSimple import Dimension
 
 
 class SolicitudTutorExterno(models.Model):
@@ -36,6 +37,7 @@ class EvaluacionFormacion(Evaluacion):
 class EtapaFormacion(Etapa):
     numero = models.PositiveSmallIntegerField(default=1)
     objetivo = models.CharField(max_length=255, null=True, blank=True, default=None)
+    dimension = models.ForeignKey(Dimension, on_delete=models.RESTRICT, null=True, default=None)
     esProrroga = models.BooleanField(default=False)
     evaluacion = models.OneToOneField(EvaluacionFormacion, on_delete=models.RESTRICT, null=True, blank=True,
                                       default=None)
@@ -62,23 +64,17 @@ class EtapaFormacion(Etapa):
 class PlanFormacion(Plan):
     joven = models.ForeignKey(DirectoryUser, related_name='planesformacion', on_delete=models.RESTRICT)
     evaluacion = models.OneToOneField(EvaluacionFinal, on_delete=models.RESTRICT, null=True, blank=True)
-    evaluacion_prorroga = models.OneToOneField(EvaluacionFinal, on_delete=models.RESTRICT, null=True, blank=True)
+    evaluacion_prorroga = models.OneToOneField(EvaluacionFinal, on_delete=models.RESTRICT, null=True, blank=True,
+                                               related_name='planprorrogado')
 
     @property
     def evaluation_approved(self):
         approved = False
         try:
             approved = self.evaluacion_id and self.evaluacion.aprobadoPor_id
-        except Exception:
-            pass
 
-        return approved
-
-    @property
-    def evaluation_prorroga_approved(self):
-        approved = False
-        try:
-            approved = self.evaluacion_prorroga_id and self.evaluacion_prorroga.aprobadoPor_id
+            if approved and EtapaFormacion.objects.filter(plan_id=self.pk, esProrroga=True).exists():
+                approved = self.evaluacion_prorroga_id and self.evaluacion_prorroga.aprobadoPor_id
         except Exception:
             pass
 

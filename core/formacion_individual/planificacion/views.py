@@ -13,8 +13,8 @@ from core.base.generics import MultiplePermissionsView
 from core.base.models.modelosPlanificacion import Comentario, Evaluacion, Archivo
 from core.base.models.modelosPlanificacionIndividual import EtapaFormacion, \
     ActividadFormacion, PlanFormacion
-from core.base.models.modelosSimple import Area, PropuestaMovimiento
-from core.base.permissions import IsJefeArea, IsTutor
+from core.base.models.modelosSimple import Area, PropuestaMovimiento, Dimension
+from core.base.permissions import IsJefeArea, IsTutor, IsDirectorRecursosHumanos
 from core.configuracion.helpers import config
 from core.formacion_individual.base.helpers import user_is_student
 from core.formacion_individual.base.permissions import IsSameJovenWhoRequestPermissions, \
@@ -33,7 +33,7 @@ from core.formacion_individual.planificacion.serializers import PlanFormacionMod
     CrearEvaluacionFinalModelSerializer, CommentsModelSerializer, UpdatePlanFormacionSerializer, \
     ArchivoModelSerializer, FirmarPlanFormacionSerializer, ActividadFormacionModelSerializer, \
     CreateUpdateActividadFormacionSerializer, CambiarEstadoActividadFormacion, SubirArchivoActividad, \
-    EvaluacionModelSerializer, PropuestaMovimientoModelSerializer
+    EvaluacionModelSerializer, PropuestaMovimientoModelSerializer, DimensionModelSerializer
 from core.formacion_individual.planificacion.signals import actividad_revision_solicitada
 from custom.authentication.models import DirectoryUser
 
@@ -165,13 +165,17 @@ class EvaluarPlanFormacion(CreateAPIView, PlanFormacionMixin):
         plan = self.get_plan()
         etapas_sin_evaluar = EtapaFormacion.objects. \
             filter(Q(evaluacion=None) | Q(evaluacion__aprobadoPor=None), plan_id=plan.pk).exists()
+
         if plan.evaluation_approved or not plan.is_approved or etapas_sin_evaluar:
             raise CantEvaluateException
 
-        if plan.evaluacion.aprobadoPor_id:
-            serializer = self.get_serializer(instance=plan.evaluacion, data=request.data)
+        etapas_prorroga = EtapaFormacion.objects.filter(esProrroga=True, plan_id=plan.pk).exists()
+        if etapas_prorroga:
+            context = self.get_serializer_context()
+            context.setdefault('esProrroga', True)
+            serializer = self.get_serializer(instance=plan.evaluacion_prorroga, data=request.data, context=context)
         else:
-            serializer = self.get_serializer(instance=plan.evaluacion_prorroga, data=request.data)
+            serializer = self.get_serializer(instance=plan.evaluacion, data=request.data)
 
         serializer.is_valid(raise_exception=True)
         evaluacion = serializer.save()
@@ -537,6 +541,28 @@ class PropuestaMovimientoModelViewset(ModelViewSet, MultiplePermissionsView):
 
     queryset = PropuestaMovimiento.objects.all()
     serializer_class = PropuestaMovimientoModelSerializer
+
+    def create(self, request, *args, **kwargs):
+        super(PropuestaMovimientoModelViewset, self).create(request, *args, **kwargs)
+        return Response({'detail': 'Propuesta de movimiento creada correctamente'}, HTTP_201_CREATED)
+
+    def destroy(self, request, *args, **kwargs):
+        super(PropuestaMovimientoModelViewset, self).destroy(request, *args, **kwargs)
+        return Response({'detail': 'Propuesta de movimiento borrada correctamente'}, HTTP_200_OK)
+
+    def update(self, request, *args, **kwargs):
+        super(PropuestaMovimientoModelViewset, self).update(request, *args, **kwargs)
+        return Response({'detail': 'Propuesta de movimiento actualizada correctamente'}, HTTP_200_OK)
+
+
+class DimensionModelViewset(ModelViewSet, MultiplePermissionsView):
+    post_permission_classes = [IsDirectorRecursosHumanos]
+    delete_permission_classes = [IsDirectorRecursosHumanos]
+    put_permission_classes = [IsDirectorRecursosHumanos]
+    patch_permission_classes = [IsDirectorRecursosHumanos]
+
+    queryset = Dimension.objects.all()
+    serializer_class = DimensionModelSerializer
 
     def create(self, request, *args, **kwargs):
         super(PropuestaMovimientoModelViewset, self).create(request, *args, **kwargs)

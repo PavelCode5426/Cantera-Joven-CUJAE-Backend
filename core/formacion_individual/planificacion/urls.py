@@ -50,6 +50,7 @@ urlpatterns = [
 router = DefaultRouter()
 router.register('evaluacion', ListRetrieveEvaluacionesArea, 'area-evaluaciones')
 router.register('propuesta-moviemiento', PropuestaMovimientoModelViewset, 'propuesta-movimiento')
+router.register('dimension', PropuestaMovimientoModelViewset, 'dimension')
 router.register('archivo', RetrieveDeleteArchive, 'archivo')
 
 urlpatterns += router.urls
