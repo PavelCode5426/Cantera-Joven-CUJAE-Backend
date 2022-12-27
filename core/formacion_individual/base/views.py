@@ -89,6 +89,8 @@ class ListGraduadosDelArea(ListAPIView):
     def get_queryset(self):
         area = get_object_or_404(Area, pk=self.kwargs['areaID'])
         # TODO HAZ QUE SOLAMENTE SALGAN LOS QUE NO SEAN TUTORES, PARA ESTO USA LA TABLA DE TUTORES ASIGNADOS
+        # NO SE HIZO PORQUE PARA ESTO ES MEJOR USAR UN DATAWAREHOUSE PARA GUARDAR LOS DATOS QUE SEAN VIEJOS,
+        # PORQUE SINO EL SISTEMA SE CARGA DEMASIADO
         return Graduado.objects.filter(area=area).distinct()
 
 
@@ -149,8 +151,9 @@ class ListJovenesDelArea(ListAPIView):
     filterset_class = JovenAdvanceFilterSet
     search_fields = ('first_name', 'last_name', 'email', 'username', 'carnet')
     ordering_fields = '__all__'
-    #TODO Pavel revisar esto, el serializador cunado es un graduado no da todo pero para el estudiante si da las cosas
+
     def get_queryset(self):
         areaID = self.kwargs['areaID']
-        return DirectoryUser.objects.select_related('grduado','estudiante').filter(Q(graduado__isnull=False) | Q(estudiante__isnull=False),
-                                            area=areaID).distinct().all()
+        jovenes = DirectoryUser.objects.select_related('graduado', 'estudiante').filter(
+            Q(graduado__isnull=False) | Q(estudiante__isnull=False), area=areaID).distinct().all()
+        return jovenes

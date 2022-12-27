@@ -1,7 +1,6 @@
 from core.base.models.modelosUsuario import PosibleGraduado
 from core.configuracion.helpers import isConfigAvailable
 from custom.authentication.LDAP.ldap_facade import LDAPFacade
-from custom.authentication.LDAP.sigenu_ldap_services import SIGENU_LDAP_Services
 from custom.logging import logger
 
 
@@ -9,6 +8,7 @@ from custom.logging import logger
 def actualizar_informacion_posibles_graduados():
     directory_users = LDAPFacade().all_pgraduates
     importados = PosibleGraduado.objects.filter(is_active=True).all()
+    usuarios_perdidos = list()
     it = iter(importados)
     text = ''
 
@@ -25,21 +25,18 @@ def actualizar_informacion_posibles_graduados():
                         ldap_user = user
                         directory_users.remove(ldap_user)
                         raise StopIteration
+                    ldap_user = None
             except StopIteration:
-                current.is_active = False
+                pass
 
             if not ldap_user:
-                text += f'* No se encontro al posible graduado {current.get_fullname()} con CI {current.carnet}\n'
-                logger.critical()
+                text += f'* No se encontro al usuario {current.get_full_name()} con CI {current.carnet}\n'
+                current.is_active = False
+                usuarios_perdidos.append(current)
             else:
-                current.fist_name = ldap_user.get('name')
-                #TODO SEGUIN CAMBIANDO COSAS
-                #current.save()
+                LDAPFacade().update_or_insert_user(ldap_user)
 
     except StopIteration as e:
-        PosibleGraduado.objects.bulk_update(importados)
+        PosibleGraduado.objects.bulk_update(usuarios_perdidos, ['is_active'])
         if text:
             logger.critical(f'Error importando posibles graduados\n{text}')
-
-
-

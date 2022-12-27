@@ -2,12 +2,11 @@ import json
 import random
 
 import openpyxl
-from annoying.functions import get_object_or_this, get_object_or_None
 from django.conf import settings
 
 from core.base.models.modelosSimple import Area, Carrera
 from core.base.models.modelosUsuario import Estudiante, Graduado, PosibleGraduado
-from custom.authentication.LDAP.sigenu_ldap_services import SIGENU_LDAP_Services, SearchOption, SIGENU_Services
+from custom.authentication.LDAP.sigenu_ldap_services import SIGENU_LDAP_Services, SearchOption
 from custom.authentication.models import DirectoryUser
 
 GRADUATE_TEACHING_CATEGORIES = [
@@ -241,53 +240,50 @@ class LDAPFacade:
         return roles
 
     def update_or_insert_area(self, areaData: dict):
-        return Area.objects.update_or_create(defaults=areaData, nombre=areaData.get('nombre'))
+        return Area.objects.update_or_create(defaults=areaData, **areaData)
 
     def update_or_insert_carrera(self, carreraData: dict):
-        return Carrera.objects.update_or_create(defaults=carreraData,codigo=carreraData.get('codigo'))
+        return Carrera.objects.update_or_create(defaults=carreraData, **carreraData)
 
     def update_or_insert_user(self, user_data: dict):
-        # TODO LAURA MEJORA ESTE CODIGO A LA HORA DE INSERTAR EL USUARIO SEGUN SI ES ETUDIANTE,GRADUADO O
-        # POSIBLE GRADUADO, HAZ QUE EL ESTUDIANTE TAMBIEN CONSULTE OTROS SERVICIOS Y TOME MAS DATOS
-        #user = DirectoryUser.objects.get(directorioID=user_data.get('areaId',None))<
 
         data = dict(
-            first_name=user_data.get('name',None),
-            last_name=user_data.get('lastname',None),
-            direccion=user_data.get('address',None),
-            cargo=user_data.get('teachingCategory',None),
-            carnet=user_data.get('identification',None),
-            directorioID=user_data.get('areaId',None),
-            telefono=user_data.get('phone',None),
-            email=user_data.get('email',''),
-            username=user_data.get('user',None),
+            first_name=user_data.get('name', None),
+            last_name=user_data.get('lastname', None),
+            direccion=user_data.get('address', None),
+            cargo=user_data.get('teachingCategory', None),
+            carnet=user_data.get('identification', None),
+            directorioID=user_data.get('areaId', None),
+            telefono=user_data.get('phone', None),
+            email=user_data.get('email', ''),
+            username=user_data.get('user', None),
         )
 
         add_area = True
         if is_student(user_data):
             data['anno_academico'] = user_data.get('studentYear')
-            #carrera = get_object_or_None(Carrera,codigo=1)
-            #if not carrera:
-                #BUSCAR EN LA LISTA Y GUARDAR EN LA VAR CARRERA
-             #   pass
-            #carrera=self.update_or_insert_carrera(carrera)[0]
-            #TODO AQUI AGREGAR LOS DATOS DEL ESTUDIANTE
-            #LLAMAR AL SIGENU , ACTUALIZAR LOS DATOS Y LA CARRERA LA VAS A BUSCAR EN LA BD SINO ESTA CARGA LA LISTA Y BUCALA
-            #CUANDO LA ENCUENTRES LA GUARDAS
-            #data.setdefault('carrera',carrera)
+            # carrera = get_object_or_None(Carrera,codigo=1)
+            # if not carrera:
+            # BUSCAR EN LA LISTA Y GUARDAR EN LA VAR CARRERA
+            #   pass
+            # carrera=self.update_or_insert_carrera(carrera)[0]
+            # TODO AQUI AGREGAR LOS DATOS DEL ESTUDIANTE
+            # LLAMAR AL SIGENU , ACTUALIZAR LOS DATOS Y LA CARRERA LA VAS A BUSCAR EN LA BD SINO ESTA CARGA LA LISTA Y BUCALA
+            # CUANDO LA ENCUENTRES LA GUARDAS
+            # data.setdefault('carrera',carrera)
             model = Estudiante
         elif is_pgraduate(user_data):
             add_area = False
             model = PosibleGraduado
         elif is_graduate(user_data):
             data['esNivelSuperior'] = '(NS)' in data['cargo']
-            data['esExterno'] = user_data.get('personExternal',False) != 'FALSE'
+            data['esExterno'] = user_data.get('personExternal', False) != 'FALSE'
             model = Graduado
         else:
             model = DirectoryUser
 
         if add_area:
-            data.setdefault('area', self.update_or_insert_area({'nombre': user_data.get('area')})[0])
+            data.setdefault('area', self.update_or_insert_area({'distinguishedName': user_data.get('area')})[0])
 
         user, created = model.objects.update_or_create(directorioID=data['directorioID'], defaults=data)
 
@@ -328,4 +324,3 @@ class LDAPFacade:
                 titles.add(title)
 
         return titles
-

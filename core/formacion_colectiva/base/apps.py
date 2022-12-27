@@ -16,8 +16,8 @@ class FormacionColectivaConfig(AppConfigToolkit, AppConfig):
             schedule(self.name + '.tasks.actualizar_informacion_posibles_graduados',
                      schedule_type=Schedule.CRON,
                      name=job_name,
-                     # cron='0 0 4 * * *' #4:00 am
-                     cron=' * * * * *'
+                     cron='0 0 4 * * *'  # 4:00 am
+                     # cron=' * * * * *'
                      )
         except Exception as e:
             pass

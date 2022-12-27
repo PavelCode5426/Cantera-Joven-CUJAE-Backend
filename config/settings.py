@@ -280,7 +280,7 @@ LOGGING = {
 Q_CLUSTER = {
     'name': 'CanteraJovenCUJAE',
     'workers': 1,
-    'timeout': 60,
+    'timeout': None,
     'recycle': 500,
     'compress': True,
     'queue_limit': 500,
@@ -297,13 +297,13 @@ EMAIL_HOST_USER = env('EMAIL_HOST_USER', default=None)
 EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD', default=None)
 EMAIL_USE_TLS = env('EMAIL_USE_TLS', default=True)
 
-SIGENU_URL = env('SIGENU_URL', default=None)
-SIGENU_USERNAME = env('SIGENU_USERNAME', default=None)
-SIGENU_PASSWORD = env('SIGENU_PASSWORD', default=None)
+SIGENU_LDAP_URL = env('SIGENU_LDAP_URL', default=None)
+SIGENU_LDAP_USERNAME = env('SIGENU_LDAP_USERNAME', default=None)
+SIGENU_LDAP_PASSWORD = env('SIGENU_LDAP_PASSWORD', default=None)
 
-SIGENU2_URL = env('SIGENU2_URL', default=None)
-SIGENU2_USERNAME = env('SIGENU2_USERNAME', default=None)
-SIGENU2_PASSWORD = env('SIGENU2_PASSWORD', default=None)
+SIGENU_REST_URL = env('SIGENU_REST_URL', default=None)
+SIGENU_REST_USERNAME = env('SIGENU_REST_USERNAME', default=None)
+SIGENU_REST_PASSWORD = env('SIGENU_REST_PASSWORD', default=None)
 
 PFI_UPLOAD_ROOT = MEDIA_ROOT + '/plan-individual'
 PFC_UPLOAD_ROOT = MEDIA_ROOT + '/plan-colectivo'

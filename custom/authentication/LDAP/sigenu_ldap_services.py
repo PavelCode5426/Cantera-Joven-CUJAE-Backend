@@ -15,9 +15,9 @@ class SearchOption(object):
 
 class SIGENU_LDAP_Services(object):
     def __init__(self):
-        self.base_url = settings.SIGENU_URL
-        self.username = settings.SIGENU_USERNAME
-        self.password = settings.SIGENU_PASSWORD
+        self.base_url = settings.SIGENU_LDAP_URL
+        self.username = settings.SIGENU_LDAP_USERNAME
+        self.password = settings.SIGENU_LDAP_PASSWORD
 
     def __request(self, url, method, query_params=None, data=None):
         auth = HTTPBasicAuth(self.username, self.password)
@@ -68,11 +68,12 @@ class SIGENU_LDAP_Services(object):
             persons += people
         return persons
 
+
 class SIGENU_Services(object):
     def __init__(self):
-        self.base_url = settings.SIGENU2_URL
-        self.username = settings.SIGENU2_USERNAME
-        self.password = settings.SIGENU2_PASSWORD
+        self.base_url = settings.SIGENU_REST_URL
+        self.username = settings.SIGENU_REST_USERNAME
+        self.password = settings.SIGENU_REST_PASSWORD
 
     def __request(self, url, method, query_params=None, data=None):
         auth = HTTPBasicAuth(self.username, self.password)
@@ -87,7 +88,6 @@ class SIGENU_Services(object):
 
     def students_data(self, carnet: str):
         return self.__request('students', 'GET', data=dict(identification=carnet)).json()
-
 
     def carreras(self):
         return self.__request('carreras', 'GET').json()

@@ -1,5 +1,8 @@
 from django.contrib.auth.backends import ModelBackend
 from django.contrib.auth.models import Group
+from django.utils.timezone import now
+from django.utils.translation import gettext_lazy as _
+from rest_framework import exceptions
 from rest_framework.authentication import TokenAuthentication
 
 from custom.authentication.models import DirectoryUser, DirectoryUserAPIKey
@@ -86,5 +89,18 @@ class BearerAuthentication(TokenAuthentication):
 
 
 class APIKeyAuthentication(TokenAuthentication):
-    keyword = 'api-key'
+    keyword = 'Bearer'
     model = DirectoryUserAPIKey
+
+    def authenticate_credentials(self, key):
+        model = self.get_model()
+        try:
+            token = model.objects.select_related('user').get(key=key)
+        except model.DoesNotExist:
+            raise exceptions.AuthenticationFailed(_('Invalid token.'))
+
+        if not (token.user.is_active and token.expired_at is None) or \
+                (token.user.is_active and not token.expired_at is None and token.expired_at > now()):
+            raise exceptions.AuthenticationFailed(_('User inactive or deleted.'))
+
+        return (token.user, token)

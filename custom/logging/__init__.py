@@ -19,6 +19,7 @@ class TelegramFormater(logging.Formatter):
             text = self._format_request(record)
         else:
             text = self._format_simple(record)
+
         return text
 
     def _format_request(self, record: LogRecord):

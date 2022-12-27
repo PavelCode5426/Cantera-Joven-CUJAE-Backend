@@ -136,7 +136,7 @@ class ImportarEstudianteSerializer(ImportarFromDirectorioSerializer):
     def create(self, validated_data):
         lis = list()
         area = validated_data['area']
-        #carrera = validated_data['carrera']
+        # carrera = validated_data['carrera']
         role = Group.objects.get(name='ESTUDIANTE')
         with transaction.atomic():
             for estudiante_dic in validated_data['estudiantes']:
@@ -152,7 +152,7 @@ class ImportarEstudianteSerializer(ImportarFromDirectorioSerializer):
                     cargo=estudiante_dic.get('teachingCategory', None),
                     telefono=estudiante_dic.get('phone', None),
                     area=area,
-                    #carrera=carrera,
+                    # carrera=carrera,
                 )
                 estudiante = Estudiante.objects.update_or_create(directorioID=data['directorioID'], defaults=data)[0]
                 estudiante.groups.add(role)
@@ -172,23 +172,26 @@ class JovenCommonAttrs(DirectoryUserSerializer):
     def get_plan(self, object):
         return object.planesformacion.filter(evaluacion=None).exists()
 
+    class Meta:
+        fields = DirectoryUserSerializer.Meta.fields + ('aval', 'plan')
+
 
 class GraduadoSerializer(JovenCommonAttrs):
     class Meta:
         model = Graduado
-        fields = DirectoryUserSerializer.Meta.fields + ('esExterno', 'esNivelSuperior', 'aval', 'plan')
+        fields = JovenCommonAttrs.Meta.fields + ('esExterno', 'esNivelSuperior')
 
 
 class EstudianteSerializer(JovenCommonAttrs):
     class Meta:
         model = Estudiante
-        fields = DirectoryUserSerializer.Meta.fields + ('anno_academico', 'aval', 'plan','carrera')
+        fields = JovenCommonAttrs.Meta.fields + ('anno_academico', 'carrera')
 
 
 class JovenSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         if hasattr(instance, 'graduado'):
-            return GraduadoSerializer(instance=instance).data
+            return GraduadoSerializer(instance=instance.graduado).data
         elif hasattr(instance, 'estudiante'):
-            return EstudianteSerializer(instance=instance).data
+            return EstudianteSerializer(instance=instance.estudiante).data
         return DirectoryUserSerializer(instance=instance).data

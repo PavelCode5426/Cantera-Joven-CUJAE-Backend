@@ -18,7 +18,7 @@ class ImportarPosibleGraduadoSerializer(ImportarFromDirectorioSerializer):
                 pgraduados = list(filter(lambda x: x['identification'] in pgraduados_carnet, pgraduados))
 
                 if len(pgraduados) != len(pgraduados_carnet):
-                    raise Exception  # EXCEPCION CUANDO FALTE ESTUDIANTES POR ENCONTRAR
+                    raise Exception  # EXCEPCION CUANDO FALTE POSIBLES GRADUADOS POR ENCONTRAR
 
                 self._validated_data['importar'] = pgraduados_carnet
                 self._validated_data['pgraduados'] = pgraduados

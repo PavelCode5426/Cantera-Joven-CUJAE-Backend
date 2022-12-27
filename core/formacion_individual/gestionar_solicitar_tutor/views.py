@@ -7,7 +7,6 @@ from core.base.models.modelosPlanificacionIndividual import SolicitudTutorExtern
 from core.formacion_individual.base.permissions import JovenOfSameAreaPermissions, \
     TutorOfSameAreaPermissions, IsSameTutorWhoRequestPermissions, IsSameJovenWhoRequestPermissions
 from custom.authentication import serializer as authSerializers
-from custom.authentication.LDAP.sigenu_ldap_services import SearchOption
 from custom.authentication.models import DirectoryUser
 from . import serializers
 from .exceptions import PreviouslyAnsweredRequestException, GraduateRequireAvalException, \
@@ -107,6 +106,11 @@ class SolicitudesTutorListAPIView(ListAPIView):
     serializer_class = serializers.SolicitudTutorExternoWithoutMotivoSerializer
     filterset_class = SolicitudTutorFilterSet
     permission_classes = (IsSameAreaPermissions, IsJefeArea | IsDirectorRecursosHumanos,)
+    search_fields = (
+        'area__nombre', 'joven__area_nombre', 'joven__first_name', 'joven__last_name', 'joven__email',
+        'joven__username',
+        'joven__carnet')
+    ordering_fields = '__all__'
 
     def get_queryset(self):
         area = self.kwargs.get('areaID', self.request.user.area_id)

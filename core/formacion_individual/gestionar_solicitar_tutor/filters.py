@@ -33,9 +33,9 @@ class SolicitudTutorFilterSet(FilterSet):
 
 
 class TutoriaFilterSet(FilterSet):
-    no_revocation = filters.BooleanFilter(method='no_revocation_filter')
+    revocado = filters.BooleanFilter(method='revocado_filter')
 
-    def no_revocation_filter(self, queryset, name, value):
+    def revocado_filter(self, queryset, name, value):
         queryset = queryset.filter(fechaRevocado__isnull=not value)
         return queryset
 

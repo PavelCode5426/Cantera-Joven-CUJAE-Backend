@@ -28,7 +28,7 @@ class NotificacionConfig(AppConfigToolkit, AppConfig):
             schedule(self.name + '.tasks.enviar_notificaciones_por_correo',
                      schedule_type=Schedule.CRON,
                      name='enviarNotificacionesPorCorreoJob',
-                     # cron='0 0 4 * * *' #4:00 am
-                     cron=' * * * * *')
+                     cron='0 0 4 * * *')  # 4:00 am
+            # cron=' * * * * *')
         except Exception as e:
             pass

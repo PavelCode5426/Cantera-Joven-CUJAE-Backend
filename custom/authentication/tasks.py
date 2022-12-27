@@ -1,16 +1,14 @@
-from social_core.utils import user_is_active
-
 from core.configuracion.helpers import isConfigAvailable
 from custom.authentication.LDAP.ldap_facade import LDAPFacade
-from custom.authentication.LDAP.sigenu_ldap_services import SIGENU_LDAP_Services
 from custom.authentication.models import DirectoryUser
 from custom.logging import logger
 
 
 @isConfigAvailable('mantener_actualizada_informacion_de_usuarios')
 def actualizar_informacion_usuarios():
-    directory_users = LDAPFacade().all_workers_with_filter()
-    importados = DirectoryUser.objects.filter(is_active=True).all()
+    directory_users = LDAPFacade().all_persons_with_filter()
+    importados = DirectoryUser.objects.filter(is_active=True, posiblegraduado=None).all()
+    usuarios_perdidos = list()
     it = iter(importados)
     text = ''
 
@@ -28,20 +26,17 @@ def actualizar_informacion_usuarios():
                         directory_users.remove(ldap_user)
                         raise StopIteration
             except StopIteration:
-                current.is_active = False
+                pass
 
             if not ldap_user:
-                text += f'* No se encontro al usuario {current.get_fullname()} con CI {current.carnet}\n'
-                logger.critical()
+                text += f'* No se encontro al usuario {current.get_full_name()} con CI {current.carnet}\n'
+                current.is_active = False
+                usuarios_perdidos.append(current)
             else:
-                current.fist_name = ldap_user.get('name')
-                #TODO SEGUIN CAMBIANDO COSAS
-                #current.save()
+                LDAPFacade().update_or_insert_user(ldap_user)
+
 
     except StopIteration as e:
-        DirectoryUser.objects.bulk_update(importados)
+        DirectoryUser.objects.bulk_update(usuarios_perdidos, ['is_active'])
         if text:
-            logger.critical(f'Error importando usuarios\n{text}')
-
-
-
+            logger.critical(f'Error importando usuarios durante la actualizacion automatica\n{text}')

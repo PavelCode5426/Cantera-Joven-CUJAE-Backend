@@ -8,6 +8,7 @@ from custom.logging import logger
 def actualizar_informacion_graduados():
     directory_users = LDAPFacade().all_graduates()
     importados = Graduado.objects.filter(is_active=True).all()
+    usuarios_perdidos = list()
     it = iter(importados)
     text = ''
 
@@ -28,15 +29,14 @@ def actualizar_informacion_graduados():
                 current.is_active = False
 
             if not ldap_user:
-                text += f'* No se encontro al graduado {current.get_fullname()} con CI {current.carnet}\n'
-                logger.critical()
+                text += f'* No se encontro al usuario {current.get_full_name()} con CI {current.carnet}\n'
+                current.is_active = False
+                usuarios_perdidos.append(current)
             else:
-                current.fist_name = ldap_user.get('name')
-                #TODO SEGUIN CAMBIANDO COSAS
-                #current.save()
+                LDAPFacade().update_or_insert_user(ldap_user)
 
     except StopIteration as e:
-        Graduado.objects.bulk_update(importados)
+        Graduado.objects.bulk_update(usuarios_perdidos, ['is_active'])
         if text:
             logger.critical(f'Error importando graduados\n{text}')
 
@@ -45,6 +45,7 @@ def actualizar_informacion_graduados():
 def actualizar_informacion_estudiantes():
     directory_users = LDAPFacade().all_students()
     importados = Estudiante.objects.filter(is_active=True).all()
+    usuarios_perdidos = list()
     it = iter(importados)
     text = ''
 
@@ -62,21 +63,16 @@ def actualizar_informacion_estudiantes():
                         directory_users.remove(ldap_user)
                         raise StopIteration
             except StopIteration:
-                current.is_active = False
+                pass
 
             if not ldap_user:
-                text += f'* No se encontro al usuario {current.get_fullname()} con CI {current.carnet}\n'
-                logger.critical()
+                text += f'* No se encontro al usuario {current.get_full_name()} con CI {current.carnet}\n'
+                current.is_active = False
+                usuarios_perdidos.append(current)
             else:
-                current.fist_name = ldap_user.get('name')
-                #TODO SEGUIN CAMBIANDO COSAS
-                #current.save()
+                LDAPFacade().update_or_insert_user(ldap_user)
 
     except StopIteration as e:
-        Estudiante.objects.bulk_update(importados)
+        Estudiante.objects.bulk_update(usuarios_perdidos, ['is_active'])
         if text:
-            logger.critical(f'Error importando usuarios\n{text}')
-
-
-
-
+            logger.critical(f'Error importando estudiantes\n{text}')
