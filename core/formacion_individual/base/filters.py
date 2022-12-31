@@ -25,7 +25,8 @@ class JovenFilterSet(FilterSet):
     def has_plan_filter(self, queryset, name, value):
         plan = bool(value)
         if plan:
-            queryset = queryset.filter(planesformacion__isnull=False)
+            queryset = queryset.filter(
+                planesformacion__isnull=False)  # TODO AJUSTAR ESTO PARA QUE SALGA CUANDO SE TERMINA EL PLAN
         else:
             queryset = queryset.filter(planesformacion=None)
         return queryset

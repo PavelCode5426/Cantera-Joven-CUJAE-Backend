@@ -1,5 +1,6 @@
 import os
 
+from crum import get_current_request
 from django.conf import settings
 from django.core.files.storage import FileSystemStorage
 from rest_framework import serializers
@@ -116,6 +117,7 @@ class EtapaFormacionModelSerializer(serializers.ModelSerializer):
 
 class UpdateEtapaFormacionSerializer(EtapaFormacionModelSerializer):
     objetivo = serializers.CharField(min_length=10, max_length=255)
+    dimension = None
     fechaInicio = serializers.DateTimeField(validators=[datetime_greater_now])
     fechaFin = serializers.DateTimeField(validators=[datetime_greater_now])
 
@@ -133,7 +135,7 @@ class UpdateEtapaFormacionSerializer(EtapaFormacionModelSerializer):
 
     class Meta:
         model = EtapaFormacion
-        exclude = ('plan', 'evaluacion')
+        exclude = ('plan',)
 
 
 class ArchivoModelSerializer(serializers.ModelSerializer):
@@ -142,7 +144,7 @@ class ArchivoModelSerializer(serializers.ModelSerializer):
     archivo = serializers.SerializerMethodField(method_name='file_full_url')
 
     def file_full_url(self, instance):
-        request = self.context.get('request')
+        request = self.context.get('request', get_current_request())
         file_url = instance.archivo.url
         return request.build_absolute_uri(file_url)
 
@@ -159,8 +161,7 @@ class ArchivoModelSerializer(serializers.ModelSerializer):
         fields = ('id', 'nombre', 'size', 'fecha', 'archivo',)
 
 
-class PlanFormacionModelSerializer(serializers.ModelSerializer):
-    joven = JovenSerializer(read_only=True)
+class PlanFormacionWithoutJoveModelSerializer(serializers.ModelSerializer):
     aprobadoPor = DirectoryUserSerializer(allow_null=True, read_only=True)
     documento = serializers.SerializerMethodField(method_name='last_version', read_only=True, allow_null=True)
 
@@ -169,6 +170,15 @@ class PlanFormacionModelSerializer(serializers.ModelSerializer):
         if archivo:
             return ArchivoModelSerializer(instance=archivo, context=self.context).data
         return None
+
+    class Meta:
+        model = PlanFormacion
+        depth = 1
+        exclude = ('joven',)
+
+
+class PlanFormacionModelSerializer(PlanFormacionWithoutJoveModelSerializer):
+    joven = JovenSerializer(read_only=True)
 
     class Meta:
         model = PlanFormacion

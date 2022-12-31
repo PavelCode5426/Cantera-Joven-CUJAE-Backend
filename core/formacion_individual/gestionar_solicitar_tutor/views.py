@@ -11,7 +11,7 @@ from custom.authentication.models import DirectoryUser
 from . import serializers
 from .exceptions import PreviouslyAnsweredRequestException, GraduateRequireAvalException, \
     SelectedUserIsNotJovenException
-from .filters import SolicitudTutorFilterSet, TutoriaFilterSet
+from .filters import SolicitudTutorFilterSet, TutoriaFilterSet, TutoriaPorTutorFilterSet
 from .permissions import SendOrReciveSolicitudTutorExternoPermissions
 from ..base.helpers import user_student_or_graduate
 from ...base.models.modelosUsuario import Graduado
@@ -53,7 +53,7 @@ class TutoradosPorTutorListAPIView(ListAPIView):
     """
     serializer_class = serializers.TutoradosDelTutorSerializer
     permission_classes = (TutorOfSameAreaPermissions | IsJefeArea | IsSameTutorWhoRequestPermissions,)
-    filterset_class = TutoriaFilterSet
+    filterset_class = TutoriaPorTutorFilterSet
     search_fields = ('joven__first_name', 'joven__last_name', 'joven__email', 'joven__username', 'joven__carnet')
     ordering_fields = '__all__'
 

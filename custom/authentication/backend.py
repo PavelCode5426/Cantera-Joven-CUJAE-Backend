@@ -89,7 +89,7 @@ class BearerAuthentication(TokenAuthentication):
 
 
 class APIKeyAuthentication(TokenAuthentication):
-    keyword = 'Bearer'
+    keyword = 'Token'
     model = DirectoryUserAPIKey
 
     def authenticate_credentials(self, key):

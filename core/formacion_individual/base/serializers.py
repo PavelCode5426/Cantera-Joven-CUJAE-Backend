@@ -170,10 +170,16 @@ class JovenCommonAttrs(DirectoryUserSerializer):
         return hasattr(object, 'aval')
 
     def get_plan(self, object):
-        return object.planesformacion.filter(evaluacion=None).exists()
+        from core.formacion_individual.planificacion.serializers import PlanFormacionWithoutJoveModelSerializer
+        plan = object.planesformacion.filter(evaluacion=None).first()
+        if plan:
+            return PlanFormacionWithoutJoveModelSerializer(instance=plan).data
+        else:
+            return None
 
     class Meta:
         fields = DirectoryUserSerializer.Meta.fields + ('aval', 'plan')
+        depth = 1
 
 
 class GraduadoSerializer(JovenCommonAttrs):

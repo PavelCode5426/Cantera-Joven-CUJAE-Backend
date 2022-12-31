@@ -9,7 +9,7 @@ from core.formacion_individual.planificacion.views import CreateRetrieveJovenPla
     ListCreateActividadFormacion, RetrieveUpdateDeleteActividadFormacion, ListCreateActividadFormacionCommets, \
     ExportarPDFPlanFormacionComplemtaria, ExportarCalendarioPlanFormacionComplemtaria, \
     SolicitarRevisionActividadFormacion, ListCreateSubActividadFormacion, RetrieveDeleteArchive, \
-    ActividadFormacionUploadFile, ListRetrieveEvaluacionesArea, PropuestaMovimientoModelViewset
+    ActividadFormacionUploadFile, ListRetrieveEvaluacionesArea, PropuestaMovimientoModelViewset, DimensionModelViewset
 
 app_name = 'PlanificacionFormacionIndividual'
 
@@ -50,7 +50,7 @@ urlpatterns = [
 router = DefaultRouter()
 router.register('evaluacion', ListRetrieveEvaluacionesArea, 'area-evaluaciones')
 router.register('propuesta-moviemiento', PropuestaMovimientoModelViewset, 'propuesta-movimiento')
-router.register('dimension', PropuestaMovimientoModelViewset, 'dimension')
+router.register('dimension', DimensionModelViewset, 'dimension')
 router.register('archivo', RetrieveDeleteArchive, 'archivo')
 
 urlpatterns += router.urls

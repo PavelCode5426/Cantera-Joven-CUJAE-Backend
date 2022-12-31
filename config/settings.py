@@ -280,7 +280,7 @@ LOGGING = {
 Q_CLUSTER = {
     'name': 'CanteraJovenCUJAE',
     'workers': 1,
-    'timeout': None,
+    'timeout': 120,
     'recycle': 500,
     'compress': True,
     'queue_limit': 500,

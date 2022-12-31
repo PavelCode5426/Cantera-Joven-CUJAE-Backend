@@ -1,5 +1,6 @@
 import os
 
+from crum import get_current_request
 from django.core.files.storage import FileSystemStorage
 from rest_framework import serializers
 
@@ -18,7 +19,7 @@ class ArchivoModelSerializer(serializers.ModelSerializer):
     archivo = serializers.SerializerMethodField(method_name='file_full_url')
 
     def file_full_url(self, instance):
-        request = self.context.get('request')
+        request = self.context.get('request', get_current_request())
         file_url = instance.archivo.url
         return request.build_absolute_uri(file_url)
 

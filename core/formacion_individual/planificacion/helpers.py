@@ -73,7 +73,11 @@ class PlanFormacionIndividualHelpers:
         self.plan = plan
 
     def obtener_tutores(self):
-        return self.plan.joven.tutores.filter(fechaRevocado=None).all()
+        elements = self.plan.joven.tutores.filter(fechaRevocado=None).all()
+        tutores = list()
+        for item in elements:
+            tutores.append(item.tutor)
+        return tutores
 
     def obtener_jefes_area(self):
         area = self.plan.joven.area

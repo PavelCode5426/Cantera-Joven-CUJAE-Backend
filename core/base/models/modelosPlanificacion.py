@@ -69,7 +69,7 @@ class Archivo(models.Model):
     POR LA FECHA SE SABRA CUAL ES EL MOMENTO DE CADA VERSION
     """
     fecha = models.DateTimeField(auto_now_add=True)
-    archivo = models.FileField(upload_to='media', max_length=1000)
+    archivo = models.FileField(upload_to='media', max_length=10000)
     plan = models.ForeignKey(Plan, on_delete=models.CASCADE, null=True, blank=True, default=None,
                              related_name='versiones')
     actividad = models.ForeignKey(Actividad, on_delete=models.CASCADE, null=True, blank=True, default=None,

@@ -233,7 +233,8 @@ class ExportarPDFPlanFormacionComplemtaria(PlanFormacionExportMixin):
     """
     PERMITE EXPORTAR UN PLAN DE FORMACION A PDF
     """
-    permission_classes = [IsPlanJovenPermissions | IsPlanTutorOrJefeAreaPermissions]
+    # permission_classes = [IsPlanJovenPermissions | IsPlanTutorOrJefeAreaPermissions]
+    permission_classes = []
     plain_exporter_class = PlainPDFExporter
 
 
@@ -241,7 +242,8 @@ class ExportarCalendarioPlanFormacionComplemtaria(PlanFormacionExportMixin):
     """
         PERMITE EXPORTAR UN PLAN DE FORMACION A CALENDARIO
     """
-    permission_classes = [IsPlanJovenPermissions | IsPlanTutorOrJefeAreaPermissions]
+    # permission_classes = [IsPlanJovenPermissions | IsPlanTutorOrJefeAreaPermissions]
+    permission_classes = []
     plain_exporter_class = PlainCalendarExporter
 
 
@@ -510,7 +512,8 @@ class ActividadFormacionUploadFile(CreateAPIView, ActividadFormacionMixin):
     """
     PERMITE SUBIR UN ARCHIVO A LA ACTIVIDAD, ESTO ES UTIL PORQUE PUEDES ENTREGAR TAREAS MEDIANTE ESTA OPCION
     """
-    permission_classes = [IsPlanJovenPermissions | IsPlanTutorPermissions]
+    # permission_classes = [IsPlanJovenPermissions | IsPlanTutorPermissions]
+    permission_classes = []
     serializer_class = SubirArchivoActividad
 
     def create(self, request, *args, **kwargs):
@@ -518,9 +521,11 @@ class ActividadFormacionUploadFile(CreateAPIView, ActividadFormacionMixin):
 
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(True)
-        serializer.save(actividad_id=self.get_actividadID(), plan_id=self.get_planID())
+        plan_id = self.get_actividad().etapa.plan_id
+        archivo = serializer.save(actividad_id=self.get_actividadID(), plan_id=plan_id)
 
-        return Response({'detail': 'Archivo subido correctamente'}, HTTP_201_CREATED)
+        response = ArchivoModelSerializer(instance=archivo).data
+        return Response(response, HTTP_201_CREATED)
 
 
 class RetrieveDeleteArchive(RetrieveModelMixin, DestroyModelMixin, GenericViewSet):

@@ -220,7 +220,8 @@ class FirmarPlanColectivo(CreateAPIView, PlanColectivoMixin):
 class ActividadColectivaUploadFile(CreateAPIView, ActividadColectivaMixin):
     """
     """
-    permission_classes = [IsDirectorRecursosHumanos | IsJefeArea]
+    # permission_classes = [IsDirectorRecursosHumanos | IsJefeArea]
+    permission_classes = []
     serializer_class = SubirArchivoActividad
 
     def create(self, request, *args, **kwargs):
@@ -228,9 +229,9 @@ class ActividadColectivaUploadFile(CreateAPIView, ActividadColectivaMixin):
         can_upload_file(actividad)
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(True)
-        serializer.save(actividad_id=actividad.pk, plan_id=actividad.etapa.plan_id)
-
-        return Response({'detail': 'Archivo subido correctamente'}, HTTP_201_CREATED)
+        archivo = serializer.save(actividad_id=actividad.pk, plan_id=actividad.etapa.plan_id)
+        response = ArchivoModelSerializer(instance=archivo).data
+        return Response(response, HTTP_201_CREATED)
 
 
 class ListCreateActividadArea(ListCreateAPIView, MultiplePermissionsView, ActividadColectivaMixin):
@@ -275,7 +276,6 @@ class ListAsistenciaActividad(ListCreateAPIView, ActividadColectivaMixin, Multip
     post_permission_classes = [IsJefeArea]
     serializer_class = PosibleGraduadoSerializer
     filterset_class = None  # TODO PONER UN FILTRO AQUI PARA LA ASISTENCIA
-
 
     def get_actividad(self, actividadID: int = None):
         actividad_query = ActividadColectiva.objects.exclude(area=None, esGeneral=False)
@@ -330,5 +330,6 @@ class ExportarPlanColectivoPDF(PlanColectivoExportMixin):
     """
     PERMITE EXPORTAR UN PLAN DE FORMACION A PDF
     """
-    permission_classes = [IsJefeArea | IsVicerrector | IsDirectorRecursosHumanos]
+    # permission_classes = [IsJefeArea | IsVicerrector | IsDirectorRecursosHumanos]
+    permission_classes = []
     plain_exporter_class = PlainPDFExporter

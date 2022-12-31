@@ -36,9 +36,27 @@ class TutoriaFilterSet(FilterSet):
     revocado = filters.BooleanFilter(method='revocado_filter')
 
     def revocado_filter(self, queryset, name, value):
-        queryset = queryset.filter(fechaRevocado__isnull=not value)
+        queryset = queryset.filter(fechaRevocado__isnull=not bool(value))
         return queryset
 
     class Meta:
         model = TutoresAsignados
         fields = ()
+
+
+class TutoriaPorTutorFilterSet(TutoriaFilterSet):
+    has_aval = filters.BooleanFilter(field_name='aval', method='has_aval_filter')
+    has_plan = filters.BooleanFilter(method='has_plan_filter')
+
+    def has_aval_filter(self, queryset, name, value):
+        aval = not bool(value)
+        return queryset.filter(joven__aval__isnull=aval)
+
+    def has_plan_filter(self, queryset, name, value):
+        plan = bool(value)
+        if plan:
+            queryset = queryset.filter(
+                joven__planesformacion__isnull=False)  # TODO AJUSTAR ESTO PARA QUE SALGA CUANDO SE TERMINA EL PLAN
+        else:
+            queryset = queryset.filter(joven__planesformacion=None)
+        return queryset
