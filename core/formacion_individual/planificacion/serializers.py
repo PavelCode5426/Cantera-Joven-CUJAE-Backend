@@ -3,6 +3,7 @@ import os
 from crum import get_current_request
 from django.conf import settings
 from django.core.files.storage import FileSystemStorage
+from django.db.models import Q
 from rest_framework import serializers
 from rest_framework.serializers import ModelSerializer
 
@@ -12,6 +13,7 @@ from core.base.models.modelosPlanificacionIndividual import EtapaFormacion, \
 from core.base.models.modelosSimple import PropuestaMovimiento, Dimension
 from core.base.validators import datetime_greater_now
 from core.formacion_individual.base.serializers import JovenSerializer
+from custom.authentication.models import DirectoryUser
 from custom.authentication.serializer import DirectoryUserSerializer
 
 
@@ -51,6 +53,16 @@ class CommentsModelSerializer(serializers.ModelSerializer):
 
 class EvaluacionFormacionModelSerializer(serializers.ModelSerializer):
     aprobadoPor = DirectoryUserSerializer(allow_null=True)
+    joven = serializers.SerializerMethodField()
+    etapa = serializers.SerializerMethodField()
+
+    def get_joven(self, object):
+        joven = DirectoryUser.objects.filter(planesformacion__etapas__etapaformacion__evaluacion_id=object.pk).first()
+        return JovenSerializer(joven).data
+
+    def get_etapa(self, object):
+        etapa = EtapaFormacion.objects.filter(evaluacion_id=object.pk).first()
+        return EtapaFormacionWithOutEvaluacionModelSerializer(etapa).data
 
     class Meta:
         model = EvaluacionFormacion
@@ -60,6 +72,12 @@ class EvaluacionFormacionModelSerializer(serializers.ModelSerializer):
 class EvaluacionFinalModelSerializer(serializers.ModelSerializer):
     aprobadoPor = DirectoryUserSerializer(allow_null=True)
     propuestaMovimiento = PropuestaMovimientoModelSerializer(allow_null=True)
+    joven = serializers.SerializerMethodField()
+
+    def get_joven(self, object):
+        joven = DirectoryUser.objects.filter(
+            Q(planesformacion__evaluacion_id=object.pk) | Q(planesformacion__evaluacion_prorroga_id=object.pk)).first()
+        return JovenSerializer(joven).data
 
     class Meta:
         model = EvaluacionFinal
@@ -102,6 +120,16 @@ class CrearEvaluacionFinalModelSerializer(serializers.ModelSerializer):
     class Meta:
         model = EvaluacionFinal
         exclude = ()
+
+
+class EtapaFormacionWithOutEvaluacionModelSerializer(serializers.ModelSerializer):
+    numero = serializers.IntegerField(read_only=True)
+    esProrroga = serializers.BooleanField(read_only=True)
+    dimension = DimensionModelSerializer(allow_null=True, read_only=True)
+
+    class Meta:
+        model = EtapaFormacion
+        exclude = ('evaluacion',)
 
 
 class EtapaFormacionModelSerializer(serializers.ModelSerializer):
@@ -231,15 +259,43 @@ class FirmarPlanFormacionSerializer(serializers.Serializer):
 
 
 class ActividadFormacionModelSerializer(serializers.ModelSerializer):
-    subactividades = serializers.SerializerMethodField(read_only=True)
+    hasChildren = serializers.SerializerMethodField(read_only=True, method_name='get_hasSubactividades')
+    esSubactividad = serializers.SerializerMethodField(read_only=True)
+    children = serializers.SerializerMethodField(read_only=True, method_name='get_subactividades')
     documentos = ArchivoModelSerializer(many=True)
 
-    def get_subactividades(self, object):
+    def get_hasSubactividades(self, object):
         return object.subactividades.exists()
+
+    def get_esSubactividad(self, object):
+        return bool(object.actividadPadre_id)
+
+    def get_subactividades(self, object):
+        return ActividadFormacionModelSerializer(object.subactividades, many=True).data
 
     class Meta:
         model = ActividadFormacion
         exclude = ('actividadPadre',)
+
+
+# class ActividadFormacionModelSerializer(serializers.ModelSerializer):
+#     hasSubactividades = serializers.SerializerMethodField(read_only=True)
+#     esSubactividad = serializers.SerializerMethodField(read_only=True)
+#     subactividades = serializers.SerializerMethodField(read_only=True)
+#     documentos = ArchivoModelSerializer(many=True)
+#
+#     def get_hasSubactividades(self, object):
+#         return object.subactividades.exists()
+#
+#     def get_esSubactividad(self, object):
+#         return bool(object.actividadPadre_id)
+#
+#     def get_subactividades(self, object):
+#         return ActividadFormacionModelSerializer(object.subactividades, many=True).data
+#
+#     class Meta:
+#         model = ActividadFormacion
+#         exclude = ('actividadPadre',)
 
 
 class CreateUpdateActividadFormacionSerializer(serializers.ModelSerializer):

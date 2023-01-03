@@ -150,6 +150,9 @@ def gestionar_la_aprobacion_de_la_evaluacion(sender, plan: PlanFormacion = None,
             plan.estado = plan.Estados.ENDESARROLLO
             plan.aprobadoPor = None
             plan.save()
+        else:
+            plan.estado = plan.Estados.FINALIZADO
+            plan.save()
 
     elif isinstance(sender, EvaluacionFormacion):
         if sender.cerrarPlan:

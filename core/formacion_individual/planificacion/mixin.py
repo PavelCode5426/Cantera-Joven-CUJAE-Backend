@@ -66,7 +66,7 @@ class ActividadFormacionMixin(EtapaFormacionMixin):
 
     def can_manage_actividad(self, actividadID: int = None) -> bool:
         actividad = self.get_actividad(actividadID)
-        return self.can_manage_etapa(actividad.etapa_id) or actividad.actividadPadre_id
+        return actividad.actividadPadre_id or self.can_manage_etapa(actividad.etapa_id)
 
     def can_upload_file(self, actividadID: int = None) -> bool:
         actividad = self.get_actividad(actividadID)

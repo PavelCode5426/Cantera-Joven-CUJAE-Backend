@@ -33,6 +33,7 @@ class Plan(models.Model):
         PENDIENTE = 'Pendiente de Revision'
         RECHAZADO = 'Rechazado'
         APROBADO = 'Aprobado'
+        FINALIZADO = 'Finalizado'
 
     estado = models.CharField(choices=Estados.choices, max_length=25, default=Estados.ENDESARROLLO)
 
@@ -82,5 +83,5 @@ class Comentario(abstractModels.AbtractUserForeignKey):
     """
     texto = models.CharField(max_length=255)
     fecha = models.DateTimeField(auto_now_add=True)
-    plan = models.ForeignKey(Plan, null=True, blank=True, default=None, on_delete=models.RESTRICT)
-    actividad = models.ForeignKey(Actividad, null=True, blank=True, default=None, on_delete=models.RESTRICT)
+    plan = models.ForeignKey(Plan, null=True, blank=True, default=None, on_delete=models.CASCADE)
+    actividad = models.ForeignKey(Actividad, null=True, blank=True, default=None, on_delete=models.CASCADE)

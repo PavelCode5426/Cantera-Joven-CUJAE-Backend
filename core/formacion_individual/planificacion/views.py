@@ -12,7 +12,7 @@ from rest_framework.viewsets import ReadOnlyModelViewSet, ModelViewSet, GenericV
 from core.base.generics import MultiplePermissionsView
 from core.base.models.modelosPlanificacion import Comentario, Evaluacion, Archivo
 from core.base.models.modelosPlanificacionIndividual import EtapaFormacion, \
-    ActividadFormacion, PlanFormacion
+    ActividadFormacion, PlanFormacion, EvaluacionFinal
 from core.base.models.modelosSimple import Area, PropuestaMovimiento, Dimension
 from core.base.permissions import IsJefeArea, IsTutor, IsDirectorRecursosHumanos
 from core.configuracion.helpers import config
@@ -22,6 +22,7 @@ from core.formacion_individual.base.permissions import IsSameJovenWhoRequestPerm
 from core.formacion_individual.planificacion import signals
 from core.formacion_individual.planificacion.exceptions import JovenHavePlan, CantEvaluateException, \
     ResourceCantBeCommented, PlanAlreadyApproved, EvaluacionAlreadyApproved, FormacionHasNotStarted
+from core.formacion_individual.planificacion.filters import EvaluacionFilterSet, PlanFormacionFilterSet
 from core.formacion_individual.planificacion.helpers import PlainPDFExporter, PlainCalendarExporter
 from core.formacion_individual.planificacion.mixin import PlanFormacionMixin, PlanFormacionExportMixin, \
     ActividadFormacionMixin, EtapaFormacionMixin
@@ -47,6 +48,7 @@ FORMACION POR PLAN
 class ListPlanFormacionInArea(ListAPIView):
     permission_classes = (IsJefeArea,)
     serializer_class = PlanFormacionModelSerializer
+    filterset_class = PlanFormacionFilterSet
     search_fields = ('joven__first_name', 'joven__last_name', 'joven__carnet')
     ordering_fields = '__all__'
 
@@ -58,12 +60,24 @@ class ListPlanFormacionInArea(ListAPIView):
 class ListPlanFormacionInTutor(ListAPIView):
     permission_classes = (IsTutor, IsSameTutorWhoRequestPermissions | IsJefeArea)
     serializer_class = PlanFormacionModelSerializer
+    filterset_class = PlanFormacionFilterSet
+    search_fields = ('joven__first_name', 'joven__last_name', 'joven__carnet')
 
     def get_queryset(self):
         tutor = get_object_or_404(DirectoryUser, pk=self.kwargs['tutorID'])
         return PlanFormacion.objects \
             .filter(joven__tutores__tutor_id=tutor, joven__tutores__fechaRevocado=None) \
             .order_by('-fechaCreado').all()
+
+
+class ListPlanFormacionInJoven(ListAPIView):
+    permission_classes = [IsSameJovenWhoRequestPermissions | IsJovenTutorOrJefeAreaPermissions]
+    serializer_class = PlanFormacionModelSerializer
+    filterset_class = PlanFormacionFilterSet
+
+    def get_queryset(self):
+        joven = get_object_or_404(DirectoryUser, pk=self.kwargs['jovenID'])
+        return PlanFormacion.objects.filter(joven=joven).order_by('-fechaCreado').all()
 
 
 class CreateRetrieveJovenPlanFormacion(CreateAPIView, RetrieveAPIView, MultiplePermissionsView):
@@ -335,8 +349,30 @@ EVALUACIONES
 class ListRetrieveEvaluacionesArea(ReadOnlyModelViewSet):
     permission_classes = (IsJefeArea,)
     serializer_class = EvaluacionModelSerializer
+    filterset_class = EvaluacionFilterSet
+    search_fields = [
+        # ETAPA DE FORMACION
+        'evaluacionformacion__etapaformacion__plan__planformacion__joven__first_name',
+        'evaluacionformacion__etapaformacion__plan__planformacion__joven__last_name',
+        'evaluacionformacion__etapaformacion__plan__planformacion__joven__carnet',
+        'evaluacionformacion__etapaformacion__plan__planformacion__joven__username',
+        'evaluacionformacion__etapaformacion__plan__planformacion__joven__email',
+        # PLAN DE FORMACION
+        'evaluacionfinal__planformacion__joven__first_name',
+        'evaluacionfinal__planformacion__joven__last_name',
+        'evaluacionfinal__planformacion__joven__carnet',
+        'evaluacionfinal__planformacion__joven__username',
+        'evaluacionfinal__planformacion__joven__email',
+        # PLAN DE FORMACION PRORROGADO
+        'evaluacionfinal__planprorrogado__joven__first_name',
+        'evaluacionfinal__planprorrogado__joven__last_name',
+        'evaluacionfinal__planprorrogado__joven__carnet',
+        'evaluacionfinal__planprorrogado__joven__username',
+        'evaluacionfinal__planprorrogado__joven__email',
+    ]
 
     def get_queryset(self):
+        EvaluacionFinal.objects.filter()
         areaID = self.request.user.area_id
         query = Evaluacion.objects.filter(
             Q(evaluacionfinal__planformacion__aprobadoPor__area_id=areaID) |
@@ -394,7 +430,7 @@ class ListCreateActividadFormacion(ListCreateAPIView, MultiplePermissionsView, A
         serializer = CreateUpdateActividadFormacionSerializer(data=request.data)
         serializer.is_valid(True)
         serializer.save(etapa=etapa)
-        return Response({'detail': 'Actividad creada correctamente'})
+        return Response(serializer.data, HTTP_201_CREATED)
 
 
 class RetrieveUpdateDeleteActividadFormacion(RetrieveUpdateDestroyAPIView, MultiplePermissionsView,
@@ -403,9 +439,9 @@ class RetrieveUpdateDeleteActividadFormacion(RetrieveUpdateDestroyAPIView, Multi
     PERMITE GESTIONAR LAS TAREAS DE FORMACION INDIVIDUAL
     """
     get_permission_classes = [IsPlanJovenPermissions | IsPlanTutorOrJefeAreaPermissions]
-    delete_permission_classes = [IsPlanTutorPermissions]
-    put_permission_classes = [IsPlanTutorPermissions]
-    patch_permission_classes = [IsPlanTutorPermissions]
+    delete_permission_classes = [IsPlanTutorPermissions | IsPlanJovenPermissions]
+    put_permission_classes = [IsPlanTutorPermissions | IsPlanJovenPermissions]
+    patch_permission_classes = [IsPlanTutorPermissions | IsPlanJovenPermissions]
 
     serializer_class = ActividadFormacionModelSerializer
 
@@ -422,7 +458,7 @@ class RetrieveUpdateDeleteActividadFormacion(RetrieveUpdateDestroyAPIView, Multi
         if getattr(actividad, '_prefetched_objects_cache', None):
             actividad._prefetched_objects_cache = {}
 
-        return Response({'detail': 'Actividad actualizada correctamente'})
+        return Response(serializer.data)
 
     def partial_update(self, request, plan, *args, **kwargs):
         self.can_change_actividad_status()
@@ -435,7 +471,7 @@ class RetrieveUpdateDeleteActividadFormacion(RetrieveUpdateDestroyAPIView, Multi
             actividad._prefetched_objects_cache = {}
 
         signals.actividad_revisada.send(actividad, plan=self.get_plan())
-        return Response({'detail': 'Actividad actualizada correctamente'})
+        return Response(serializer.data)
 
     def destroy(self, request, *args, **kwargs):
         self.can_manage_actividad()
@@ -461,7 +497,7 @@ class ListCreateSubActividadFormacion(ListCreateAPIView, MultiplePermissionsView
         serializer = CreateUpdateActividadFormacionSerializer(data=request.data)
         serializer.is_valid(True)
         serializer.save(etapa_id=actividad.etapa_id, actividadPadre_id=actividad.pk)
-        return Response({'detail': 'Actividad creada correctamente'})
+        return Response(serializer.data, HTTP_200_OK)
 
 
 class SolicitarRevisionActividadFormacion(CreateAPIView, ActividadFormacionMixin):

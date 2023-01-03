@@ -9,12 +9,15 @@ from core.formacion_individual.planificacion.views import CreateRetrieveJovenPla
     ListCreateActividadFormacion, RetrieveUpdateDeleteActividadFormacion, ListCreateActividadFormacionCommets, \
     ExportarPDFPlanFormacionComplemtaria, ExportarCalendarioPlanFormacionComplemtaria, \
     SolicitarRevisionActividadFormacion, ListCreateSubActividadFormacion, RetrieveDeleteArchive, \
-    ActividadFormacionUploadFile, ListRetrieveEvaluacionesArea, PropuestaMovimientoModelViewset, DimensionModelViewset
+    ActividadFormacionUploadFile, ListRetrieveEvaluacionesArea, PropuestaMovimientoModelViewset, DimensionModelViewset, \
+    ListPlanFormacionInJoven
 
 app_name = 'PlanificacionFormacionIndividual'
 
 urlpatterns = [
     path('joven/<int:jovenID>/plan-individual', CreateRetrieveJovenPlanFormacion.as_view()),
+    # LISTADO DE PLANES DEL JOVEN
+    path('joven/<int:jovenID>/planes', ListPlanFormacionInJoven.as_view()),
     # ME TENDRA QUE DAR LOS PLANES DEL GRADUADO Y DEL ESTUDIANTE
     path('area/<int:areaID>/planes', ListPlanFormacionInArea.as_view()),
     # MUESTRA TAMBIEN LOS PLANES DEL GRADUADO Y EL ESTUDIANTE
