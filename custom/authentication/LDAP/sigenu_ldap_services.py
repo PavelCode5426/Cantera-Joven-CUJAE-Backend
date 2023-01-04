@@ -27,7 +27,11 @@ class SIGENU_LDAP_Services(object):
             auth=auth,
             params=query_params,
             json=data,
-            verify=False
+            verify=False,
+            proxies={
+                'http': 'http://10.8.6.50:3128',
+                'https': 'https://10.8.6.50:3128',
+            }
         )
 
     def login(self, username: str, password: str):
@@ -91,4 +95,3 @@ class SIGENU_Services(object):
 
     def carreras(self):
         return self.__request('carreras', 'GET').json()
-
