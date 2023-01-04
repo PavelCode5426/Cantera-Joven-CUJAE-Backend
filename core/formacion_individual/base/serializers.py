@@ -1,6 +1,7 @@
 from annoying.functions import get_object_or_None
 from django.contrib.auth.models import Group
 from django.db import transaction
+from django.db.models import Q
 from rest_framework import serializers
 
 from core.base.models.modelosSimple import Area
@@ -171,7 +172,9 @@ class JovenCommonAttrs(DirectoryUserSerializer):
 
     def get_plan(self, object):
         from core.formacion_individual.planificacion.serializers import PlanFormacionWithoutJoveModelSerializer
-        plan = object.planesformacion.filter(evaluacion=None).first()
+        plan = object.planesformacion \
+            .filter(Q(evaluacion__isnull=True) | Q(evaluacion__aprobadoPor__isnull=True) |
+                    Q(evaluacion_prorroga__isnull=True) | Q(evaluacion_prorroga__aprobadoPor__isnull=True)).first()
         if plan:
             return PlanFormacionWithoutJoveModelSerializer(instance=plan).data
         else:

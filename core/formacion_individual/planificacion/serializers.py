@@ -58,7 +58,7 @@ class EvaluacionFormacionModelSerializer(serializers.ModelSerializer):
 
     def get_joven(self, object):
         joven = DirectoryUser.objects.filter(planesformacion__etapas__etapaformacion__evaluacion_id=object.pk).first()
-        return JovenSerializer(joven).data
+        return DirectoryUserSerializer(joven).data
 
     def get_etapa(self, object):
         etapa = EtapaFormacion.objects.filter(evaluacion_id=object.pk).first()
@@ -74,10 +74,16 @@ class EvaluacionFinalModelSerializer(serializers.ModelSerializer):
     propuestaMovimiento = PropuestaMovimientoModelSerializer(allow_null=True)
     joven = serializers.SerializerMethodField()
 
+    plan = serializers.SerializerMethodField()
+
     def get_joven(self, object):
         joven = DirectoryUser.objects.filter(
             Q(planesformacion__evaluacion_id=object.pk) | Q(planesformacion__evaluacion_prorroga_id=object.pk)).first()
-        return JovenSerializer(joven).data
+        return DirectoryUserSerializer(joven).data
+
+    def get_plan(self, object):
+        plan = PlanFormacion.objects.filter(Q(evaluacion_id=object.pk) | Q(evaluacion_prorroga_id=object.pk)).first()
+        return AuxPlanFormacionModelSerializer(plan).data
 
     class Meta:
         model = EvaluacionFinal
@@ -207,6 +213,8 @@ class PlanFormacionWithoutJoveModelSerializer(serializers.ModelSerializer):
 
 class PlanFormacionModelSerializer(PlanFormacionWithoutJoveModelSerializer):
     joven = JovenSerializer(read_only=True)
+    evaluacion = EvaluacionFinalModelSerializer(read_only=True, allow_null=True)
+    evaluacion_prorroga = EvaluacionFinalModelSerializer(read_only=True, allow_null=True)
 
     class Meta:
         model = PlanFormacion
@@ -358,3 +366,10 @@ class SubirArchivoActividad(serializers.Serializer):
         file = file_system.save(f'{settings.PFI_UPLOAD_ROOT}/plan_{plan_id}/actividad_{actividad_id}/{file}', file)
 
         return Archivo.objects.create(actividad_id=actividad_id, archivo=file)
+
+
+class AuxPlanFormacionModelSerializer(PlanFormacionWithoutJoveModelSerializer):
+    class Meta:
+        model = PlanFormacion
+        depth = 1
+        exclude = ()

@@ -103,7 +103,10 @@ class CreateRetrieveJovenPlanFormacion(CreateAPIView, RetrieveAPIView, MultipleP
         if not config('comenzar_formacion_individual'):
             raise FormacionHasNotStarted
 
-        if PlanFormacion.objects.filter(joven=joven, evaluacion=None).exists():
+        if PlanFormacion.objects.filter(
+                Q(evaluacion__isnull=True) | Q(evaluacion__aprobadoPor__isnull=True) |
+                Q(evaluacion_prorroga__isnull=True) | Q(evaluacion_prorroga__aprobadoPor__isnull=True),
+                joven=joven).exists():
             raise JovenHavePlan
 
         plan = PlanFormacion.objects.create(joven=joven)
@@ -200,10 +203,15 @@ class EvaluarPlanFormacion(CreateAPIView, PlanFormacionMixin):
             signals.evaluacion_creada.send(evaluacion, plan=plan)
             plan.evaluacion_id = evaluacion.pk
             plan.save()
+        if not plan.evaluacion_prorroga and etapas_prorroga:
+            signals.evaluacion_creada.send(evaluacion, plan=plan)
+            plan.evaluacion_prorroga_id = evaluacion.pk
+            plan.save()
         else:
             signals.evaluacion_actualizada.send(evaluacion, plan=plan)
 
-        return Response({'detail': 'Plan evaluado correctamente'}, HTTP_200_OK)
+        serializer = EvaluacionModelSerializer(evaluacion)
+        return Response(serializer.data, HTTP_200_OK)
 
 
 class VersionesPlanFormacion(ListAPIView, PlanFormacionMixin):
@@ -336,7 +344,8 @@ class EvaluarEtapaFormacion(CreateAPIView, EtapaFormacionMixin):
         else:
             signals.evaluacion_actualizada.send(evaluacion, plan=plan, etapa=etapa)
 
-        return Response({'detail': 'Etapa evaluada correctamente'}, HTTP_200_OK)
+        serializer = EvaluacionModelSerializer(evaluacion)
+        return Response(serializer.data, HTTP_200_OK)
 
 
 """
@@ -375,9 +384,11 @@ class ListRetrieveEvaluacionesArea(ReadOnlyModelViewSet):
         EvaluacionFinal.objects.filter()
         areaID = self.request.user.area_id
         query = Evaluacion.objects.filter(
-            Q(evaluacionfinal__planformacion__aprobadoPor__area_id=areaID) |
-            Q(evaluacionformacion__etapaformacion__plan__aprobadoPor__area_id=areaID)) \
-            .order_by('-id').all()
+            Q(evaluacionfinal__planformacion__joven__area_id=areaID) |
+            Q(evaluacionfinal__planprorrogado__joven__area_id=areaID) |
+            Q(evaluacionformacion__etapaformacion__plan__aprobadoPor__area_id=areaID)). \
+            order_by('-id').all()
+        # Q(aprobadoPor__area_id=areaID)).\
         return query
 
 

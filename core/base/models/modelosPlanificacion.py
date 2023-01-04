@@ -8,6 +8,7 @@ class Evaluacion(models.Model):
     texto = models.CharField(max_length=255)
     esSatisfactorio = models.BooleanField(default=True)
     aprobadoPor = models.ForeignKey(authModels.DirectoryUser, models.RESTRICT, null=True, blank=True)
+    fechaCreado = models.DateTimeField(auto_now_add=True)
 
     @property
     def is_evaluacion_final(self):
