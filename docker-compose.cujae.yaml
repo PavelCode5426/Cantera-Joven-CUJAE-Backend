@@ -53,6 +53,10 @@ services:
       #NO CONFIGURAR EN CASO DE NO QUERER UTILIZAR TELEGRAM
       TELEGRAM_CHANNEL: 1001550325467
       TELEGRAM_TOKEN: 5250171383:AAGcKpubG_xVjAjg4XVZNWlWP8pCvZib5vw
+
+      #PROXY
+      HTTP_PROXY: http://10.8.6.50:3128
+      HTTPS_PROXY: https://10.8.6.50:3128
     volumes:
       - api_data:/media
     links:
