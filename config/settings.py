@@ -308,11 +308,10 @@ SIGENU_REST_PASSWORD = env('SIGENU_REST_PASSWORD', default=None)
 PFI_UPLOAD_ROOT = MEDIA_ROOT + '/plan-individual'
 PFC_UPLOAD_ROOT = MEDIA_ROOT + '/plan-colectivo'
 
-if env('HTTP_PROXY', default=None) or env('HTTPS_PROXY', default=None):
-    PROXIES = {
-        'http': env('HTTP_PROXY', default=None),
-        'https': env('HTTPS_PROXY', default=None)
-    }
+PROXIES = {
+    'http': env('HTTP_PROXY', default=None),
+    'https': env('HTTPS_PROXY', default=None)
+}
 
 # apps_loader = AppsLoader()
 # apps_loader.load()

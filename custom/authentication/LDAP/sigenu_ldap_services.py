@@ -29,7 +29,7 @@ class SIGENU_LDAP_Services(object):
             params=query_params,
             json=data,
             verify=False,
-            proxies=self.proxies
+            # proxies=self.proxies
         )
 
     def login(self, username: str, password: str):
