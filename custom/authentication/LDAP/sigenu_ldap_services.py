@@ -18,6 +18,7 @@ class SIGENU_LDAP_Services(object):
         self.base_url = settings.SIGENU_LDAP_URL
         self.username = settings.SIGENU_LDAP_USERNAME
         self.password = settings.SIGENU_LDAP_PASSWORD
+        self.proxies = settings.PROXIES
 
     def __request(self, url, method, query_params=None, data=None):
         auth = HTTPBasicAuth(self.username, self.password)
@@ -28,10 +29,7 @@ class SIGENU_LDAP_Services(object):
             params=query_params,
             json=data,
             verify=False,
-            proxies={
-                'http': 'http://10.8.6.50:3128',
-                'https': 'https://10.8.6.50:3128',
-            }
+            proxies=self.proxies
         )
 
     def login(self, username: str, password: str):
