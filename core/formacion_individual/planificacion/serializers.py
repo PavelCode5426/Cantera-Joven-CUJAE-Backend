@@ -4,6 +4,7 @@ from crum import get_current_request
 from django.conf import settings
 from django.core.files.storage import FileSystemStorage
 from django.db.models import Q
+from django.utils.timezone import now
 from rest_framework import serializers
 from rest_framework.serializers import ModelSerializer
 
@@ -266,30 +267,10 @@ class FirmarPlanFormacionSerializer(serializers.Serializer):
         return validated_data['sign']
 
 
-class ActividadFormacionModelSerializer(serializers.ModelSerializer):
-    hasChildren = serializers.SerializerMethodField(read_only=True, method_name='get_hasSubactividades')
-    esSubactividad = serializers.SerializerMethodField(read_only=True)
-    children = serializers.SerializerMethodField(read_only=True, method_name='get_subactividades')
-    documentos = ArchivoModelSerializer(many=True)
-
-    def get_hasSubactividades(self, object):
-        return object.subactividades.exists()
-
-    def get_esSubactividad(self, object):
-        return bool(object.actividadPadre_id)
-
-    def get_subactividades(self, object):
-        return ActividadFormacionModelSerializer(object.subactividades, many=True).data
-
-    class Meta:
-        model = ActividadFormacion
-        exclude = ('actividadPadre',)
-
-
 # class ActividadFormacionModelSerializer(serializers.ModelSerializer):
-#     hasSubactividades = serializers.SerializerMethodField(read_only=True)
+#     hasChildren = serializers.SerializerMethodField(read_only=True, method_name='get_hasSubactividades')
 #     esSubactividad = serializers.SerializerMethodField(read_only=True)
-#     subactividades = serializers.SerializerMethodField(read_only=True)
+#     children = serializers.SerializerMethodField(read_only=True, method_name='get_subactividades')
 #     documentos = ArchivoModelSerializer(many=True)
 #
 #     def get_hasSubactividades(self, object):
@@ -304,6 +285,26 @@ class ActividadFormacionModelSerializer(serializers.ModelSerializer):
 #     class Meta:
 #         model = ActividadFormacion
 #         exclude = ('actividadPadre',)
+
+
+class ActividadFormacionModelSerializer(serializers.ModelSerializer):
+    hasSubactividades = serializers.SerializerMethodField(read_only=True)
+    esSubactividad = serializers.SerializerMethodField(read_only=True)
+    subactividades = serializers.SerializerMethodField(read_only=True)
+    documentos = ArchivoModelSerializer(many=True)
+
+    def get_hasSubactividades(self, object):
+        return object.subactividades.exists()
+
+    def get_esSubactividad(self, object):
+        return bool(object.actividadPadre_id)
+
+    def get_subactividades(self, object):
+        return ActividadFormacionModelSerializer(object.subactividades, many=True).data
+
+    class Meta:
+        model = ActividadFormacion
+        exclude = ('actividadPadre',)
 
 
 class CreateUpdateActividadFormacionSerializer(serializers.ModelSerializer):
@@ -346,7 +347,10 @@ class CambiarEstadoActividadFormacion(serializers.ModelSerializer):
         instance = super(CambiarEstadoActividadFormacion, self).update(instance, validated_data)
         if instance.estado is not ActividadFormacion.Estado.CUMPLIDA:
             instance.fechaCumplimiento = None
-            instance.save()
+        elif instance.fechaCumplimiento == None:
+            instance.fechaCumplimiento = now()
+
+        instance.save()
         return instance
 
     class Meta:

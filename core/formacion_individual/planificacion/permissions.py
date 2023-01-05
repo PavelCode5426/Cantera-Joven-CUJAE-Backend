@@ -46,7 +46,8 @@ class PlanPermission:
         elif 'evaluacionID' in view_kwargs:
             evaluacionID = view_kwargs['evaluacionID']
             query = PlanFormacion.objects.filter(Q(etapas__etapaformacion__evaluacion_id=evaluacionID) |
-                                                 Q(evaluacion_id=evaluacionID)).distinct()
+                                                 Q(evaluacion_id=evaluacionID) |
+                                                 Q(evaluacion_prorroga_id=evaluacionID)).distinct()
             plan = get_object_or_404(query)
 
         self.add_plan_to_view(view_kwargs, plan)

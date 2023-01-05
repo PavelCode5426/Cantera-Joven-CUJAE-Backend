@@ -307,10 +307,12 @@ class RetrieveUpdateEtapaFormacion(RetrieveUpdateAPIView, EtapaFormacionMixin, M
         instance = self.get_object()
         serializer = UpdateEtapaFormacionSerializer(instance, data=request.data)
         serializer.is_valid(True)
-        serializer.save()
+        etapa = serializer.save()
 
         if getattr(instance, '_prefetched_objects_cache', None):
             instance._prefetched_objects_cache = {}
+
+        serializer = EtapaFormacionModelSerializer(etapa)
 
         return Response(serializer.data, HTTP_200_OK)
 
@@ -476,12 +478,13 @@ class RetrieveUpdateDeleteActividadFormacion(RetrieveUpdateDestroyAPIView, Multi
         actividad = self.get_object()
         serializer = CambiarEstadoActividadFormacion(instance=actividad, data=request.data)
         serializer.is_valid(True)
-        serializer.save()
+        actividad = serializer.save()
 
         if getattr(actividad, '_prefetched_objects_cache', None):
             actividad._prefetched_objects_cache = {}
 
         signals.actividad_revisada.send(actividad, plan=self.get_plan())
+        serializer = self.get_serializer(actividad)
         return Response(serializer.data)
 
     def destroy(self, request, *args, **kwargs):
@@ -516,6 +519,7 @@ class SolicitarRevisionActividadFormacion(CreateAPIView, ActividadFormacionMixin
     PERMITE SOLICITAR LA REVISION DE UNA TAREA AL TUTOR
     """
     permission_classes = (IsPlanJovenPermissions,)
+    serializer_class = ActividadFormacionModelSerializer
 
     def create(self, request, *args, **kwargs):
         self.can_change_actividad_status()
@@ -525,8 +529,9 @@ class SolicitarRevisionActividadFormacion(CreateAPIView, ActividadFormacionMixin
         actividad.save()
 
         actividad_revision_solicitada.send(actividad, plan=self.get_plan())
-
-        return Response({'detail': 'Solicitud de revision enviada para la actividad'})
+        serializer = self.get_serializer(actividad)
+        return Response(serializer.data)
+        # return Response({'detail': 'Solicitud de revision enviada para la actividad'})
 
 
 class ListCreateActividadFormacionCommets(ListCreateAPIView, ActividadFormacionMixin):

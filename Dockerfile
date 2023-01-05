@@ -17,7 +17,7 @@ WORKDIR /code
 COPY requirements.txt /code/
 
 #Corremos el comando de instalacion de dependencias.
-#RUN pip install --upgrade pip
+RUN pip install --upgrade pip
 
 RUN pip install -r requirements.txt
 
