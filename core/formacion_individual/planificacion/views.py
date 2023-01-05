@@ -624,13 +624,13 @@ class DimensionModelViewset(ModelViewSet, MultiplePermissionsView):
     serializer_class = DimensionModelSerializer
 
     def create(self, request, *args, **kwargs):
-        super(PropuestaMovimientoModelViewset, self).create(request, *args, **kwargs)
+        super(DimensionModelViewset, self).create(request, *args, **kwargs)
         return Response({'detail': 'Propuesta de movimiento creada correctamente'}, HTTP_201_CREATED)
 
     def destroy(self, request, *args, **kwargs):
-        super(PropuestaMovimientoModelViewset, self).destroy(request, *args, **kwargs)
+        super(DimensionModelViewset, self).destroy(request, *args, **kwargs)
         return Response({'detail': 'Propuesta de movimiento borrada correctamente'}, HTTP_200_OK)
 
     def update(self, request, *args, **kwargs):
-        super(PropuestaMovimientoModelViewset, self).update(request, *args, **kwargs)
+        super(DimensionModelViewset, self).update(request, *args, **kwargs)
         return Response({'detail': 'Propuesta de movimiento actualizada correctamente'}, HTTP_200_OK)
