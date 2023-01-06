@@ -103,10 +103,7 @@ class CreateRetrieveJovenPlanFormacion(CreateAPIView, RetrieveAPIView, MultipleP
         if not config('comenzar_formacion_individual'):
             raise FormacionHasNotStarted
 
-        if PlanFormacion.objects.filter(
-                Q(evaluacion__isnull=True) | Q(evaluacion__aprobadoPor__isnull=True) |
-                Q(evaluacion_prorroga__isnull=True) | Q(evaluacion_prorroga__aprobadoPor__isnull=True),
-                joven=joven).exists():
+        if PlanFormacion.objects.exclude(estado=PlanFormacion.Estados.FINALIZADO).exists():
             raise JovenHavePlan
 
         plan = PlanFormacion.objects.create(joven=joven)
