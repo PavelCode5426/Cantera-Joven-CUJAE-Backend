@@ -217,6 +217,18 @@ class FirmarPlanColectivo(CreateAPIView, PlanColectivoMixin):
         return Response({'detail': 'Plan rechazado correctamente'})
 
 
+class CerrarPlanColectivo(CreateAPIView, PlanColectivoMixin):
+    """
+    """
+    permission_classes = [IsDirectorRecursosHumanos]
+
+    def create(self, request, *args, **kwargs):
+        plan = self.get_plan()
+        plan.estado = plan.Estados.FINALIZADO
+        plan.save()
+        return Response({'detail': 'Plan cerrado correctamente'})
+
+
 class ActividadColectivaUploadFile(CreateAPIView, ActividadColectivaMixin):
     """
     """
