@@ -1,5 +1,7 @@
 import random
 
+from django.contrib.auth.models import Group
+
 from custom.authentication.models import DirectoryUser
 from . import seeder
 from ..models.modelosSimple import Area
@@ -32,14 +34,29 @@ def fake_data_func_estudiante():
 # CREAR USUARIO DE FIJO EN EL SISTEMA
 
 try:
-    user = DirectoryUser.objects.create_superuser("Administrador", "Administrador",
-                                                  "admin@ceis.cujae.edu.cu",
-                                                  "admin")
-
-    user.area = Area.objects.get(nombre='Facultad de Ingenieria Informatica')
+    area = Area.objects.get(nombre='Facultad de Ingenieria Informatica')
+    user = DirectoryUser.objects.create_superuser("Administrador", "Administrador", "admin@ceis.cujae.edu.cu", "admin")
+    user.area = area
     user.save()
-except Exception:
-    pass
+
+    user = DirectoryUser.objects.create_user("Jefe", "de Area", "jefe_area@ceis.cujae.edu.cu", "jefe")
+    user.area = area
+    user.groups.add(Group.objects.get(name='JEFE DE AREA'))
+    user.save()
+
+    user = DirectoryUser.objects.create_user("Director", "de Recursos Humanos", "drhcc@ceis.cujae.edu.cu", "director")
+    user.area = area
+    user.groups.add(Group.objects.get(name='DIRECTOR DE RECURSOS HUMANOS'))
+    user.save()
+
+    user = DirectoryUser.objects.create_user("Vicerrector", "Primero", "vrp@ceis.cujae.edu.cu", "vicerrector")
+    user.area = area
+    user.groups.add(Group.objects.get(name='VICERRECTOR'))
+    user.save()
+
+
+except Exception as e:
+    print(e)
 
 seeder.add_entity(DirectoryUser, 100, fake_data_func_user())
 
