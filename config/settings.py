@@ -219,7 +219,9 @@ REST_FRAMEWORK = {
     ],
     'DEFAULT_PAGINATION_CLASS': 'core.base.pagination.StandardResultsSetPagination',
     'DEFAULT_METADATA_CLASS': 'core.base.metadata.MinimalMetadata',
-    'EXCEPTION_HANDLER': 'core.base.exceptions.custom_exception_handler'
+    'EXCEPTION_HANDLER': 'core.base.exceptions.custom_exception_handler',
+    'DATETIME_FORMAT': '%Y-%m-%d %H:%M',
+    'DATE_FORMAT': '%Y-%m-%d',
 }
 
 SWAGGER_SETTINGS = {
