@@ -5,7 +5,6 @@ from django.contrib.auth.models import Group
 from custom.authentication.models import DirectoryUser
 from . import seeder
 from ..models.modelosSimple import Area
-from ..models.modelosUsuario import Graduado, Estudiante
 
 
 def fake_data_func_user():
@@ -44,6 +43,11 @@ try:
     user.groups.add(Group.objects.get(name='JEFE DE AREA'))
     user.save()
 
+    user = DirectoryUser.objects.create_user("Jefe", "de Area", "jefe_area_civil@ceis.cujae.edu.cu", "jefecivil")
+    user.area = Area.objects.get(nombre='Facultad de Ingenieria Civil')
+    user.groups.add(Group.objects.get(name='JEFE DE AREA'))
+    user.save()
+
     user = DirectoryUser.objects.create_user("Director", "de Recursos Humanos", "drhcc@ceis.cujae.edu.cu", "director")
     user.area = area
     user.groups.add(Group.objects.get(name='DIRECTOR DE RECURSOS HUMANOS'))
@@ -60,6 +64,8 @@ except Exception as e:
 
 seeder.add_entity(DirectoryUser, 100, fake_data_func_user())
 
-seeder.add_entity(Graduado, 100, fake_data_func_user())
+# seeder.add_entity(Graduado, 100, fake_data_func_user())
 
-seeder.add_entity(Estudiante, 50, fake_data_func_estudiante())
+# seeder.add_entity(Estudiante, 50, fake_data_func_estudiante())
+
+# seeder.add_entity(PosibleGraduado, 50, fake_data_func_user())

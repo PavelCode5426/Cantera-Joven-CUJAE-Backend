@@ -4,14 +4,12 @@ from rest_framework.status import HTTP_400_BAD_REQUEST, HTTP_200_OK
 from rest_framework.views import APIView
 from rest_framework.viewsets import mixins, GenericViewSet
 
-from core.base.helpers import notificar_al_DRH
 from core.base.models import modelosSimple, modelosPlanificacionColectiva, modelosUsuario
 from . import serializers, signals
 from .filters import PosibleGraduadoPreubicadoFilterSet
 from ...base.models.modelosUsuario import PosibleGraduado
 from ...base.permissions import IsDirectorRecursosHumanos, IsJefeArea, IsVicerrector, IsSameAreaPermissions, \
-    IsSameUserWhoRequestPermissions, IsPosibleGraduado
-
+    IsPosibleGraduado
 
 
 class ListarObtenerArea(mixins.ListModelMixin, mixins.RetrieveModelMixin, GenericViewSet):
@@ -82,7 +80,6 @@ class AceptarRechazarUbicacionLaboralAdelantadaAPIView(APIView):
             modelosPlanificacionColectiva.UbicacionLaboralAdelantada.objects.bulk_update(preubicaciones,
                                                                                          ['esPreubicacion'])
 
-
             response = Response({'detail': 'Ubicacion Laboral Adelantada Aceptada'}, HTTP_200_OK)
         else:
             response = Response({'detail': 'Ubicacion Laboral Adelantada Rechazada'}, HTTP_200_OK)
@@ -107,8 +104,8 @@ class ListarObtenerPosibleGraduadoListAPIView(ListAPIView):
 class ListarUbicacionesPosibleGraduado(ListAPIView):
     permission_classes = [
         IsDirectorRecursosHumanos |
-        IsSameUserWhoRequestPermissions, IsPosibleGraduado |
-        IsSameAreaPermissions, IsJefeArea
+        IsPosibleGraduado |
+        IsJefeArea
     ]
     serializer_class = serializers.PreubicacionLaboralAdelantadaModelSerializer
 
@@ -134,5 +131,4 @@ class PreubicadosPorAreaListAPIView(ListAPIView):
     def get_queryset(self):
         areaID = self.kwargs['areaID']
         # MUESTRA LOS YA UBICADOS EN EL AREA
-        return PosibleGraduado.objects.filter(ubicacionlaboraladelantada__area_id=areaID,
-                                              ubicacionlaboraladelantada__esPreubicacion=False).all()
+        return PosibleGraduado.objects.filter(area_id=areaID).all()

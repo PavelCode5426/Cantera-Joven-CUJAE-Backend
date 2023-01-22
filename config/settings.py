@@ -73,23 +73,23 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
 
     # Modulos Ajustados
-    'custom.authentication',
-    'custom.administrator',
-    'custom.logging',
+    # 'custom.authentication',
+    # 'custom.administrator',
+    # 'custom.logging',
 
     # Modulos Instalados
-    'core.base',
-    'core.configuracion',
-    'core.notificacion',
-
-    'core.formacion_colectiva.base',
-    'core.formacion_colectiva.gestionar_area',
-    'core.formacion_colectiva.planificacion',
-
-    'core.formacion_individual.base',
-    'core.formacion_individual.gestionar_avales',
-    'core.formacion_individual.gestionar_solicitar_tutor',
-    'core.formacion_individual.planificacion',
+    # 'core.base',
+    # 'core.configuracion',
+    # 'core.notificacion',
+    #
+    # 'core.formacion_colectiva.base',
+    # 'core.formacion_colectiva.gestionar_area',
+    # 'core.formacion_colectiva.planificacion',
+    #
+    # 'core.formacion_individual.base',
+    # 'core.formacion_individual.gestionar_avales',
+    # 'core.formacion_individual.gestionar_solicitar_tutor',
+    # 'core.formacion_individual.planificacion',
 
 ]
 
@@ -315,6 +315,6 @@ PROXIES = {
     'https': env('HTTPS_PROXY', default=None)
 }
 
-# apps_loader = AppsLoader()
-# apps_loader.load()
-# INSTALLED_APPS += apps_loader.get_apps()
+apps_loader = AppsLoader()
+apps_loader.load()
+INSTALLED_APPS += apps_loader.get_apps()
